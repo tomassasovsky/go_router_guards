@@ -34,7 +34,7 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   const ProtectedRoute();
 
   @override
-  GuardChain get guards => GuardChain()..add(AuthenticationGuard());
+  GuardExpression get guards => Guards.guard(AuthenticationGuard());
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -47,9 +47,10 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  GuardChain get guards => GuardChain()
-    ..add(AuthenticationGuard())
-    ..add(RoleBasedGuard(['admin']));
+  GuardExpression get guards => Guards.and(
+    Guards.guard(AuthenticationGuard()),
+    Guards.guard(RoleBasedGuard(['admin'])),
+  );
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
