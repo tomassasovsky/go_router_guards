@@ -8,9 +8,9 @@ A flexible and extensible guard system for Go Router that enables type-safe rout
 [![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]
 [![License: MIT][license_badge]][license_link]
 
-[ci_badge]: https://github.com/tomassasovsky/go_router_guards/workflows/go_router_guards/badge.svg
+[ci_badge]: https://github.com/tomassasovsky/go_router_guards/workflows/ci/badge.svg
 [ci_link]: https://github.com/tomassasovsky/go_router_guards/actions/workflows/main.yaml
-[coverage_badge]: https://codecov.io/gh/tomassasovsky/go_router_guards/branch/main/graph/badge.svg
+[coverage_badge]: https://codecov.io/gh/tomassasovsky/go_router_guards/master/graph/badge.svg
 [pub_badge]: https://img.shields.io/pub/v/go_router_guards.svg
 [pub_link]: https://pub.dev/packages/go_router_guards
 [license_badge]: https://img.shields.io/badge/License-MIT-yellow.svg
