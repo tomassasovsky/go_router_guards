@@ -411,7 +411,7 @@ void main() {
         expect(
           result,
           equals('/login'),
-        ); // Should return left result per ?? operator
+        ); // Should return left result
       });
 
       test('fails in right-to-left order when both expressions pass', () async {
