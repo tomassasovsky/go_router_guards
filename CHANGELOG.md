@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.0.0+1] - 2025-01-27
+## [1.0.0+2] - 2025-07-28
+
+### Changed
+- Removed all references to `Guards.guard()` in the codebase.
+
+## [1.0.0+1] - 2025-07-28
 
 ### Added
 - **Expression-Based Guard System**: Complete rewrite from chain-based to expression-based architecture

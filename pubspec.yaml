@@ -1,6 +1,6 @@
 name: go_router_guards
 description: A flexible and extensible guard system for Go Router that allows you to chain multiple guards together for route protection.
-version: 1.0.0+1
+version: 1.0.0+2
 homepage: https://github.com/tomassasovsky/go_router_guards
 repository: https://github.com/tomassasovsky/go_router_guards
 issue_tracker: https://github.com/tomassasovsky/go_router_guards/issues
