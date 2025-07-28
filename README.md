@@ -2,12 +2,23 @@
 
 A flexible and extensible guard system for Go Router that enables type-safe route protection with chainable guards.
 
-[![Pub](https://img.shields.io/pub/v/go_router_guards.svg)](https://pub.dev/packages/go_router_guards)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Very Good Ventures][very_good_ventures_badge]][very_good_ventures_link]
+[![ci][ci_badge]][ci_link]
+[![coverage][coverage_badge]][ci_link]
+[![pub package][pub_badge]][pub_link]
+[![style: very good analysis][very_good_analysis_badge]][very_good_analysis_link]
+[![License: MIT][license_badge]][license_link]
 
-[very_good_ventures_badge]: https://raw.githubusercontent.com/VeryGoodOpenSource/very_good_cli/main/assets/vgv_badge.png
-[very_good_ventures_link]: https://verygood.ventures
+[ci_badge]: https://github.com/tomassasovsky/go_router_guards/workflows/go_router_guards/badge.svg
+[ci_link]: https://github.com/tomassasovsky/go_router_guards/actions/workflows/main.yaml
+[coverage_badge]: https://codecov.io/gh/tomassasovsky/go_router_guards/branch/main/graph/badge.svg
+[pub_badge]: https://img.shields.io/pub/v/go_router_guards.svg
+[pub_link]: https://pub.dev/packages/go_router_guards
+[license_badge]: https://img.shields.io/badge/License-MIT-yellow.svg
+[license_link]: https://opensource.org/licenses/MIT
+
+[very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
+[very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
+
 
 ## Quick Start
 
