@@ -1,8 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:go_router_guards/go_router_guards.dart';
+import 'package:meta/meta.dart';
 
 /// ALL operator for multiple guards.
 ///
@@ -18,6 +19,7 @@ import 'package:go_router_guards/go_router_guards.dart';
 ///   PaymentGuard(),
 /// ])
 /// ```
+@internal
 class All implements RouteGuard {
   /// Creates an ALL operator for multiple guards.
   All(
@@ -72,6 +74,7 @@ class All implements RouteGuard {
 ///   SuperAdminGuard(),
 /// ])
 /// ```
+@internal
 class AnyOf implements RouteGuard {
   /// Creates an ANY OF operator for multiple guards.
   AnyOf(
@@ -129,6 +132,7 @@ class AnyOf implements RouteGuard {
 ///   SuperAdminGuard(),
 /// ], '/unauthorized')
 /// ```
+@internal
 class OneOf implements RouteGuard {
   /// Creates a ONE OF operator for multiple guards.
   OneOf(

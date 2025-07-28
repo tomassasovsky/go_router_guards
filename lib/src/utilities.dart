@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router_guards/go_router_guards.dart';
-import 'package:meta/meta.dart';
+import 'package:go_router_guards/src/multi_operators.dart';
 
 /// Utility class for creating guard combinations with a fluent API.
 ///
@@ -14,11 +14,7 @@ import 'package:meta/meta.dart';
 /// - `ExecutionOrder.sequential`: Execute guards in the order they
 ///   are provided (default)
 /// - `ExecutionOrder.parallel`: Execute all guards simultaneously
-class Guards {
-  /// Internal constructor to prevent instantiation.
-  @internal
-  const Guards();
-
+abstract class Guards {
   /// ALL operator for multiple guards.
   ///
   /// All guards must pass (return null) for access to be granted.
