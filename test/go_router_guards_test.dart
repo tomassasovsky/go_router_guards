@@ -614,7 +614,6 @@ void main() {
         expect(allow, isA<GuardExpression>());
       });
 
-
       test('creates AND ALL expression', () {
         final expressions = [TestGuardExpression(), TestGuardExpression()];
         final andAll = Guards.andAll(expressions);
