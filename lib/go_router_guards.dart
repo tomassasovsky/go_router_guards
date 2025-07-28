@@ -57,7 +57,7 @@
 /// - **Complex Boolean Logic**: Support for any boolean expression
 /// - **Execution Order Control**: Choose how guards are executed
 /// - **Performance Optimized**: Short-circuit evaluation and parallel execution
-/// - **Robust Error Handling**: Comprehensive input validation and safe 
+/// - **Robust Error Handling**: Comprehensive input validation and safe
 ///   parallel execution
 /// - **Customizable Redirects**: Configurable redirect paths for all operators
 /// - **Immutable Design**: Safe, predictable behavior
@@ -66,6 +66,6 @@
 /// ## Documentation
 ///
 /// For detailed documentation and examples, see the [README](https://github.com/tomassasovsky/go_router_guards).
-library go_router_guards;
+library;
 
 export 'src/go_router_guards.dart';
