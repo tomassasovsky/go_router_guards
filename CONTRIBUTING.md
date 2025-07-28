@@ -274,9 +274,9 @@ Only the first guard executes.
 ## Code Example
 ```dart
 @override
-GuardExpression get guards => Guards.all([
-  Guards.guard(AsyncGuard1()),
-  Guards.guard(AsyncGuard2()),
+RouteGuard get guards => Guards.all([
+  AsyncGuard1(),
+  AsyncGuard2(),
 ]);
 ```
 ```

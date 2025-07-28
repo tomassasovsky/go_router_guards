@@ -54,8 +54,8 @@ class ProtectedRoute extends GoRouteData with GuardedRoute {
 
   @override
   GuardExpression get guards => Guards.all([
-    Guards.guard(AuthenticationGuard()),
-    Guards.guard(RoleGuard(['admin'])),
+    AuthenticationGuard(),
+    RoleGuard(['admin']),
   ]);
 
   @override
@@ -105,51 +105,51 @@ Create complex guard logic using boolean expressions:
 ```dart
 // Simple AND: both must pass
 Guards.all([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(RoleGuard(['admin'])),
+  AuthenticationGuard(),
+  RoleGuard(['admin']),
 ])
 
 // Simple OR: either can pass
 Guards.anyOf([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(AdminGuard()),
+  AuthenticationGuard(),
+  AdminGuard(),
 ])
 
 // Complex expression: (a & b) || c
 Guards.anyOf([
   Guards.all([
-    Guards.guard(AuthenticationGuard()),
-    Guards.guard(RoleGuard(['admin'])),
+    AuthenticationGuard(),
+    RoleGuard(['admin']),
   ]),
-  Guards.guard(SuperAdminGuard()),
+  SuperAdminGuard(),
 ])
 
 // Multiple guards with ALL: all must pass
 Guards.all([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(RoleGuard(['admin'])),
-  Guards.guard(SubscriptionGuard()),
-  Guards.guard(PaymentGuard()),
+  AuthenticationGuard(),
+  RoleGuard(['admin']),
+  SubscriptionGuard(),
+  PaymentGuard(),
 ])
 
 // Multiple guards with ANY OF: any can pass
 Guards.anyOf([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(AdminGuard()),
-  Guards.guard(SuperAdminGuard()),
+  AuthenticationGuard(),
+  AdminGuard(),
+  SuperAdminGuard(),
 ])
 
 // Multiple guards with ONE OF: exactly one must pass
 Guards.oneOf([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(AdminGuard()),
-  Guards.guard(SuperAdminGuard()),
+  AuthenticationGuard(),
+  AdminGuard(),
+  SuperAdminGuard(),
 ], '/unauthorized')
 
 // ONE OF: exactly one must pass
 Guards.oneOf([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(AdminGuard()),
+  AuthenticationGuard(),
+  AdminGuard(),
 ], '/unauthorized')
 ```
 
@@ -164,10 +164,10 @@ class AdminRoute extends GoRouteData with GuardedRoute {
   @override
   GuardExpression get guards => Guards.anyOf([
     Guards.all([
-      Guards.guard(AuthenticationGuard()),
-      Guards.guard(RoleGuard(['admin'])),
+      AuthenticationGuard(),
+      RoleGuard(['admin']),
     ]),
-    Guards.guard(SuperAdminGuard()),
+    SuperAdminGuard(),
   ]);
 
   @override
@@ -190,13 +190,13 @@ class PremiumAdminRoute extends GoRouteData with GuardedRoute {
   @override
   GuardExpression get guards => Guards.anyOf([
     Guards.all([
-      Guards.guard(AuthenticationGuard()),
-      Guards.guard(RoleGuard(['admin'])),
-      Guards.guard(SubscriptionGuard()),
+      AuthenticationGuard(),
+      RoleGuard(['admin']),
+      SubscriptionGuard(),
     ]),
     Guards.anyOf([
-      Guards.guard(SuperAdminGuard()),
-      Guards.guard(SpecialAccessGuard()),
+      SuperAdminGuard(),
+      SpecialAccessGuard(),
     ]),
   ]);
 
@@ -234,10 +234,10 @@ class ConditionalGuard implements RouteGuard {
 test('complex guard expression', () async {
   final expression = Guards.anyOf([
     Guards.all([
-      Guards.guard(AuthenticationGuard()),
-      Guards.guard(RoleGuard(['admin'])),
+      AuthenticationGuard(),
+      RoleGuard(['admin']),
     ]),
-    Guards.guard(SuperAdminGuard()),
+    SuperAdminGuard(),
   ]);
 
   // Test with authenticated admin
@@ -270,9 +270,9 @@ Order guards from fastest to slowest in ALL expressions:
 
 ```dart
 Guards.all([
-  Guards.guard(AppInitializationGuard()), // Fast check
-  Guards.guard(AuthenticationGuard()),    // Medium check
-  Guards.guard(AsyncGuard()),             // Slow async check
+  AppInitializationGuard(), // Fast check
+  AuthenticationGuard(),    // Medium check
+  AsyncGuard(),             // Slow async check
 ])
 ```
 
@@ -293,8 +293,8 @@ class PremiumFeatureGuard implements RouteGuard {
 }
 
 // Reusable expression
-final premiumGuard = Guards.guard(PremiumFeatureGuard());
-final adminGuard = Guards.guard(RoleGuard(['admin']));
+final premiumGuard = PremiumFeatureGuard();
+final adminGuard = RoleGuard(['admin']);
 
 // Use in multiple routes
 final adminPremiumGuard = Guards.all([adminGuard, premiumGuard]);
@@ -325,8 +325,8 @@ class RobustGuard implements RouteGuard {
 ```dart
 test('AND expression with both guards passing', () async {
   final expression = Guards.all([
-    Guards.guard(AuthenticationGuard()),
-    Guards.guard(RoleGuard(['admin'])),
+    AuthenticationGuard(),
+    RoleGuard(['admin']),
   ]);
   
   when(mockAuthCubit.state).thenReturn(AuthenticatedState());
