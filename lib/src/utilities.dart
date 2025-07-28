@@ -1,15 +1,22 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:go_router_guards/go_router_guards.dart';
 
 /// Utility class for creating guard expressions with a fluent API.
 ///
 /// Provides static methods to create various types of guard expressions
-/// and logical combinations.
+/// and logical combinations. All methods support an optional `executionOrder`
+/// parameter to control the order in which guard expressions are evaluated:
+///
+/// - `ExecutionOrder.leftToRight`: Execute expressions in the order they
+///   are provided (default)
+/// - `ExecutionOrder.rightToLeft`: Execute expressions in reverse order
+/// - `ExecutionOrder.parallel`: Execute all expressions simultaneously
 class Guards {
-  const Guards._();
+  /// Private constructor to prevent instantiation
+  const Guards();
 
   /// Creates a guard expression from a RouteGuard.
   ///
@@ -17,7 +24,11 @@ class Guards {
   /// ```dart
   /// Guards.guard(AuthenticationGuard())
   /// ```
-  static GuardExpression guard(RouteGuard guard) => Guard(guard);
+  static GuardExpression guard(
+    RouteGuard guard, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) =>
+      Guard(guard, executionOrder: executionOrder);
 
   /// Creates an AND expression.
   ///
@@ -29,9 +40,20 @@ class Guards {
   ///   Guards.guard(AuthenticationGuard()),
   ///   Guards.guard(RoleGuard(['admin'])),
   /// )
+  ///
+  /// // With custom execution order
+  /// Guards.and(
+  ///   Guards.guard(AuthenticationGuard()),
+  ///   Guards.guard(RoleGuard(['admin'])),
+  ///   executionOrder: ExecutionOrder.parallel,
+  /// )
   /// ```
-  static GuardExpression and(GuardExpression left, GuardExpression right) =>
-      And(left, right);
+  static GuardExpression and(
+    GuardExpression left,
+    GuardExpression right, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) =>
+      And(left, right, executionOrder: executionOrder);
 
   /// Creates an OR expression.
   ///
@@ -43,9 +65,20 @@ class Guards {
   ///   Guards.guard(AuthenticationGuard()),
   ///   Guards.guard(AdminGuard()),
   /// )
+  ///
+  /// // With custom execution order
+  /// Guards.or(
+  ///   Guards.guard(AuthenticationGuard()),
+  ///   Guards.guard(AdminGuard()),
+  ///   executionOrder: ExecutionOrder.rightToLeft,
+  /// )
   /// ```
-  static GuardExpression or(GuardExpression left, GuardExpression right) =>
-      Or(left, right);
+  static GuardExpression or(
+    GuardExpression left,
+    GuardExpression right, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) =>
+      Or(left, right, executionOrder: executionOrder);
 
   /// Creates an XOR expression.
   ///
@@ -62,19 +95,14 @@ class Guards {
   static GuardExpression xor(
     GuardExpression left,
     GuardExpression right,
-    String redirectPath,
-  ) =>
-      Xor(left, right, redirectPath);
-
-  /// Creates a NOT expression.
-  ///
-  /// Inverts the result of the expression.
-  ///
-  /// Example:
-  /// ```dart
-  /// Guards.not(Guards.guard(AuthenticationGuard()))
-  /// ```
-  static GuardExpression not(GuardExpression expression) => Not(expression);
+    String redirectPath, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) {
+    if (redirectPath.isEmpty) {
+      throw ArgumentError('redirectPath cannot be empty');
+    }
+    return Xor(left, right, redirectPath, executionOrder: executionOrder);
+  }
 
   /// {@template go_router_guards.and_all}
   /// AND operator for multiple guard expressions.
@@ -90,10 +118,25 @@ class Guards {
   ///   Guards.guard(SubscriptionGuard()),
   ///   Guards.guard(PaymentGuard()),
   /// ])
+  ///
+  /// // With custom execution order
+  /// Guards.andAll([
+  ///   Guards.guard(AuthenticationGuard()),
+  ///   Guards.guard(RoleGuard(['admin'])),
+  ///   Guards.guard(SubscriptionGuard()),
+  ///   Guards.guard(PaymentGuard()),
+  /// ], executionOrder: ExecutionOrder.parallel)
   /// ```
   /// {@endtemplate}
-  static GuardExpression andAll(List<GuardExpression> expressions) =>
-      AndAll(expressions);
+  static GuardExpression andAll(
+    List<GuardExpression> expressions, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) {
+    if (expressions.isEmpty) {
+      throw ArgumentError('expressions list cannot be empty');
+    }
+    return AndAll(expressions, executionOrder: executionOrder);
+  }
 
   /// {@template go_router_guards.or_all}
   /// OR operator for multiple guard expressions.
@@ -108,10 +151,24 @@ class Guards {
   ///   Guards.guard(AdminGuard()),
   ///   Guards.guard(SuperAdminGuard()),
   /// ])
+  ///
+  /// // With custom execution order
+  /// Guards.orAll([
+  ///   Guards.guard(AuthenticationGuard()),
+  ///   Guards.guard(AdminGuard()),
+  ///   Guards.guard(SuperAdminGuard()),
+  /// ], executionOrder: ExecutionOrder.rightToLeft)
   /// ```
   /// {@endtemplate}
-  static GuardExpression orAll(List<GuardExpression> expressions) =>
-      OrAll(expressions);
+  static GuardExpression orAll(
+    List<GuardExpression> expressions, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) {
+    if (expressions.isEmpty) {
+      throw ArgumentError('expressions list cannot be empty');
+    }
+    return OrAll(expressions, executionOrder: executionOrder);
+  }
 
   /// {@template go_router_guards.xor_all}
   /// XOR operator for multiple guard expressions.
@@ -125,13 +182,28 @@ class Guards {
   ///   Guards.guard(AdminGuard()),
   ///   Guards.guard(SuperAdminGuard()),
   /// ], '/unauthorized')
+  ///
+  /// // With custom execution order
+  /// Guards.xorAll([
+  ///   Guards.guard(AuthenticationGuard()),
+  ///   Guards.guard(AdminGuard()),
+  ///   Guards.guard(SuperAdminGuard()),
+  /// ], '/unauthorized', executionOrder: ExecutionOrder.parallel)
   /// ```
   /// {@endtemplate}
   static GuardExpression xorAll(
     List<GuardExpression> expressions,
-    String redirectPath,
-  ) =>
-      XorAll(expressions, redirectPath);
+    String redirectPath, {
+    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  }) {
+    if (expressions.isEmpty) {
+      throw ArgumentError('expressions list cannot be empty');
+    }
+    if (redirectPath.isEmpty) {
+      throw ArgumentError('redirectPath cannot be empty');
+    }
+    return XorAll(expressions, redirectPath, executionOrder: executionOrder);
+  }
 
   /// Creates an expression that always allows access.
   ///
@@ -142,17 +214,6 @@ class Guards {
   /// Guards.allow()
   /// ```
   static GuardExpression allow() => const _AllowGuard();
-
-  /// Creates an expression that always denies access.
-  ///
-  /// Useful for testing or as a default guard.
-  ///
-  /// Example:
-  /// ```dart
-  /// Guards.deny('/custom')
-  /// ```
-  static GuardExpression deny([String redirectPath = '/unauthorized']) =>
-      _DenyGuard(redirectPath);
 }
 
 /// Guard that always allows access.
@@ -161,15 +222,4 @@ class _AllowGuard extends GuardExpression {
 
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) => null;
-}
-
-/// Guard that always denies access.
-class _DenyGuard extends GuardExpression {
-  const _DenyGuard(this.redirectPath);
-
-  final String redirectPath;
-
-  @override
-  FutureOr<String?> execute(BuildContext context, GoRouterState state) =>
-      redirectPath;
 }

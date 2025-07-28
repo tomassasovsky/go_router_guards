@@ -50,10 +50,12 @@ class And extends GuardExpression {
         return leftResult; // Return left result (could be null or failure)
 
       case ExecutionOrder.parallel:
-        final results = await Future.wait<String?>([
-          Future.value(left.execute(context, state)),
-          Future.value(right.execute(context, state)),
-        ]);
+        final results = await Future.wait<String?>(
+          [
+            Future.value(left.execute(context, state)),
+            Future.value(right.execute(context, state)),
+          ],
+        );
 
         final leftResult = results[0];
         final rightResult = results[1];
@@ -112,10 +114,12 @@ class Or extends GuardExpression {
         return rightResult; // Both failed, return right result
 
       case ExecutionOrder.parallel:
-        final results = await Future.wait<String?>([
-          Future.value(left.execute(context, state)),
-          Future.value(right.execute(context, state)),
-        ]);
+        final results = await Future.wait<String?>(
+          [
+            Future.value(left.execute(context, state)),
+            Future.value(right.execute(context, state)),
+          ],
+        );
 
         final leftResult = results[0];
         final rightResult = results[1];
@@ -193,10 +197,12 @@ class Xor extends GuardExpression {
         return leftResult ?? rightResult ?? redirectPath;
 
       case ExecutionOrder.parallel:
-        final results = await Future.wait<String?>([
-          Future.value(left.execute(context, state)),
-          Future.value(right.execute(context, state)),
-        ]);
+        final results = await Future.wait<String?>(
+          [
+            Future.value(left.execute(context, state)),
+            Future.value(right.execute(context, state)),
+          ],
+        );
 
         final leftResult = results[0];
         final rightResult = results[1];
@@ -210,33 +216,5 @@ class Xor extends GuardExpression {
         // Both passed or both failed
         return leftResult ?? rightResult ?? redirectPath;
     }
-  }
-}
-
-/// {@template go_router_guards.not}
-/// NOT operator for guard expressions.
-///
-/// Inverts the result of the expression. If the expression passes,
-/// access is denied. If the expression fails, access is granted.
-///
-/// Example:
-/// ```dart
-/// Guards.not(Guards.guard(AuthenticationGuard()))
-/// ```
-/// {@endtemplate}
-class Not extends GuardExpression {
-  /// {@macro go_router_guards.not}
-  const Not(
-    this.expression, {
-    super.executionOrder = ExecutionOrder.leftToRight,
-  });
-
-  /// The expression to invert.
-  final GuardExpression expression;
-
-  @override
-  FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
-    final result = await expression.execute(context, state);
-    return result == null ? '/unauthorized' : null;
   }
 }

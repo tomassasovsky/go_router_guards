@@ -227,15 +227,7 @@ Guards.and(
 )
 ```
 
-#### 3. **GuardChain (Backward Compatibility)**
-```dart
-// Simple sequential guards
-GuardChain()
-  .add(AuthenticationGuard())
-  .add(RoleGuard(['admin']))
-  .add(SubscriptionGuard())
-  .add(PaymentGuard())
-```
+
 
 ### Complex Guard Logic
 
@@ -409,30 +401,9 @@ class RobustGuard implements RouteGuard {
 ```dart
 // Always allow access (for testing or public routes)
 Guards.allow()
-
-// Always deny access (for maintenance or testing)
-Guards.deny('/maintenance')
-
-// Custom deny path
-Guards.deny('/unauthorized')
 ```
 
-## Backward Compatibility
 
-The original `GuardChain` class is still available for backward compatibility:
-
-```dart
-// Old way (still works)
-GuardChain()
-  ..add(AuthenticationGuard())
-  ..add(RoleBasedGuard(['admin']))
-
-// New way (recommended)
-Guards.and(
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(RoleGuard(['admin'])),
-)
-```
 
 ## Testing
 
@@ -465,28 +436,7 @@ testWidgets('complex guard expression redirects correctly', (tester) async {
 });
 ```
 
-## Migration from GuardChain
 
-### Before (GuardChain)
-```dart
-class ProtectedRoute extends GoRouteData with GuardedRoute {
-  @override
-  GuardChain get guards => GuardChain()
-    ..add(AuthenticationGuard())
-    ..add(RoleBasedGuard(['admin']));
-}
-```
-
-### After (Guard Expressions)
-```dart
-class ProtectedRoute extends GoRouteData with GuardedRoute {
-  @override
-  GuardExpression get guards => Guards.and(
-    Guards.guard(AuthenticationGuard()),
-    Guards.guard(RoleGuard(['admin'])),
-  );
-}
-```
 
 ## Contributing
 

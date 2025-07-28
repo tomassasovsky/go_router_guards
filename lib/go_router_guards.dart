@@ -4,7 +4,7 @@
 /// This package provides a powerful expression-based guard system that allows
 /// you to:
 /// - Create custom route guards with the `RouteGuard` mixin
-/// - Combine guards using logical operators (AND, OR, XOR, NOT)
+/// - Combine guards using logical operators (AND, OR, XOR)
 /// - Build complex expressions like `(a & b) || c`
 /// - Control execution order (left-to-right, right-to-left, parallel)
 /// - Use multi-expression operators for multiple guards
@@ -57,6 +57,9 @@
 /// - **Complex Boolean Logic**: Support for any boolean expression
 /// - **Execution Order Control**: Choose how guards are executed
 /// - **Performance Optimized**: Short-circuit evaluation and parallel execution
+/// - **Robust Error Handling**: Comprehensive input validation and safe 
+///   parallel execution
+/// - **Customizable Redirects**: Configurable redirect paths for all operators
 /// - **Immutable Design**: Safe, predictable behavior
 /// - **Extensible Architecture**: Easy to extend and customize
 ///

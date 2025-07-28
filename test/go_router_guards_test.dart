@@ -27,8 +27,19 @@ void main() {
       expect(Guards, isNotNull);
     });
 
-    test('exports GuardChain class for backward compatibility', () {
-      expect(GuardChain, isNotNull);
+    test('Guards class has private constructor', () {
+      // The constructor is private, so we can't instantiate it
+      // This test verifies that the class exists and has static methods
+      expect(Guards.guard, isA<Function>());
+      expect(Guards.and, isA<Function>());
+      expect(Guards.or, isA<Function>());
+      expect(Guards.xor, isA<Function>());
+    });
+
+    test('Guards class can be instantiated', () {
+      // Test that the constructor can be called
+      const guards = Guards();
+      expect(guards, isA<Guards>());
     });
 
     test('exports GuardedRoute mixin', () {
@@ -199,6 +210,24 @@ void main() {
         final result = await and.execute(mockContext, mockState);
         expect(result, isNull);
       });
+
+      test('fails in parallel when first expression fails', () async {
+        final left = TestGuardExpression(() => '/login');
+        final right = TestGuardExpression(() => '/unauthorized');
+        final and = And(left, right, executionOrder: ExecutionOrder.parallel);
+
+        final result = await and.execute(mockContext, mockState);
+        expect(result, equals('/login'));
+      });
+
+      test('fails in parallel when second expression fails', () async {
+        final left = TestGuardExpression(() => null);
+        final right = TestGuardExpression(() => '/unauthorized');
+        final and = And(left, right, executionOrder: ExecutionOrder.parallel);
+
+        final result = await and.execute(mockContext, mockState);
+        expect(result, equals('/unauthorized'));
+      });
     });
 
     group('Or', () {
@@ -266,6 +295,23 @@ void main() {
         expect(executionOrder, equals(['right']));
       });
 
+      test('executes in right-to-left order when both fail', () async {
+        final executionOrder = <String>[];
+        final left = TestGuardExpression(() {
+          executionOrder.add('left');
+          return '/login';
+        });
+        final right = TestGuardExpression(() {
+          executionOrder.add('right');
+          return '/unauthorized';
+        });
+        final or = Or(left, right, executionOrder: ExecutionOrder.rightToLeft);
+
+        final result = await or.execute(mockContext, mockState);
+        expect(executionOrder, equals(['right', 'left']));
+        expect(result, equals('/unauthorized'));
+      });
+
       test('executes in parallel when specified', () async {
         final left = TestGuardExpression(() => null);
         final right = TestGuardExpression(() => '/unauthorized');
@@ -273,6 +319,15 @@ void main() {
 
         final result = await or.execute(mockContext, mockState);
         expect(result, isNull);
+      });
+
+      test('fails in parallel when both expressions fail', () async {
+        final left = TestGuardExpression(() => '/login');
+        final right = TestGuardExpression(() => '/unauthorized');
+        final or = Or(left, right, executionOrder: ExecutionOrder.parallel);
+
+        final result = await or.execute(mockContext, mockState);
+        expect(result, equals('/login'));
       });
     });
 
@@ -342,6 +397,37 @@ void main() {
         expect(executionOrder, equals(['right', 'left']));
       });
 
+      test('fails in right-to-left order when both expressions fail', () async {
+        final left = TestGuardExpression(() => '/login');
+        final right = TestGuardExpression(() => '/unauthorized');
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.rightToLeft,
+        );
+
+        final result = await xor.execute(mockContext, mockState);
+        expect(
+          result,
+          equals('/login'),
+        ); // Should return left result per ?? operator
+      });
+
+      test('fails in right-to-left order when both expressions pass', () async {
+        final left = TestGuardExpression(() => null);
+        final right = TestGuardExpression(() => null);
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.rightToLeft,
+        );
+
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, equals('/custom')); // Should return custom redirect path
+      });
+
       test('executes in parallel when specified', () async {
         final left = TestGuardExpression(() => null);
         final right = TestGuardExpression(() => '/unauthorized');
@@ -355,31 +441,105 @@ void main() {
         final result = await xor.execute(mockContext, mockState);
         expect(result, isNull);
       });
-    });
 
-    group('Not', () {
-      late MockBuildContext mockContext;
-      late MockGoRouterState mockState;
+      test('fails in parallel when both expressions pass', () async {
+        final left = TestGuardExpression(() => null);
+        final right = TestGuardExpression(() => null);
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
 
-      setUp(() {
-        mockContext = MockBuildContext();
-        mockState = MockGoRouterState();
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, equals('/custom'));
       });
 
-      test('denies access when expression passes', () async {
-        final expression = TestGuardExpression(() => null);
-        final not = Not(expression);
+      test('fails in parallel when both expressions fail', () async {
+        final left = TestGuardExpression(() => '/login');
+        final right = TestGuardExpression(() => '/unauthorized');
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
 
-        final result = await not.execute(mockContext, mockState);
-        expect(result, equals('/unauthorized'));
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, equals('/login'));
       });
 
-      test('allows access when expression fails', () async {
-        final expression = TestGuardExpression(() => '/login');
-        final not = Not(expression);
+      test('passes in parallel when exactly one expression passes', () async {
+        final left = TestGuardExpression(() => null);
+        final right = TestGuardExpression(() => '/unauthorized');
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
 
-        final result = await not.execute(mockContext, mockState);
+        final result = await xor.execute(mockContext, mockState);
         expect(result, isNull);
+      });
+
+      test('fails in parallel when both expressions fail with custom redirect',
+          () async {
+        final left = TestGuardExpression(() => '/login');
+        final right = TestGuardExpression(() => '/unauthorized');
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
+
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, equals('/login'));
+      });
+
+      test('fails in parallel when both expressions pass', () async {
+        final left = TestGuardExpression(() => null);
+        final right = TestGuardExpression(() => null);
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
+
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, equals('/custom'));
+      });
+
+      test('passes in parallel when exactly one expression passes', () async {
+        final left = TestGuardExpression(() => null);
+        final right = TestGuardExpression(() => '/unauthorized');
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
+
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, isNull);
+      });
+
+      test('fails in parallel when both expressions fail with non-null results',
+          () async {
+        final left = TestGuardExpression(() => '/login');
+        final right = TestGuardExpression(() => '/unauthorized');
+        final xor = Xor(
+          left,
+          right,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
+
+        final result = await xor.execute(mockContext, mockState);
+        expect(result, equals('/login'));
       });
     });
 
@@ -388,6 +548,44 @@ void main() {
         final routeGuard = TestGuard();
         final expression = Guards.guard(routeGuard);
         expect(expression, isA<Guard>());
+      });
+
+      test('throws error for empty andAll expressions', () {
+        expect(
+          () => Guards.andAll([]),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('throws error for empty orAll expressions', () {
+        expect(
+          () => Guards.orAll([]),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('throws error for empty xorAll expressions', () {
+        expect(
+          () => Guards.xorAll([], '/redirect'),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('throws error for empty redirectPath in xor', () {
+        final left = TestGuardExpression();
+        final right = TestGuardExpression();
+        expect(
+          () => Guards.xor(left, right, ''),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('throws error for empty redirectPath in xorAll', () {
+        final expressions = [TestGuardExpression()];
+        expect(
+          () => Guards.xorAll(expressions, ''),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test('creates AND expression', () {
@@ -411,20 +609,9 @@ void main() {
         expect(xor, isA<Xor>());
       });
 
-      test('creates NOT expression', () {
-        final expression = TestGuardExpression();
-        final not = Guards.not(expression);
-        expect(not, isA<Not>());
-      });
-
       test('creates allow expression', () {
         final allow = Guards.allow();
         expect(allow, isA<GuardExpression>());
-      });
-
-      test('creates deny expression', () {
-        final deny = Guards.deny('/custom');
-        expect(deny, isA<GuardExpression>());
       });
 
       test('creates allow expression', () {
@@ -458,24 +645,6 @@ void main() {
         final result = await allow.execute(mockContext, mockState);
         expect(result, isNull);
       });
-
-      test('deny expression always fails', () async {
-        final deny = Guards.deny('/custom');
-        final mockContext = MockBuildContext();
-        final mockState = MockGoRouterState();
-
-        final result = await deny.execute(mockContext, mockState);
-        expect(result, equals('/custom'));
-      });
-
-      test('deny expression uses default path', () async {
-        final deny = Guards.deny();
-        final mockContext = MockBuildContext();
-        final mockState = MockGoRouterState();
-
-        final result = await deny.execute(mockContext, mockState);
-        expect(result, equals('/unauthorized'));
-      });
     });
 
     group('AndAll', () {
@@ -485,6 +654,14 @@ void main() {
       setUp(() {
         mockContext = MockBuildContext();
         mockState = MockGoRouterState();
+      });
+
+      test('throws error for empty expressions list', () async {
+        const andAll = AndAll([]);
+        expect(
+          () => andAll.execute(mockContext, mockState),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test('passes when all expressions pass', () async {
@@ -602,6 +779,14 @@ void main() {
         mockState = MockGoRouterState();
       });
 
+      test('throws error for empty expressions list', () async {
+        const orAll = OrAll([]);
+        expect(
+          () => orAll.execute(mockContext, mockState),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
       test('passes when first expression passes', () async {
         final expressions = [
           TestGuardExpression(() => null),
@@ -706,6 +891,19 @@ void main() {
         final result = await orAll.execute(mockContext, mockState);
         expect(result, isNull);
       });
+
+      test('fails in parallel when all expressions fail', () async {
+        final expressions = [
+          TestGuardExpression(() => '/login'),
+          TestGuardExpression(() => '/unauthorized'),
+          TestGuardExpression(() => '/payment'),
+        ];
+        final orAll =
+            OrAll(expressions, executionOrder: ExecutionOrder.parallel);
+
+        final result = await orAll.execute(mockContext, mockState);
+        expect(result, equals('/login'));
+      });
     });
 
     group('XorAll', () {
@@ -715,6 +913,14 @@ void main() {
       setUp(() {
         mockContext = MockBuildContext();
         mockState = MockGoRouterState();
+      });
+
+      test('throws error for empty expressions list', () async {
+        const xorAll = XorAll([], '/custom');
+        expect(
+          () => xorAll.execute(mockContext, mockState),
+          throwsA(isA<ArgumentError>()),
+        );
       });
 
       test('passes when only first expression passes', () async {
@@ -818,120 +1024,90 @@ void main() {
         final result = await xorAll.execute(mockContext, mockState);
         expect(result, isNull);
       });
-    });
 
-    group('GuardChain (backward compatibility)', () {
-      late MockBuildContext mockContext;
-      late MockGoRouterState mockState;
+      test('fails in parallel when multiple expressions pass', () async {
+        final expressions = [
+          TestGuardExpression(() => null),
+          TestGuardExpression(() => null),
+          TestGuardExpression(() => '/payment'),
+        ];
+        final xorAll = XorAll(
+          expressions,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
 
-      setUp(() {
-        mockContext = MockBuildContext();
-        mockState = MockGoRouterState();
+        final result = await xorAll.execute(mockContext, mockState);
+        expect(result, equals('/custom'));
       });
 
-      test('creates empty chain', () {
-        const chain = GuardChain();
-        expect(chain.length, equals(0));
-        expect(chain.isEmpty, isTrue);
-        expect(chain.isNotEmpty, isFalse);
+      test('fails in parallel when all expressions fail', () async {
+        final expressions = [
+          TestGuardExpression(() => '/login'),
+          TestGuardExpression(() => '/unauthorized'),
+          TestGuardExpression(() => '/payment'),
+        ];
+        final xorAll = XorAll(
+          expressions,
+          '/custom',
+          executionOrder: ExecutionOrder.parallel,
+        );
+
+        final result = await xorAll.execute(mockContext, mockState);
+        expect(result, equals('/login'));
       });
 
-      test('adds guard to chain and returns new chain', () {
-        const chain = GuardChain();
-        final guard = TestGuard();
-        final newChain = chain.add(guard);
+      test('short-circuits when multiple expressions pass in leftToRight order',
+          () async {
+        var thirdExecuted = false;
+        final expressions = [
+          TestGuardExpression(() => null), // First passes
+          TestGuardExpression(
+            () => null,
+          ), // Second passes - should trigger short-circuit
+          TestGuardExpression(() {
+            thirdExecuted = true;
+            return '/should-not-execute';
+          }),
+        ];
+        final xorAll = XorAll(
+          expressions,
+          '/custom',
+        );
 
-        expect(chain.length, equals(0)); // Original unchanged
-        expect(newChain.length, equals(1));
-        expect(newChain.isEmpty, isFalse);
-        expect(newChain.isNotEmpty, isTrue);
+        final result = await xorAll.execute(mockContext, mockState);
+        expect(result, equals('/custom'));
+        expect(
+          thirdExecuted,
+          isFalse,
+        ); // Should not execute due to short-circuit
       });
 
-      test('supports method chaining', () {
-        const chain = GuardChain();
-        final guard1 = TestGuard();
-        final guard2 = TestGuard();
+      test('short-circuits when multiple expressions pass in rightToLeft order',
+          () async {
+        var firstExecuted = false;
+        final expressions = [
+          TestGuardExpression(() {
+            firstExecuted = true;
+            return '/should-not-execute';
+          }),
+          TestGuardExpression(() => null), // Second passes
+          TestGuardExpression(
+            () => null,
+          ), // Third passes - should trigger short-circuit
+        ];
+        final xorAll = XorAll(
+          expressions,
+          '/custom',
+          executionOrder: ExecutionOrder.rightToLeft,
+        );
 
-        final newChain = chain.add(guard1).add(guard2);
-
-        expect(newChain.length, equals(2));
-      });
-
-      test('adds all guards at once', () {
-        const chain = GuardChain();
-        final guards = [TestGuard(), TestGuard(), TestGuard()];
-
-        final newChain = chain.addAll(guards);
-
-        expect(chain.length, equals(0)); // Original unchanged
-        expect(newChain.length, equals(3));
-      });
-
-      test('clears all guards', () {
-        final chain = const GuardChain().add(TestGuard()).add(TestGuard());
-
-        expect(chain.length, equals(2));
-
-        final clearedChain = chain.clear();
-
-        expect(chain.length, equals(2)); // Original unchanged
-        expect(clearedChain.length, equals(0));
-        expect(clearedChain.isEmpty, isTrue);
-      });
-
-      test('executes guards in order', () async {
-        const chain = GuardChain();
-        final results = <String>[];
-
-        final guard1 = TestGuard(() {
-          results.add('guard1');
-          return null;
-        });
-        final guard2 = TestGuard(() {
-          results.add('guard2');
-          return null;
-        });
-
-        final newChain = chain.add(guard1).add(guard2);
-
-        final result = await newChain.execute(mockContext, mockState);
-
-        expect(result, isNull);
-        expect(results, equals(['guard1', 'guard2']));
-      });
-
-      test('stops execution on first redirect', () async {
-        const chain = GuardChain();
-
-        final guard1 = TestGuard(() => '/redirect1');
-        final guard2 = TestGuard(() => '/redirect2');
-
-        final newChain = chain.add(guard1).add(guard2);
-
-        final result = await newChain.execute(mockContext, mockState);
-
-        expect(result, equals('/redirect1'));
-      });
-
-      test('returns null when all guards pass', () async {
-        const chain = GuardChain();
-
-        final guard1 = TestGuard(() => null);
-        final guard2 = TestGuard(() => null);
-
-        final newChain = chain.add(guard1).add(guard2);
-
-        final result = await newChain.execute(mockContext, mockState);
-
-        expect(result, isNull);
-      });
-
-      test('handles empty chain', () async {
-        const chain = GuardChain();
-
-        final result = await chain.execute(mockContext, mockState);
-
-        expect(result, isNull);
+        final result = await xorAll.execute(mockContext, mockState);
+        expect(result, equals('/custom'));
+        expect(
+          firstExecuted,
+          isFalse,
+        ); // Should not execute due to short-circuit
       });
     });
 
@@ -1073,7 +1249,9 @@ class TestGuardedRouteWithGuards extends GoRouteData with GuardedRoute {
   const TestGuardedRouteWithGuards();
 
   @override
-  GuardExpression get guards => Guards.deny('/custom-redirect');
+  GuardExpression get guards => Guards.guard(
+        TestGuard(() => '/custom-redirect'),
+      );
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

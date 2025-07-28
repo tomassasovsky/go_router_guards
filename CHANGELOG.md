@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **And**: Both expressions must pass for access to be granted
   - **Or**: At least one expression must pass for access to be granted
   - **Xor**: Exactly one expression must pass for access to be granted
-  - **Not**: Inverts the result of an expression
   - Support for complex boolean logic like `(a & b) || c`
 
 - **ExecutionOrder Enum**: Control how guard expressions are executed
@@ -31,9 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Guards.and()` - Create AND expressions
   - `Guards.or()` - Create OR expressions
   - `Guards.xor()` - Create XOR expressions with custom redirect path
-  - `Guards.not()` - Create NOT expressions
+
   - `Guards.allow()` - Always allow access (for testing)
-  - `Guards.deny()` - Always deny access (for testing)
 
 - **Immutable GuardChain**: Copy-on-write guard chain system
   - Immutable design for better safety and performance
@@ -74,24 +72,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **License**: MIT License
 
 ### Breaking Changes
-- **GuardChain API**: Now immutable with copy-on-write semantics
-  - `chain.add()` now returns a new chain instead of modifying existing
-  - `chain.addAll()` now returns a new chain instead of modifying existing
-  - `chain.clear()` now returns a new empty chain instead of clearing existing
-  - Method chaining now uses `.add()` instead of `..add()`
+- **GuardChain API Removed**: The old chain API has been completely removed
+  - `GuardChain` class no longer exists
+  - Use the expression-based system with `Guards` utility instead
+  - This simplifies the API and removes backward compatibility complexity
 
 ### Migration Guide
-- **GuardChain Migration**: Update method chaining syntax
+- **GuardChain Migration**: Replace chain API with expression-based system
   ```dart
-  // Before
-  GuardChain()
-    ..add(AuthenticationGuard())
-    ..add(RoleGuard(['admin']))
-  
-  // After
+  // Before (removed)
   GuardChain()
     .add(AuthenticationGuard())
     .add(RoleGuard(['admin']))
+  
+  // After (recommended)
+  Guards.and(
+    Guards.guard(AuthenticationGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  )
   ```
 
 - **New Expression System**: Use the new expression-based system for complex logic

@@ -32,6 +32,10 @@ class AndAll extends GuardExpression {
 
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
+    if (expressions.isEmpty) {
+      throw ArgumentError('AndAll expressions list cannot be empty');
+    }
+
     switch (executionOrder) {
       case ExecutionOrder.leftToRight:
         for (final expression in expressions) {
@@ -89,6 +93,10 @@ class OrAll extends GuardExpression {
 
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
+    if (expressions.isEmpty) {
+      throw ArgumentError('OrAll expressions list cannot be empty');
+    }
+
     switch (executionOrder) {
       case ExecutionOrder.leftToRight:
         String? firstFailure;
@@ -118,7 +126,9 @@ class OrAll extends GuardExpression {
         for (final result in results) {
           if (result == null) return null; // At least one passed
         }
-        return results.first; // All failed, return first failure
+        return results.isNotEmpty
+            ? results.first
+            : null; // All failed, return first failure
     }
   }
 }
@@ -153,20 +163,48 @@ class XorAll extends GuardExpression {
 
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
+    if (expressions.isEmpty) {
+      throw ArgumentError('XorAll expressions list cannot be empty');
+    }
+
     switch (executionOrder) {
       case ExecutionOrder.leftToRight:
         final results = <String?>[];
+        var passingCount = 0;
+
         for (final expression in expressions) {
           final result = await expression.execute(context, state);
           results.add(result);
+
+          if (result == null) {
+            passingCount++;
+            // If we already have more than one passing, we can short-circuit
+            if (passingCount > 1) {
+              return redirectPath;
+            }
+          }
+
+          if (!context.mounted) return null;
         }
         return _evaluateXorResults(results);
 
       case ExecutionOrder.rightToLeft:
         final results = <String?>[];
+        var passingCount = 0;
+
         for (var i = expressions.length - 1; i >= 0; i--) {
           final result = await expressions[i].execute(context, state);
           results.add(result);
+
+          if (result == null) {
+            passingCount++;
+            // If we already have more than one passing, we can short-circuit
+            if (passingCount > 1) {
+              return redirectPath;
+            }
+          }
+
+          if (!context.mounted) return null;
         }
         return _evaluateXorResults(results);
 
