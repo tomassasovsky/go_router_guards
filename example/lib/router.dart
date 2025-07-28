@@ -9,7 +9,48 @@ import 'screens.dart';
 
 part 'router.g.dart';
 
-@TypedGoRoute<HomeRoute>(path: '/')
+// Simple authentication guard
+class AuthenticationGuard implements RouteGuard {
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    final isAuthenticated = context.read<AuthCubit>().state.isAuthenticated;
+
+    if (!isAuthenticated) {
+      return LoginRoute().location;
+    }
+
+    return null;
+  }
+}
+
+// Role-based guard
+class RoleGuard implements RouteGuard {
+  const RoleGuard(this.requiredRoles);
+
+  final List<String> requiredRoles;
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    final userRoles = context.read<UserCubit>().state.roles;
+
+    final hasRequiredRole = requiredRoles.any(userRoles.contains);
+    if (!hasRequiredRole) {
+      return UnauthorizedRoute().location;
+    }
+
+    return null;
+  }
+}
+
+@TypedGoRoute<HomeRoute>(
+  path: '/',
+  routes: [
+    TypedGoRoute<ProtectedRoute>(path: '/protected'),
+    TypedGoRoute<LoginRoute>(path: '/login'),
+    TypedGoRoute<AdminRoute>(path: '/admin'),
+    TypedGoRoute<UnauthorizedRoute>(path: '/unauthorized'),
+  ],
+)
 class HomeRoute extends GoRouteData with _$HomeRoute {
   const HomeRoute();
 
@@ -19,7 +60,21 @@ class HomeRoute extends GoRouteData with _$HomeRoute {
   }
 }
 
-@TypedGoRoute<LoginRoute>(path: '/login')
+class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
+  const ProtectedRoute();
+
+  @override
+  RouteGuard get guards => Guards.all([
+    AuthenticationGuard(),
+    RoleGuard(['admin']),
+  ]);
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProtectedScreen();
+  }
+}
+
 class LoginRoute extends GoRouteData with _$LoginRoute {
   const LoginRoute();
 
@@ -29,27 +84,13 @@ class LoginRoute extends GoRouteData with _$LoginRoute {
   }
 }
 
-@TypedGoRoute<ProtectedRoute>(path: '/protected')
-class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
-  const ProtectedRoute();
-
-  @override
-  GuardExpression get guards => Guards.guard(AuthenticationGuard());
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ProtectedScreen();
-  }
-}
-
-@TypedGoRoute<AdminRoute>(path: '/admin')
 class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  GuardExpression get guards => Guards.all([
-    Guards.guard(AuthenticationGuard()),
-    Guards.guard(RoleBasedGuard(['admin'])),
+  RouteGuard get guards => Guards.all([
+    AuthenticationGuard(),
+    RoleGuard(['admin']),
   ]);
 
   @override
@@ -58,40 +99,12 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   }
 }
 
-@TypedGoRoute<UnauthorizedRoute>(path: '/unauthorized')
 class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
   const UnauthorizedRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const UnauthorizedScreen();
-  }
-}
-
-// Example guards
-class AuthenticationGuard implements RouteGuard {
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final authState = context.read<AuthCubit>().state;
-    if (!authState.isAuthenticated) {
-      return LoginRoute().location;
-    }
-    return null;
-  }
-}
-
-class RoleBasedGuard implements RouteGuard {
-  final List<String> requiredRoles;
-
-  RoleBasedGuard(this.requiredRoles);
-
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final userState = context.read<UserCubit>().state;
-    if (!requiredRoles.any((role) => userState.roles.contains(role))) {
-      return UnauthorizedRoute().location;
-    }
-    return null;
   }
 }
 

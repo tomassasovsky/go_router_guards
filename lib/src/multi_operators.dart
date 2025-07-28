@@ -4,50 +4,43 @@ import 'package:go_router/go_router.dart';
 
 import 'package:go_router_guards/go_router_guards.dart';
 
-/// {@template go_router_guards.all}
-/// ALL operator for multiple guard expressions.
+/// ALL operator for multiple guards.
 ///
-/// All expressions must pass (return null) for access to be granted.
-/// Expressions are executed in order, and execution stops on first failure.
+/// All guards must pass (return null) for access to be granted.
+/// Guards are executed in order, and execution stops on first failure.
 ///
 /// Example:
 /// ```dart
 /// Guards.all([
-///   Guards.guard(AuthenticationGuard()),
-///   Guards.guard(RoleGuard(['admin'])),
-///   Guards.guard(SubscriptionGuard()),
-///   Guards.guard(PaymentGuard()),
+///   AuthenticationGuard(),
+///   RoleGuard(['admin']),
+///   SubscriptionGuard(),
+///   PaymentGuard(),
 /// ])
 /// ```
-/// {@endtemplate}
-class All extends GuardExpression {
-  /// {@macro go_router_guards.all}
-  const All(
-    this.expressions, {
-    super.executionOrder = ExecutionOrder.leftToRight,
+class All implements RouteGuard {
+  /// Creates an ALL operator for multiple guards.
+  All(
+    this.guards, {
+    this.executionOrder = ExecutionOrder.sequential,
   });
 
-  /// The expressions to evaluate.
-  final List<GuardExpression> expressions;
+  /// The guards to evaluate.
+  final List<RouteGuard> guards;
+
+  /// The execution order for the guards.
+  final ExecutionOrder executionOrder;
 
   @override
-  FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
-    if (expressions.isEmpty) {
-      throw ArgumentError('All expressions list cannot be empty');
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    if (guards.isEmpty) {
+      throw ArgumentError('All guards list cannot be empty');
     }
 
     switch (executionOrder) {
-      case ExecutionOrder.leftToRight:
-        for (final expression in expressions) {
-          final result = await expression.execute(context, state);
-          if (result != null) return result;
-          if (!context.mounted) return null;
-        }
-        return null;
-
-      case ExecutionOrder.rightToLeft:
-        for (var i = expressions.length - 1; i >= 0; i--) {
-          final result = await expressions[i].execute(context, state);
+      case ExecutionOrder.sequential:
+        for (final guard in guards) {
+          final result = await guard.redirect(context, state);
           if (result != null) return result;
           if (!context.mounted) return null;
         }
@@ -55,7 +48,7 @@ class All extends GuardExpression {
 
       case ExecutionOrder.parallel:
         final results = await Future.wait<String?>(
-          expressions.map((e) => Future.value(e.execute(context, state))),
+          guards.map((g) => Future.value(g.redirect(context, state))),
         );
 
         for (final result in results) {
@@ -66,53 +59,44 @@ class All extends GuardExpression {
   }
 }
 
-/// {@template go_router_guards.any_of}
-/// ANY OF operator for multiple guard expressions.
+/// ANY OF operator for multiple guards.
 ///
-/// At least one expression must pass (return null) for access to be granted.
-/// Expressions are executed in order, and execution stops on first success.
+/// At least one guard must pass (return null) for access to be granted.
+/// Guards are executed in order, and execution stops on first success.
 ///
 /// Example:
 /// ```dart
 /// Guards.anyOf([
-///   Guards.guard(AuthenticationGuard()),
-///   Guards.guard(AdminGuard()),
-///   Guards.guard(SuperAdminGuard()),
+///   AuthenticationGuard(),
+///   AdminGuard(),
+///   SuperAdminGuard(),
 /// ])
 /// ```
-/// {@endtemplate}
-class AnyOf extends GuardExpression {
-  /// {@macro go_router_guards.any_of}
-  const AnyOf(
-    this.expressions, {
-    super.executionOrder = ExecutionOrder.leftToRight,
+class AnyOf implements RouteGuard {
+  /// Creates an ANY OF operator for multiple guards.
+  AnyOf(
+    this.guards, {
+    this.executionOrder = ExecutionOrder.sequential,
   });
 
-  /// The expressions to evaluate.
-  final List<GuardExpression> expressions;
+  /// The guards to evaluate.
+  final List<RouteGuard> guards;
+
+  /// The execution order for the guards.
+  final ExecutionOrder executionOrder;
 
   @override
-  FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
-    if (expressions.isEmpty) {
-      throw ArgumentError('AnyOf expressions list cannot be empty');
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    if (guards.isEmpty) {
+      throw ArgumentError('AnyOf guards list cannot be empty');
     }
 
     switch (executionOrder) {
-      case ExecutionOrder.leftToRight:
+      case ExecutionOrder.sequential:
         String? firstFailure;
-        for (final expression in expressions) {
-          final result = await expression.execute(context, state);
-          if (result == null) return null; // Expression passed
-          firstFailure ??= result;
-          if (!context.mounted) return null;
-        }
-        return firstFailure;
-
-      case ExecutionOrder.rightToLeft:
-        String? firstFailure;
-        for (var i = expressions.length - 1; i >= 0; i--) {
-          final result = await expressions[i].execute(context, state);
-          if (result == null) return null; // Expression passed
+        for (final guard in guards) {
+          final result = await guard.redirect(context, state);
+          if (result == null) return null; // Guard passed
           firstFailure ??= result;
           if (!context.mounted) return null;
         }
@@ -120,7 +104,7 @@ class AnyOf extends GuardExpression {
 
       case ExecutionOrder.parallel:
         final results = await Future.wait<String?>(
-          expressions.map((e) => Future.value(e.execute(context, state))),
+          guards.map((g) => Future.value(g.redirect(context, state))),
         );
 
         for (final result in results) {
@@ -133,67 +117,48 @@ class AnyOf extends GuardExpression {
   }
 }
 
-/// {@template go_router_guards.one_of}
-/// ONE OF operator for multiple guard expressions.
+/// ONE OF operator for multiple guards.
 ///
-/// Exactly one expression must pass (return null) for access to be granted.
+/// Exactly one guard must pass (return null) for access to be granted.
 ///
 /// Example:
 /// ```dart
 /// Guards.oneOf([
-///   Guards.guard(AuthenticationGuard()),
-///   Guards.guard(AdminGuard()),
-///   Guards.guard(SuperAdminGuard()),
+///   AuthenticationGuard(),
+///   AdminGuard(),
+///   SuperAdminGuard(),
 /// ], '/unauthorized')
 /// ```
-/// {@endtemplate}
-class OneOf extends GuardExpression {
-  /// {@macro go_router_guards.one_of}
-  const OneOf(
-    this.expressions,
+class OneOf implements RouteGuard {
+  /// Creates a ONE OF operator for multiple guards.
+  OneOf(
+    this.guards,
     this.redirectPath, {
-    super.executionOrder = ExecutionOrder.leftToRight,
+    this.executionOrder = ExecutionOrder.sequential,
   });
 
-  /// The expressions to evaluate.
-  final List<GuardExpression> expressions;
+  /// The guards to evaluate.
+  final List<RouteGuard> guards;
 
-  /// The redirect path to use if multiple expressions pass or all fail.
+  /// The redirect path to use if multiple guards pass or all fail.
   final String redirectPath;
 
+  /// The execution order for the guards.
+  final ExecutionOrder executionOrder;
+
   @override
-  FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
-    if (expressions.isEmpty) {
-      throw ArgumentError('OneOf expressions list cannot be empty');
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    if (guards.isEmpty) {
+      throw ArgumentError('OneOf guards list cannot be empty');
     }
 
     switch (executionOrder) {
-      case ExecutionOrder.leftToRight:
+      case ExecutionOrder.sequential:
         final results = <String?>[];
         var passingCount = 0;
 
-        for (final expression in expressions) {
-          final result = await expression.execute(context, state);
-          results.add(result);
-
-          if (result == null) {
-            passingCount++;
-            // If we already have more than one passing, we can short-circuit
-            if (passingCount > 1) {
-              return redirectPath;
-            }
-          }
-
-          if (!context.mounted) return null;
-        }
-        return _evaluateOneOfResults(results);
-
-      case ExecutionOrder.rightToLeft:
-        final results = <String?>[];
-        var passingCount = 0;
-
-        for (var i = expressions.length - 1; i >= 0; i--) {
-          final result = await expressions[i].execute(context, state);
+        for (final guard in guards) {
+          final result = await guard.redirect(context, state);
           results.add(result);
 
           if (result == null) {
@@ -210,7 +175,7 @@ class OneOf extends GuardExpression {
 
       case ExecutionOrder.parallel:
         final results = await Future.wait<String?>(
-          expressions.map((e) => Future.value(e.execute(context, state))),
+          guards.map((g) => Future.value(g.redirect(context, state))),
         );
         return _evaluateOneOfResults(results);
     }

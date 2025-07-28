@@ -16,10 +16,10 @@ import 'package:go_router_guards/go_router_guards.dart';
 ///   const ProtectedRoute();
 ///
 ///   @override
-///   GuardExpression get guards => Guards.and(
-///     Guards.guard(AuthenticationGuard()),
-///     Guards.guard(RoleGuard(['admin'])),
-///   );
+///   RouteGuard get guards => Guards.all([
+///     AuthenticationGuard(),
+///     RoleGuard(['admin']),
+///   ]);
 ///
 ///   @override
 ///   Widget build(BuildContext context, GoRouterState state) {
@@ -28,17 +28,17 @@ import 'package:go_router_guards/go_router_guards.dart';
 /// }
 /// ```
 mixin GuardedRoute on GoRouteData {
-  /// The guard expression to execute when accessing this route.
+  /// The guard to execute when accessing this route.
   ///
   /// Override this getter to define route protection.
   /// Defaults to allowing all access.
-  GuardExpression get guards => Guards.allow();
+  RouteGuard get guards => Guards.allow();
 
   /// Executes the guards for this route.
   ///
   /// Returns a redirect path if access is denied, null if access is granted.
   FutureOr<String?> executeGuards(BuildContext context, GoRouterState state) {
-    return guards.execute(context, state);
+    return guards.redirect(context, state);
   }
 
   /// Redirect method for backward compatibility.

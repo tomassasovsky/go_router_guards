@@ -6,16 +6,27 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [
-  $homeRoute,
-  $loginRoute,
-  $protectedRoute,
-  $adminRoute,
-  $unauthorizedRoute,
-];
+List<RouteBase> get $appRoutes => [$homeRoute];
 
-RouteBase get $homeRoute =>
-    GoRouteData.$route(path: '/', factory: _$HomeRoute._fromState);
+RouteBase get $homeRoute => GoRouteData.$route(
+  path: '/',
+
+  factory: _$HomeRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: '/protected',
+
+      factory: _$ProtectedRoute._fromState,
+    ),
+    GoRouteData.$route(path: '/login', factory: _$LoginRoute._fromState),
+    GoRouteData.$route(path: '/admin', factory: _$AdminRoute._fromState),
+    GoRouteData.$route(
+      path: '/unauthorized',
+
+      factory: _$UnauthorizedRoute._fromState,
+    ),
+  ],
+);
 
 mixin _$HomeRoute on GoRouteData {
   static HomeRoute _fromState(GoRouterState state) => const HomeRoute();
@@ -36,35 +47,6 @@ mixin _$HomeRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $loginRoute =>
-    GoRouteData.$route(path: '/login', factory: _$LoginRoute._fromState);
-
-mixin _$LoginRoute on GoRouteData {
-  static LoginRoute _fromState(GoRouterState state) => const LoginRoute();
-
-  @override
-  String get location => GoRouteData.$location('/login');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $protectedRoute => GoRouteData.$route(
-  path: '/protected',
-
-  factory: _$ProtectedRoute._fromState,
-);
 
 mixin _$ProtectedRoute on GoRouteData {
   static ProtectedRoute _fromState(GoRouterState state) =>
@@ -87,8 +69,25 @@ mixin _$ProtectedRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $adminRoute =>
-    GoRouteData.$route(path: '/admin', factory: _$AdminRoute._fromState);
+mixin _$LoginRoute on GoRouteData {
+  static LoginRoute _fromState(GoRouterState state) => const LoginRoute();
+
+  @override
+  String get location => GoRouteData.$location('/login');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
 
 mixin _$AdminRoute on GoRouteData {
   static AdminRoute _fromState(GoRouterState state) => const AdminRoute();
@@ -109,12 +108,6 @@ mixin _$AdminRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $unauthorizedRoute => GoRouteData.$route(
-  path: '/unauthorized',
-
-  factory: _$UnauthorizedRoute._fromState,
-);
 
 mixin _$UnauthorizedRoute on GoRouteData {
   static UnauthorizedRoute _fromState(GoRouterState state) =>

@@ -5,135 +5,116 @@ import 'package:go_router/go_router.dart';
 import 'package:go_router_guards/go_router_guards.dart';
 import 'package:meta/meta.dart';
 
-/// Utility class for creating guard expressions with a fluent API.
+/// Utility class for creating guard combinations with a fluent API.
 ///
-/// Provides static methods to create various types of guard expressions
-/// and logical combinations. All methods support an optional `executionOrder`
-/// parameter to control the order in which guard expressions are evaluated:
+/// Provides static methods to create various types of guard combinations
+/// and logical operators. All methods support an optional `executionOrder`
+/// parameter to control the order in which guards are evaluated:
 ///
-/// - `ExecutionOrder.leftToRight`: Execute expressions in the order they
+/// - `ExecutionOrder.sequential`: Execute guards in the order they
 ///   are provided (default)
-/// - `ExecutionOrder.rightToLeft`: Execute expressions in reverse order
-/// - `ExecutionOrder.parallel`: Execute all expressions simultaneously
+/// - `ExecutionOrder.parallel`: Execute all guards simultaneously
 class Guards {
   /// Internal constructor to prevent instantiation.
   @internal
   const Guards();
 
-  /// Creates a guard expression from a RouteGuard.
+  /// ALL operator for multiple guards.
   ///
-  /// Example:
-  /// ```dart
-  /// Guards.guard(AuthenticationGuard())
-  /// ```
-  static GuardExpression guard(
-    RouteGuard guard, {
-    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
-  }) =>
-      Guard(guard, executionOrder: executionOrder);
-
-  /// {@template go_router_guards.all}
-  /// ALL operator for multiple guard expressions.
-  ///
-  /// All expressions must pass (return null) for access to be granted.
-  /// Expressions are executed in order, and execution stops on first failure.
+  /// All guards must pass (return null) for access to be granted.
+  /// Guards are executed in order, and execution stops on first failure.
   ///
   /// Example:
   /// ```dart
   /// Guards.all([
-  ///   Guards.guard(AuthenticationGuard()),
-  ///   Guards.guard(RoleGuard(['admin'])),
-  ///   Guards.guard(SubscriptionGuard()),
-  ///   Guards.guard(PaymentGuard()),
+  ///   AuthenticationGuard(),
+  ///   RoleGuard(['admin']),
+  ///   SubscriptionGuard(),
+  ///   PaymentGuard(),
   /// ])
   ///
-  /// // With custom execution order
+  /// // With parallel execution
   /// Guards.all([
-  ///   Guards.guard(AuthenticationGuard()),
-  ///   Guards.guard(RoleGuard(['admin'])),
-  ///   Guards.guard(SubscriptionGuard()),
-  ///   Guards.guard(PaymentGuard()),
+  ///   AuthenticationGuard(),
+  ///   RoleGuard(['admin']),
+  ///   SubscriptionGuard(),
+  ///   PaymentGuard(),
   /// ], executionOrder: ExecutionOrder.parallel)
   /// ```
-  /// {@endtemplate}
-  static GuardExpression all(
-    List<GuardExpression> expressions, {
-    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  static RouteGuard all(
+    List<RouteGuard> guards, {
+    ExecutionOrder executionOrder = ExecutionOrder.sequential,
   }) {
-    if (expressions.isEmpty) {
-      throw ArgumentError('expressions list cannot be empty');
+    if (guards.isEmpty) {
+      throw ArgumentError('guards list cannot be empty');
     }
-    return All(expressions, executionOrder: executionOrder);
+    return All(guards, executionOrder: executionOrder);
   }
 
-  /// {@template go_router_guards.any_of}
-  /// ANY OF operator for multiple guard expressions.
+  /// ANY OF operator for multiple guards.
   ///
-  /// At least one expression must pass (return null) for access to be granted.
-  /// Expressions are executed in order, and execution stops on first success.
+  /// At least one guard must pass (return null) for access to be granted.
+  /// Guards are executed in order, and execution stops on first success.
   ///
   /// Example:
   /// ```dart
   /// Guards.anyOf([
-  ///   Guards.guard(AuthenticationGuard()),
-  ///   Guards.guard(AdminGuard()),
-  ///   Guards.guard(SuperAdminGuard()),
+  ///   AuthenticationGuard(),
+  ///   AdminGuard(),
+  ///   SuperAdminGuard(),
   /// ])
   ///
-  /// // With custom execution order
+  /// // With parallel execution
   /// Guards.anyOf([
-  ///   Guards.guard(AuthenticationGuard()),
-  ///   Guards.guard(AdminGuard()),
-  ///   Guards.guard(SuperAdminGuard()),
-  /// ], executionOrder: ExecutionOrder.rightToLeft)
+  ///   AuthenticationGuard(),
+  ///   AdminGuard(),
+  ///   SuperAdminGuard(),
+  /// ], executionOrder: ExecutionOrder.parallel)
   /// ```
-  /// {@endtemplate}
-  static GuardExpression anyOf(
-    List<GuardExpression> expressions, {
-    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+  static RouteGuard anyOf(
+    List<RouteGuard> guards, {
+    ExecutionOrder executionOrder = ExecutionOrder.sequential,
   }) {
-    if (expressions.isEmpty) {
-      throw ArgumentError('expressions list cannot be empty');
+    if (guards.isEmpty) {
+      throw ArgumentError('guards list cannot be empty');
     }
-    return AnyOf(expressions, executionOrder: executionOrder);
+    return AnyOf(guards, executionOrder: executionOrder);
   }
 
-  /// {@template go_router_guards.one_of}
-  /// ONE OF operator for multiple guard expressions.
+  /// ONE OF operator for multiple guards.
   ///
-  /// Exactly one expression must pass (return null) for access to be granted.
+  /// Exactly one guard must pass (return null) for access to be granted.
   ///
   /// Example:
   /// ```dart
   /// Guards.oneOf([
-  ///   Guards.guard(AuthenticationGuard()),
-  ///   Guards.guard(AdminGuard()),
-  ///   Guards.guard(SuperAdminGuard()),
+  ///   AuthenticationGuard(),
+  ///   AdminGuard(),
+  ///   SuperAdminGuard(),
   /// ], '/unauthorized')
   ///
-  /// // With custom execution order
+  /// // With parallel execution
   /// Guards.oneOf([
-  ///   Guards.guard(AuthenticationGuard()),
-  ///   Guards.guard(AdminGuard()),
-  ///   Guards.guard(SuperAdminGuard()),
+  ///   AuthenticationGuard(),
+  ///   AdminGuard(),
+  ///   SuperAdminGuard(),
   /// ], '/unauthorized', executionOrder: ExecutionOrder.parallel)
   /// ```
-  /// {@endtemplate}
-  static GuardExpression oneOf(
-    List<GuardExpression> expressions,
+  static RouteGuard oneOf(
+    List<RouteGuard> guards,
     String redirectPath, {
-    ExecutionOrder executionOrder = ExecutionOrder.leftToRight,
+    ExecutionOrder executionOrder = ExecutionOrder.sequential,
   }) {
-    if (expressions.isEmpty) {
-      throw ArgumentError('expressions list cannot be empty');
+    if (guards.isEmpty) {
+      throw ArgumentError('guards list cannot be empty');
     }
     if (redirectPath.isEmpty) {
       throw ArgumentError('redirectPath cannot be empty');
     }
-    return OneOf(expressions, redirectPath, executionOrder: executionOrder);
+    return OneOf(guards, redirectPath, executionOrder: executionOrder);
   }
 
-  /// Creates an expression that always allows access.
+  /// Creates a guard that always allows access.
   ///
   /// Useful for testing or as a default guard.
   ///
@@ -141,13 +122,13 @@ class Guards {
   /// ```dart
   /// Guards.allow()
   /// ```
-  static GuardExpression allow() => const _AllowGuard();
+  static RouteGuard allow() => const _AllowGuard();
 }
 
 /// Guard that always allows access.
-class _AllowGuard extends GuardExpression {
+class _AllowGuard implements RouteGuard {
   const _AllowGuard();
 
   @override
-  FutureOr<String?> execute(BuildContext context, GoRouterState state) => null;
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) => null;
 }

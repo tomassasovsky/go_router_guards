@@ -5,8 +5,7 @@
 ### Added
 - **Expression-Based Guard System**: Complete rewrite from chain-based to expression-based architecture
   - **GuardExpression**: Abstract base class for all guard expressions
-  - **Binary Operators**: `And`, `Or`, `Xor` for combining two guard expressions
-  - **Multi-Expression Operators**: `AndAll`, `OrAll`, `XorAll` for handling multiple guards efficiently
+  - **Multi-Expression Operators**: `all`, `anyOf`, `oneOf` for handling multiple guards efficiently
   - **Complex Boolean Logic**: Support for arbitrary boolean expressions like `(a & b) || (c & d) || e`
   - **Short-circuit Evaluation**: Performance optimization that stops execution early when possible
 
@@ -17,12 +16,9 @@
 
 - **Guards Utility Class**: Fluent API for building guard expressions
   - `Guards.guard()` - Create guard expressions from RouteGuard
-  - `Guards.and()` - Create AND expressions
-  - `Guards.or()` - Create OR expressions
-  - `Guards.xor()` - Create XOR expressions with custom redirect path
-  - `Guards.andAll()` - Create AND expressions for multiple guards
-  - `Guards.orAll()` - Create OR expressions for multiple guards
-  - `Guards.xorAll()` - Create XOR expressions for multiple guards
+  - `Guards.all()` - Create AND expressions for multiple guards
+  - `Guards.anyOf()` - Create OR expressions for multiple guards
+  - `Guards.oneOf()` - Create XOR expressions for multiple guards
   - `Guards.allow()` - Always allow access (for testing)
 
 - **GuardedRoute Mixin**: Seamless integration with Go Router type-safe routes
@@ -33,14 +29,12 @@
 - **Modular Package Architecture**: Organized code into focused, maintainable files
   - `core.dart` - Fundamental interfaces and enums
   - `expressions.dart` - Basic guard expression wrapper
-  - `operators.dart` - Binary logical operators
   - `multi_operators.dart` - Multi-expression logical operators
   - `utilities.dart` - Fluent API and utility guards
   - `route.dart` - Go Router integration
 
 - **Robust Error Handling**: Comprehensive input validation and safe parallel execution
   - Empty list validation for multi-expression operators
-  - Empty redirect path validation for XOR operators
   - Safe parallel execution with `eagerError: false`
   - BuildContext.mounted checks to prevent async context issues
 
@@ -81,22 +75,22 @@
     .add(RoleGuard(['admin']))
   
   // After (recommended)
-  Guards.and(
+  Guards.all([
     Guards.guard(AuthenticationGuard()),
     Guards.guard(RoleGuard(['admin'])),
-  )
+  ])
   ```
 
 - **New Expression System**: Use the new expression-based system for complex logic
   ```dart
   // Complex logic: (auth & role) || admin
-  Guards.or(
-    Guards.and(
+  Guards.anyOf([
+    Guards.all([
       Guards.guard(AuthenticationGuard()),
       Guards.guard(RoleGuard(['admin'])),
-    ),
+    ]),
     Guards.guard(SuperAdminGuard()),
-  )
+  ])
   ```
 
 ### Examples
@@ -107,13 +101,13 @@ class ProtectedRoute extends GoRouteData with GuardedRoute {
   const ProtectedRoute();
 
   @override
-  GuardExpression get guards => Guards.or(
-    Guards.and(
+  GuardExpression get guards => Guards.anyOf([
+    Guards.all([
       Guards.guard(AuthenticationGuard()),
       Guards.guard(RoleGuard(['admin'])),
-    ),
+    ]),
     Guards.guard(SuperAdminGuard()),
-  );
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
