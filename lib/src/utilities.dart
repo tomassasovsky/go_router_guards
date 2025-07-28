@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router_guards/go_router_guards.dart';
+import 'package:meta/meta.dart';
 
 /// Utility class for creating guard expressions with a fluent API.
 ///
@@ -15,7 +16,8 @@ import 'package:go_router_guards/go_router_guards.dart';
 /// - `ExecutionOrder.rightToLeft`: Execute expressions in reverse order
 /// - `ExecutionOrder.parallel`: Execute all expressions simultaneously
 class Guards {
-  /// Private constructor to prevent instantiation
+  /// Internal constructor to prevent instantiation.
+  @internal
   const Guards();
 
   /// Creates a guard expression from a RouteGuard.
