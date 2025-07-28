@@ -14,11 +14,10 @@ A flexible and extensible guard system for Go Router that enables type-safe rout
 [pub_badge]: https://img.shields.io/pub/v/go_router_guards.svg
 [pub_link]: https://pub.dev/packages/go_router_guards
 [license_badge]: https://img.shields.io/badge/License-MIT-yellow.svg
-[license_link]: https://opensource.org/licenses/MIT
+[license_link]: LICENSE
 
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
-
 
 ## Quick Start
 
@@ -54,10 +53,10 @@ class ProtectedRoute extends GoRouteData with GuardedRoute {
   const ProtectedRoute();
 
   @override
-  GuardExpression get guards => Guards.and(
+  GuardExpression get guards => Guards.all([
     Guards.guard(AuthenticationGuard()),
     Guards.guard(RoleGuard(['admin'])),
-  );
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -105,56 +104,53 @@ Create complex guard logic using boolean expressions:
 
 ```dart
 // Simple AND: both must pass
-Guards.and(
+Guards.all([
   Guards.guard(AuthenticationGuard()),
   Guards.guard(RoleGuard(['admin'])),
-)
+])
 
 // Simple OR: either can pass
-Guards.or(
+Guards.anyOf([
   Guards.guard(AuthenticationGuard()),
   Guards.guard(AdminGuard()),
-)
+])
 
 // Complex expression: (a & b) || c
-Guards.or(
-  Guards.and(
+Guards.anyOf([
+  Guards.all([
     Guards.guard(AuthenticationGuard()),
     Guards.guard(RoleGuard(['admin'])),
-  ),
+  ]),
   Guards.guard(SuperAdminGuard()),
-)
+])
 
-// Multiple guards with AND ALL: all must pass
-Guards.andAll([
+// Multiple guards with ALL: all must pass
+Guards.all([
   Guards.guard(AuthenticationGuard()),
   Guards.guard(RoleGuard(['admin'])),
   Guards.guard(SubscriptionGuard()),
   Guards.guard(PaymentGuard()),
 ])
 
-// Multiple guards with OR ALL: any can pass
-Guards.orAll([
+// Multiple guards with ANY OF: any can pass
+Guards.anyOf([
   Guards.guard(AuthenticationGuard()),
   Guards.guard(AdminGuard()),
   Guards.guard(SuperAdminGuard()),
 ])
 
-// Multiple guards with XOR ALL: exactly one must pass
-Guards.xorAll([
+// Multiple guards with ONE OF: exactly one must pass
+Guards.oneOf([
   Guards.guard(AuthenticationGuard()),
   Guards.guard(AdminGuard()),
   Guards.guard(SuperAdminGuard()),
 ], '/unauthorized')
 
-// XOR: exactly one must pass
-Guards.xor(
+// ONE OF: exactly one must pass
+Guards.oneOf([
   Guards.guard(AuthenticationGuard()),
   Guards.guard(AdminGuard()),
-)
-
-// NOT: invert the result
-Guards.not(Guards.guard(AuthenticationGuard()))
+], '/unauthorized')
 ```
 
 ### GuardedRoute Mixin
@@ -166,13 +162,13 @@ class AdminRoute extends GoRouteData with GuardedRoute {
   const AdminRoute();
 
   @override
-  GuardExpression get guards => Guards.or(
-    Guards.and(
+  GuardExpression get guards => Guards.anyOf([
+    Guards.all([
       Guards.guard(AuthenticationGuard()),
       Guards.guard(RoleGuard(['admin'])),
-    ),
+    ]),
     Guards.guard(SuperAdminGuard()),
-  );
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -180,54 +176,6 @@ class AdminRoute extends GoRouteData with GuardedRoute {
   }
 }
 ```
-
-## Advanced Usage
-
-### Working with Multiple Guards
-
-When you need more than two guards for a route, you have several options:
-
-#### 1. **Multi-Expression Operators (Recommended)**
-```dart
-// All guards must pass
-Guards.andAll([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(RoleGuard(['admin'])),
-  Guards.guard(SubscriptionGuard()),
-  Guards.guard(PaymentGuard()),
-])
-
-// Any guard can pass
-Guards.orAll([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(AdminGuard()),
-  Guards.guard(SuperAdminGuard()),
-])
-
-// Exactly one guard must pass
-Guards.xorAll([
-  Guards.guard(AuthenticationGuard()),
-  Guards.guard(AdminGuard()),
-  Guards.guard(SuperAdminGuard()),
-], '/unauthorized')
-```
-
-#### 2. **Nested Binary Operators**
-```dart
-// For complex logic: ((a & b) & c) & d
-Guards.and(
-  Guards.and(
-    Guards.and(
-      Guards.guard(AuthenticationGuard()),
-      Guards.guard(RoleGuard(['admin'])),
-    ),
-    Guards.guard(SubscriptionGuard()),
-  ),
-  Guards.guard(PaymentGuard()),
-)
-```
-
-
 
 ### Complex Guard Logic
 
@@ -240,42 +188,17 @@ class PremiumAdminRoute extends GoRouteData with GuardedRoute {
   const PremiumAdminRoute();
 
   @override
-  GuardExpression get guards => Guards.or(
-    Guards.and(
-      Guards.guard(AuthenticationGuard()),
-      Guards.and(
-        Guards.guard(RoleGuard(['admin'])),
-        Guards.guard(SubscriptionGuard()),
-      ),
-    ),
-    Guards.or(
-      Guards.guard(SuperAdminGuard()),
-      Guards.guard(SpecialAccessGuard()),
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const PremiumAdminScreen();
-  }
-}
-
-// Same logic using multi-expression operators (cleaner)
-class PremiumAdminRouteV2 extends GoRouteData with GuardedRoute {
-  const PremiumAdminRouteV2();
-
-  @override
-  GuardExpression get guards => Guards.or(
-    Guards.andAll([
+  GuardExpression get guards => Guards.anyOf([
+    Guards.all([
       Guards.guard(AuthenticationGuard()),
       Guards.guard(RoleGuard(['admin'])),
       Guards.guard(SubscriptionGuard()),
     ]),
-    Guards.orAll([
+    Guards.anyOf([
       Guards.guard(SuperAdminGuard()),
       Guards.guard(SpecialAccessGuard()),
     ]),
-  );
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -309,13 +232,13 @@ class ConditionalGuard implements RouteGuard {
 
 ```dart
 test('complex guard expression', () async {
-  final expression = Guards.or(
-    Guards.and(
+  final expression = Guards.anyOf([
+    Guards.all([
       Guards.guard(AuthenticationGuard()),
       Guards.guard(RoleGuard(['admin'])),
-    ),
+    ]),
     Guards.guard(SuperAdminGuard()),
-  );
+  ]);
 
   // Test with authenticated admin
   when(mockAuthCubit.state).thenReturn(AuthenticatedState());
@@ -343,14 +266,14 @@ context.go('/protected');
 
 ### 2. Order Guards by Performance
 
-Order guards from fastest to slowest in AND expressions:
+Order guards from fastest to slowest in ALL expressions:
 
 ```dart
-Guards.and(
+Guards.all([
   Guards.guard(AppInitializationGuard()), // Fast check
   Guards.guard(AuthenticationGuard()),    // Medium check
   Guards.guard(AsyncGuard()),             // Slow async check
-)
+])
 ```
 
 ### 3. Create Reusable Guard Expressions
@@ -374,7 +297,7 @@ final premiumGuard = Guards.guard(PremiumFeatureGuard());
 final adminGuard = Guards.guard(RoleGuard(['admin']));
 
 // Use in multiple routes
-final adminPremiumGuard = Guards.and(adminGuard, premiumGuard);
+final adminPremiumGuard = Guards.all([adminGuard, premiumGuard]);
 ```
 
 ### 4. Handle Guard Failures Gracefully
@@ -396,24 +319,15 @@ class RobustGuard implements RouteGuard {
 }
 ```
 
-### 5. Use Guard Utilities
-
-```dart
-// Always allow access (for testing or public routes)
-Guards.allow()
-```
-
-
-
 ## Testing
 
 ### Unit Testing Guard Expressions
 ```dart
 test('AND expression with both guards passing', () async {
-  final expression = Guards.and(
+  final expression = Guards.all([
     Guards.guard(AuthenticationGuard()),
     Guards.guard(RoleGuard(['admin'])),
-  );
+  ]);
   
   when(mockAuthCubit.state).thenReturn(AuthenticatedState());
   when(mockUserCubit.state).thenReturn(UserState(roles: ['admin']));
@@ -436,16 +350,9 @@ testWidgets('complex guard expression redirects correctly', (tester) async {
 });
 ```
 
-
-
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 

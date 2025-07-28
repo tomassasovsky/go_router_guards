@@ -4,15 +4,15 @@ import 'package:go_router/go_router.dart';
 
 import 'package:go_router_guards/go_router_guards.dart';
 
-/// {@template go_router_guards.and_all}
-/// AND operator for multiple guard expressions.
+/// {@template go_router_guards.all}
+/// ALL operator for multiple guard expressions.
 ///
 /// All expressions must pass (return null) for access to be granted.
 /// Expressions are executed in order, and execution stops on first failure.
 ///
 /// Example:
 /// ```dart
-/// Guards.andAll([
+/// Guards.all([
 ///   Guards.guard(AuthenticationGuard()),
 ///   Guards.guard(RoleGuard(['admin'])),
 ///   Guards.guard(SubscriptionGuard()),
@@ -20,9 +20,9 @@ import 'package:go_router_guards/go_router_guards.dart';
 /// ])
 /// ```
 /// {@endtemplate}
-class AndAll extends GuardExpression {
-  /// {@macro go_router_guards.and_all}
-  const AndAll(
+class All extends GuardExpression {
+  /// {@macro go_router_guards.all}
+  const All(
     this.expressions, {
     super.executionOrder = ExecutionOrder.leftToRight,
   });
@@ -33,7 +33,7 @@ class AndAll extends GuardExpression {
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
     if (expressions.isEmpty) {
-      throw ArgumentError('AndAll expressions list cannot be empty');
+      throw ArgumentError('All expressions list cannot be empty');
     }
 
     switch (executionOrder) {
@@ -66,24 +66,24 @@ class AndAll extends GuardExpression {
   }
 }
 
-/// {@template go_router_guards.or_all}
-/// OR operator for multiple guard expressions.
+/// {@template go_router_guards.any_of}
+/// ANY OF operator for multiple guard expressions.
 ///
 /// At least one expression must pass (return null) for access to be granted.
 /// Expressions are executed in order, and execution stops on first success.
 ///
 /// Example:
 /// ```dart
-/// Guards.orAll([
+/// Guards.anyOf([
 ///   Guards.guard(AuthenticationGuard()),
 ///   Guards.guard(AdminGuard()),
 ///   Guards.guard(SuperAdminGuard()),
 /// ])
 /// ```
 /// {@endtemplate}
-class OrAll extends GuardExpression {
-  /// {@macro go_router_guards.or_all}
-  const OrAll(
+class AnyOf extends GuardExpression {
+  /// {@macro go_router_guards.any_of}
+  const AnyOf(
     this.expressions, {
     super.executionOrder = ExecutionOrder.leftToRight,
   });
@@ -94,7 +94,7 @@ class OrAll extends GuardExpression {
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
     if (expressions.isEmpty) {
-      throw ArgumentError('OrAll expressions list cannot be empty');
+      throw ArgumentError('AnyOf expressions list cannot be empty');
     }
 
     switch (executionOrder) {
@@ -133,23 +133,23 @@ class OrAll extends GuardExpression {
   }
 }
 
-/// {@template go_router_guards.xor_all}
-/// XOR operator for multiple guard expressions.
+/// {@template go_router_guards.one_of}
+/// ONE OF operator for multiple guard expressions.
 ///
 /// Exactly one expression must pass (return null) for access to be granted.
 ///
 /// Example:
 /// ```dart
-/// Guards.xorAll([
+/// Guards.oneOf([
 ///   Guards.guard(AuthenticationGuard()),
 ///   Guards.guard(AdminGuard()),
 ///   Guards.guard(SuperAdminGuard()),
 /// ], '/unauthorized')
 /// ```
 /// {@endtemplate}
-class XorAll extends GuardExpression {
-  /// {@macro go_router_guards.xor_all}
-  const XorAll(
+class OneOf extends GuardExpression {
+  /// {@macro go_router_guards.one_of}
+  const OneOf(
     this.expressions,
     this.redirectPath, {
     super.executionOrder = ExecutionOrder.leftToRight,
@@ -164,7 +164,7 @@ class XorAll extends GuardExpression {
   @override
   FutureOr<String?> execute(BuildContext context, GoRouterState state) async {
     if (expressions.isEmpty) {
-      throw ArgumentError('XorAll expressions list cannot be empty');
+      throw ArgumentError('OneOf expressions list cannot be empty');
     }
 
     switch (executionOrder) {
@@ -186,7 +186,7 @@ class XorAll extends GuardExpression {
 
           if (!context.mounted) return null;
         }
-        return _evaluateXorResults(results);
+        return _evaluateOneOfResults(results);
 
       case ExecutionOrder.rightToLeft:
         final results = <String?>[];
@@ -206,17 +206,17 @@ class XorAll extends GuardExpression {
 
           if (!context.mounted) return null;
         }
-        return _evaluateXorResults(results);
+        return _evaluateOneOfResults(results);
 
       case ExecutionOrder.parallel:
         final results = await Future.wait<String?>(
           expressions.map((e) => Future.value(e.execute(context, state))),
         );
-        return _evaluateXorResults(results);
+        return _evaluateOneOfResults(results);
     }
   }
 
-  String? _evaluateXorResults(List<String?> results) {
+  String? _evaluateOneOfResults(List<String?> results) {
     final passingCount = results.where((r) => r == null).length;
 
     if (passingCount == 1) return null; // Exactly one passed

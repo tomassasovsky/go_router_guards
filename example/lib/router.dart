@@ -47,10 +47,10 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  GuardExpression get guards => Guards.and(
+  GuardExpression get guards => Guards.all([
     Guards.guard(AuthenticationGuard()),
     Guards.guard(RoleBasedGuard(['admin'])),
-  );
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

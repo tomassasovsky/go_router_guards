@@ -1,6 +1,5 @@
 export 'core.dart' show ExecutionOrder, GuardExpression, RouteGuard;
 export 'expressions.dart' show Guard;
-export 'multi_operators.dart' show AndAll, OrAll, XorAll;
-export 'operators.dart' show And, Or, Xor;
+export 'multi_operators.dart' show All, AnyOf, OneOf;
 export 'route.dart' show GuardedRoute;
 export 'utilities.dart' show Guards;
