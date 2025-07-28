@@ -28,7 +28,7 @@ Add `go_router_guards` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  go_router_guards: ^0.1.0
+  go_router_guards: ^0.1.0+1
 ```
 
 ### Type-Safe Routes with Guards
