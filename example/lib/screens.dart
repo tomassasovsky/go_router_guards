@@ -76,7 +76,12 @@ class ProtectedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Protected')),
-      body: const Center(child: Text('This is a protected route!')),
+      body: const Center(
+        child: Text(
+          'This is a protected route. '
+          'If you see this, you are authenticated!',
+        ),
+      ),
     );
   }
 }
@@ -88,7 +93,12 @@ class AdminScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Admin')),
-      body: const Center(child: Text('This is an admin-only route!')),
+      body: const Center(
+        child: Text(
+          'This is an admin-only route. '
+          'If you see this, you are an admin!',
+        ),
+      ),
     );
   }
 }

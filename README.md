@@ -1,6 +1,6 @@
 # go_router_guards
 
-A flexible and extensible guard system for Go Router that enables type-safe route protection with chainable guards.
+A flexible and extensible guard system for Go Router that enables type-safe route protection with complex boolean logic support.
 
 [![ci][ci_badge]][ci_link]
 [![coverage][coverage_badge]][ci_link]
@@ -14,11 +14,10 @@ A flexible and extensible guard system for Go Router that enables type-safe rout
 [pub_badge]: https://img.shields.io/pub/v/go_router_guards.svg
 [pub_link]: https://pub.dev/packages/go_router_guards
 [license_badge]: https://img.shields.io/badge/License-MIT-yellow.svg
-[license_link]: https://opensource.org/licenses/MIT
+[license_link]: LICENSE
 
 [very_good_analysis_badge]: https://img.shields.io/badge/style-very_good_analysis-B22C89.svg
 [very_good_analysis_link]: https://pub.dev/packages/very_good_analysis
-
 
 ## Quick Start
 
@@ -28,12 +27,12 @@ Add `go_router_guards` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  go_router_guards: ^0.1.0+1
+  go_router_guards: ^1.0.0+1
 ```
 
-### Type-Safe Routes with Guards
+### Type-Safe Routes with Guard Expressions
 
-Following [VGV's routing best practices](https://engineering.verygood.ventures/navigation/navigation/), use type-safe routes with guards:
+Following [VGV's routing best practices](https://engineering.verygood.ventures/navigation/navigation/), use type-safe routes with guard expressions:
 
 ```dart
 import 'package:go_router_guards/go_router_guards.dart';
@@ -54,7 +53,10 @@ class ProtectedRoute extends GoRouteData with GuardedRoute {
   const ProtectedRoute();
 
   @override
-  GuardChain get guards => GuardChain()..add(AuthenticationGuard());
+  GuardExpression get guards => Guards.all([
+    Guards.guard(AuthenticationGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -96,15 +98,59 @@ mixin RouteGuard {
 - Return `null` to allow access
 - Return a route location (e.g., `LoginRoute().location`) to redirect
 
-### GuardChain
+### Guard Expressions with Logical Operators
 
-Chain multiple guards together:
+Create complex guard logic using boolean expressions:
 
 ```dart
-GuardChain()
-  ..add(AuthenticationGuard())
-  ..add(RoleBasedGuard(['admin']))
-  ..add(SubscriptionGuard())
+// Simple AND: both must pass
+Guards.all([
+  Guards.guard(AuthenticationGuard()),
+  Guards.guard(RoleGuard(['admin'])),
+])
+
+// Simple OR: either can pass
+Guards.anyOf([
+  Guards.guard(AuthenticationGuard()),
+  Guards.guard(AdminGuard()),
+])
+
+// Complex expression: (a & b) || c
+Guards.anyOf([
+  Guards.all([
+    Guards.guard(AuthenticationGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  ]),
+  Guards.guard(SuperAdminGuard()),
+])
+
+// Multiple guards with ALL: all must pass
+Guards.all([
+  Guards.guard(AuthenticationGuard()),
+  Guards.guard(RoleGuard(['admin'])),
+  Guards.guard(SubscriptionGuard()),
+  Guards.guard(PaymentGuard()),
+])
+
+// Multiple guards with ANY OF: any can pass
+Guards.anyOf([
+  Guards.guard(AuthenticationGuard()),
+  Guards.guard(AdminGuard()),
+  Guards.guard(SuperAdminGuard()),
+])
+
+// Multiple guards with ONE OF: exactly one must pass
+Guards.oneOf([
+  Guards.guard(AuthenticationGuard()),
+  Guards.guard(AdminGuard()),
+  Guards.guard(SuperAdminGuard()),
+], '/unauthorized')
+
+// ONE OF: exactly one must pass
+Guards.oneOf([
+  Guards.guard(AuthenticationGuard()),
+  Guards.guard(AdminGuard()),
+], '/unauthorized')
 ```
 
 ### GuardedRoute Mixin
@@ -116,15 +162,91 @@ class AdminRoute extends GoRouteData with GuardedRoute {
   const AdminRoute();
 
   @override
-  GuardChain get guards => GuardChain()
-    ..add(AuthenticationGuard())
-    ..add(RoleBasedGuard(['admin']));
+  GuardExpression get guards => Guards.anyOf([
+    Guards.all([
+      Guards.guard(AuthenticationGuard()),
+      Guards.guard(RoleGuard(['admin'])),
+    ]),
+    Guards.guard(SuperAdminGuard()),
+  ]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AdminScreen();
   }
 }
+```
+
+### Complex Guard Logic
+
+```dart
+// Route accessible by:
+// - Authenticated users with admin role AND premium subscription
+// - OR super admins
+// - OR users with special access token
+class PremiumAdminRoute extends GoRouteData with GuardedRoute {
+  const PremiumAdminRoute();
+
+  @override
+  GuardExpression get guards => Guards.anyOf([
+    Guards.all([
+      Guards.guard(AuthenticationGuard()),
+      Guards.guard(RoleGuard(['admin'])),
+      Guards.guard(SubscriptionGuard()),
+    ]),
+    Guards.anyOf([
+      Guards.guard(SuperAdminGuard()),
+      Guards.guard(SpecialAccessGuard()),
+    ]),
+  ]);
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const PremiumAdminScreen();
+  }
+}
+```
+
+### Conditional Guards
+
+```dart
+class ConditionalGuard implements RouteGuard {
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    final appState = context.read<AppCubit>().state;
+    
+    if (appState.isMaintenanceMode) {
+      return MaintenanceRoute().location;
+    }
+    
+    if (appState.isOffline) {
+      return OfflineRoute().location;
+    }
+    
+    return null;
+  }
+}
+```
+
+### Testing Guards
+
+```dart
+test('complex guard expression', () async {
+  final expression = Guards.anyOf([
+    Guards.all([
+      Guards.guard(AuthenticationGuard()),
+      Guards.guard(RoleGuard(['admin'])),
+    ]),
+    Guards.guard(SuperAdminGuard()),
+  ]);
+
+  // Test with authenticated admin
+  when(mockAuthCubit.state).thenReturn(AuthenticatedState());
+  when(mockUserCubit.state).thenReturn(UserState(roles: ['admin']));
+  
+  final result = await expression.execute(mockContext, mockState);
+  expect(result, isNull); // Access granted
+});
 ```
 
 ## Best Practices
@@ -142,18 +264,19 @@ ProtectedRoute().go(context);
 context.go('/protected');
 ```
 
-### 2. Chain Guards by Performance
+### 2. Order Guards by Performance
 
-Order guards from fastest to slowest:
+Order guards from fastest to slowest in ALL expressions:
 
 ```dart
-GuardChain()
-  ..add(AppInitializationGuard()) // Fast check
-  ..add(AuthenticationGuard())    // Medium check
-  ..add(AsyncGuard())             // Slow async check
+Guards.all([
+  Guards.guard(AppInitializationGuard()), // Fast check
+  Guards.guard(AuthenticationGuard()),    // Medium check
+  Guards.guard(AsyncGuard()),             // Slow async check
+])
 ```
 
-### 3. Create Reusable Guards
+### 3. Create Reusable Guard Expressions
 
 Extract common guard logic:
 
@@ -168,6 +291,13 @@ class PremiumFeatureGuard implements RouteGuard {
     return null;
   }
 }
+
+// Reusable expression
+final premiumGuard = Guards.guard(PremiumFeatureGuard());
+final adminGuard = Guards.guard(RoleGuard(['admin']));
+
+// Use in multiple routes
+final adminPremiumGuard = Guards.all([adminGuard, premiumGuard]);
 ```
 
 ### 4. Handle Guard Failures Gracefully
@@ -191,82 +321,38 @@ class RobustGuard implements RouteGuard {
 
 ## Testing
 
-### Unit Testing Guards
+### Unit Testing Guard Expressions
 ```dart
-test('AuthenticationGuard should redirect when not authenticated', () async {
-  final guard = AuthenticationGuard();
-  final mockContext = MockBuildContext();
-  final mockState = MockGoRouterState();
+test('AND expression with both guards passing', () async {
+  final expression = Guards.all([
+    Guards.guard(AuthenticationGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  ]);
   
-  when(mockContext.read<AuthCubit>()).thenReturn(mockAuthCubit);
-  when(mockAuthCubit.state).thenReturn(UnauthenticatedState());
+  when(mockAuthCubit.state).thenReturn(AuthenticatedState());
+  when(mockUserCubit.state).thenReturn(UserState(roles: ['admin']));
   
-  final result = await guard.redirect(mockContext, mockState);
-  
-  expect(result, LoginRoute().location);
+  final result = await expression.execute(mockContext, mockState);
+  expect(result, isNull);
 });
 ```
 
 ### Integration Testing
 ```dart
-testWidgets('Protected route should redirect to login', (tester) async {
+testWidgets('complex guard expression redirects correctly', (tester) async {
   await tester.pumpWidget(MyApp());
   
-  await tester.tap(find.text('Protected Route'));
+  await tester.tap(find.text('Premium Admin Route'));
   await tester.pumpAndSettle();
   
+  // Should redirect to login if not authenticated
   expect(find.text('Login'), findsOneWidget);
 });
 ```
 
-## Migration from Manual Guards
-
-### Before (Manual Implementation)
-```dart
-class ProtectedRoute extends GoRouteData {
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final authState = context.read<AuthCubit>().state;
-    if (!authState.isAuthenticated) {
-      return '/login'; // Hardcoded path
-    }
-    return null;
-  }
-}
-```
-
-### After (Type-Safe Guards)
-```dart
-class ProtectedRoute extends GoRouteData with GuardedRoute {
-  @override
-  GuardChain get guards => GuardChain()..add(AuthenticationGuard());
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const ProtectedScreen();
-  }
-}
-
-class AuthenticationGuard implements RouteGuard {
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final authState = context.read<AuthCubit>().state;
-    if (!authState.isAuthenticated) {
-      return LoginRoute().location; // Type-safe navigation
-    }
-    return null;
-  }
-}
-```
-
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## License
 
