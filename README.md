@@ -189,50 +189,6 @@ class RobustGuard implements RouteGuard {
 }
 ```
 
-## Integration Examples
-
-### With Cubit/Bloc
-```dart
-class AuthGuard implements RouteGuard {
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final authState = context.read<AuthCubit>().state;
-    if (!authState.isAuthenticated) {
-      return LoginRoute().location;
-    }
-    return null;
-  }
-}
-```
-
-### With Provider
-```dart
-class UserGuard implements RouteGuard {
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final user = context.read<UserProvider>().user;
-    if (user == null) {
-      return LoginRoute().location;
-    }
-    return null;
-  }
-}
-```
-
-### With Riverpod
-```dart
-class ProfileGuard implements RouteGuard {
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final profile = context.read(profileProvider);
-    if (!profile.hasCompletedOnboarding) {
-      return OnboardingRoute().location;
-    }
-    return null;
-  }
-}
-```
-
 ## Testing
 
 ### Unit Testing Guards
