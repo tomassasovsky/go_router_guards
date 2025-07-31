@@ -12,8 +12,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  go_router: ^16.0.0
-  meta: ^1.16.0
+  go_router:
+    git:
+      url: https://github.com/tomassasovsky/packages.git
+      ref: feat/go-router-context-redirect
+      path: packages/go_router
 
 dev_dependencies:
   build_runner: ^2.4.15
