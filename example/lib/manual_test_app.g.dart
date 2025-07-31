@@ -40,7 +40,6 @@ RouteBase get $homeRoute => GoRouteData.$route(
       factory: _$AsyncGuardRoute._fromState,
     ),
     GoRouteData.$route(path: '/blocking', factory: _$BlockingRoute._fromState),
-    GoRouteData.$route(path: '/legacy', factory: _$LegacyGuardRoute._fromState),
   ],
 );
 
@@ -206,27 +205,6 @@ mixin _$BlockingRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/blocking');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin _$LegacyGuardRoute on GoRouteData {
-  static LegacyGuardRoute _fromState(GoRouterState state) =>
-      const LegacyGuardRoute();
-
-  @override
-  String get location => GoRouteData.$location('/legacy');
 
   @override
   void go(BuildContext context) => context.go(location);

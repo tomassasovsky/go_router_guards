@@ -1,15 +1,15 @@
 # Enhanced Guards System
 
-This document describes the new enhanced guards system that provides middleware-style navigation control similar to auto_route's guard system, while maintaining full compatibility with go_router.
+This document describes the enhanced guards system that provides middleware-style navigation control similar to auto_route's guard system, while maintaining full compatibility with go_router.
 
 ## Overview
 
-The enhanced guards system introduces:
+The enhanced guards system provides:
 
 - **NavigationResolver**: Provides control flow similar to auto_route's resolver
-- **RouteGuardEnhanced**: Middleware-style guard base class
-- **GuardsEnhanced**: Factory methods for common guard patterns
-- **Backward Compatibility**: Existing guards continue to work unchanged
+- **RouteGuardEnhanced**: Middleware-style guard base class for all guard implementations
+- **GuardsEnhanced**: Factory methods for combining guards (all, anyOf, oneOf)
+- **RouteGuardUtils**: Utilities for using guards with regular (non-type-safe) GoRoute objects
 
 ## Key Concepts
 

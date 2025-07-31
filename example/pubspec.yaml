@@ -19,6 +19,8 @@ dependencies:
     path: ../
   flutter_bloc: ^8.1.4
   bloc: ^8.1.3
+  flutter_web_plugins:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

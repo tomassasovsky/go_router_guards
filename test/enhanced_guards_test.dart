@@ -53,9 +53,9 @@ void main() {
             equals('/test-path')); // blocked to current path
       });
 
-      test('should handle redirectTo()', () async {
-        final resolver = NavigationResolver(mockContext, mockState);
-        await resolver.redirectTo('/redirect-path');
+      test('should handle redirect()', () async {
+        final resolver = NavigationResolver(mockContext, mockState)
+          ..redirect('/redirect-path');
 
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
@@ -73,33 +73,6 @@ void main() {
       });
     });
 
-    group('RouteGuardEnhanced', () {
-      test('should work with simple factory', () async {
-        final guard = RouteGuardEnhanced.simple((resolver, context, state) {
-          resolver.next();
-        });
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
-        expect(result.continueNavigation, isTrue);
-      });
-
-      test('should work with redirectIf factory', () async {
-        final guard = RouteGuardEnhanced.redirectIf(
-            (context, state) => true, '/redirect');
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
-        expect(result.redirectPath, equals('/redirect'));
-      });
-
-      test('should work with async redirectIf factory', () async {
-        final guard = RouteGuardEnhanced.redirectIf(
-            (context, state) async => false, '/redirect');
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
-        expect(result.continueNavigation, isTrue);
-      });
-    });
-
     group('GuardsEnhanced combinations', () {
       test('all should pass when all guards pass', () async {
         final allowGuard1 = TestEnhancedGuard((resolver, context, state) {
@@ -109,7 +82,7 @@ void main() {
           resolver.next();
         });
 
-        final guard = GuardsEnhanced.all([allowGuard1, allowGuard2]);
+        final guard = Guards.all([allowGuard1, allowGuard2]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.continueNavigation, isTrue);
@@ -123,7 +96,7 @@ void main() {
           resolver.redirect('/blocked');
         });
 
-        final guard = GuardsEnhanced.all([allowGuard, blockGuard]);
+        final guard = Guards.all([allowGuard, blockGuard]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.redirectPath, equals('/blocked'));
@@ -137,7 +110,7 @@ void main() {
           resolver.next();
         });
 
-        final guard = GuardsEnhanced.anyOf([blockGuard, allowGuard]);
+        final guard = Guards.anyOf([blockGuard, allowGuard]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.continueNavigation, isTrue);
@@ -151,7 +124,7 @@ void main() {
           resolver.redirect('/block2');
         });
 
-        final guard = GuardsEnhanced.anyOf([
+        final guard = Guards.anyOf([
           blockGuard1,
           blockGuard2,
         ], fallbackRedirect: '/fallback');
@@ -168,7 +141,7 @@ void main() {
           resolver.redirect('/blocked');
         });
 
-        final guard = GuardsEnhanced.oneOf([allowGuard, blockGuard]);
+        final guard = Guards.oneOf([allowGuard, blockGuard]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.continueNavigation, isTrue);
@@ -182,7 +155,7 @@ void main() {
           resolver.next();
         });
 
-        final guard = GuardsEnhanced.oneOf([allowGuard1, allowGuard2]);
+        final guard = Guards.oneOf([allowGuard1, allowGuard2]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.redirectPath,
@@ -197,7 +170,7 @@ void main() {
           resolver.redirect('/block2');
         });
 
-        final guard = GuardsEnhanced.oneOf([
+        final guard = Guards.oneOf([
           blockGuard1,
           blockGuard2,
         ], fallbackRedirect: '/fallback');
@@ -236,7 +209,7 @@ void main() {
 }
 
 /// Test implementation of RouteGuardEnhanced for testing
-class TestEnhancedGuard extends RouteGuardEnhanced {
+class TestEnhancedGuard extends RouteGuard {
   TestEnhancedGuard(this.onNavigationCallback);
 
   final FutureOr<void> Function(

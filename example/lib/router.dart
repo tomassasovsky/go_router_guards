@@ -10,35 +10,45 @@ import 'screens.dart';
 part 'router.g.dart';
 
 // Simple authentication guard
-class AuthenticationGuard implements RouteGuard {
+class AuthenticationGuard extends RouteGuard {
+  const AuthenticationGuard();
+
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+  FutureOr<void> onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
     final isAuthenticated = context.read<AuthCubit>().state.isAuthenticated;
 
     if (!isAuthenticated) {
-      return LoginRoute().location;
+      resolver.redirect(LoginRoute().location);
+    } else {
+      resolver.next();
     }
-
-    return null;
   }
 }
 
 // Role-based guard
-class RoleGuard implements RouteGuard {
+class RoleGuard extends RouteGuard {
   const RoleGuard(this.requiredRoles);
 
   final List<String> requiredRoles;
 
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+  FutureOr<void> onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
     final userRoles = context.read<UserCubit>().state.roles;
 
     final hasRequiredRole = requiredRoles.any(userRoles.contains);
     if (!hasRequiredRole) {
-      return UnauthorizedRoute().location;
+      resolver.redirect(UnauthorizedRoute().location);
+    } else {
+      resolver.next();
     }
-
-    return null;
   }
 }
 
@@ -75,7 +85,9 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   }
 }
 
-class LoginRoute extends GoRouteData with _$LoginRoute {
+/// Example of using UnguardedRoute to opt-out of global guards
+/// This route will bypass any global guards applied to the router
+class LoginRoute extends GoRouteData with _$LoginRoute, UnguardedRoute {
   const LoginRoute();
 
   @override
@@ -107,5 +119,3 @@ class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
     return const UnauthorizedScreen();
   }
 }
-
-final router = GoRouter(routes: $appRoutes);

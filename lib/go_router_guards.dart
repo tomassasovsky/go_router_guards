@@ -1,62 +1,127 @@
-/// A flexible and extensible guard system for Go Router that enables type-safe
-/// route protection with complex boolean logic support.
+/// A flexible and extensible guard system for Go Router that allows you to
+/// create middleware-style navigation guards with inclusion and exclusion
+/// capabilities.
 ///
-/// This package provides a powerful guard system that allows you to:
-/// - Create custom route guards by implementing the `RouteGuard` class
-/// - Combine guards using logical operators (AND, OR, XOR)
-/// - Build complex expressions like `(a & b) || c`
-/// - Control execution order (sequential, parallel)
-/// - Use multi-guard operators for multiple guards
-/// - Integrate seamlessly with Go Router's type-safe routes
+/// ## Features
+///
+/// - **Route Guards**: Create custom guards that can redirect, block, or
+///   allow navigation
+/// - **Guard Combinations**: Combine multiple guards with `Guards.all()`,
+///   `Guards.anyOf()`, `Guards.oneOf()`
+/// - **Global Guards**: Apply guards to all routes with fine-grained control
+///   over which routes are affected
+/// - **Inclusion & Exclusion**: Specify exactly which routes should have
+///   guards applied
+/// - **Type-Safe Integration**: Full support for Go Router's type-safe routing
+///   with `GuardedRoute` and `UnguardedRoute` mixins
+/// - **Backward Compatibility**: Works with both traditional and type-safe
+///   GoRouter configurations
 ///
 /// ## Quick Start
 ///
+/// ### Creating a Guard
 /// ```dart
-/// import 'package:go_router_guards/go_router_guards.dart';
-///
-/// // Create a custom guard
-/// class AuthenticationGuard implements RouteGuard {
+/// class AuthGuard extends RouteGuard {
 ///   @override
-///   FutureOr<String?> redirect(
+///   FutureOr<void> onNavigation(
+///     NavigationResolver resolver,
 ///     BuildContext context,
 ///     GoRouterState state,
 ///   ) async {
-///     final authState = context.read<AuthCubit>().state;
-///     if (!authState.isAuthenticated) {
-///       return '/login';
+///     final isAuthenticated = await checkAuth();
+///     if (isAuthenticated) {
+///       resolver.next(); // Allow navigation
+///     } else {
+///       resolver.redirect('/login'); // Redirect to login
 ///     }
-///     return null;
 ///   }
 /// }
+/// ```
 ///
-/// // Use with type-safe routes
-/// @TypedGoRoute<ProtectedRoute>(path: '/protected')
-/// class ProtectedRoute extends GoRouteData with GuardedRoute {
-///   const ProtectedRoute();
+/// ### Global Guards with Inclusion
+/// ```dart
+/// final router = GoRouter(
+///   routes: [...],
+///   redirect: RouteGuardUtils.createGuardRedirect(
+///     GlobalGuard(
+///       guard: AuthGuard(),
+///       // Only apply to specific routes
+///       includedPatterns: [
+///         RegExp(r'^/user/.*'), // All user routes
+///         RegExp(r'^/admin/.*'), // All admin routes
+///       ],
+///       includedPaths: ['/dashboard'], // Specific path
+///     ),
+///   ),
+/// );
+/// ```
 ///
+/// ### Global Guards with Exclusion
+/// ```dart
+/// final router = GoRouter(
+///   routes: [...],
+///   redirect: RouteGuardUtils.createGuardRedirect(
+///     GlobalGuard(
+///       guard: AuthGuard(),
+///       // Apply to all routes except these
+///       excludedPatterns: [RegExp(r'^/public/.*')],
+///       excludedPaths: ['/login', '/register'],
+///     ),
+///   ),
+/// );
+/// ```
+///
+/// ### Type-Safe Routes with Guards
+/// ```dart
+/// @TypedGoRoute<AdminRoute>(path: '/admin')
+/// class AdminRoute extends GoRouteData with GuardedRoute {
 ///   @override
 ///   RouteGuard get guards => Guards.all([
-///     AuthenticationGuard(),
+///     AuthGuard(),
 ///     RoleGuard(['admin']),
 ///   ]);
 ///
 ///   @override
-///   Widget build(BuildContext context, GoRouterState state) {
-///     return const ProtectedScreen();
-///   }
+///   Widget build(context, state) => AdminScreen();
 /// }
-///
-/// // Navigate with type safety
-/// ProtectedRoute().go(context);
 /// ```
 ///
-/// ## Features
+/// ### Opting Out of Global Guards
+/// ```dart
+/// @TypedGoRoute<LoginRoute>(path: '/login')
+/// class LoginRoute extends GoRouteData with UnguardedRoute {
+///   @override
+///   Widget build(context, state) => LoginScreen();
+/// }
+/// ```
 ///
-/// - **Type-Safe Routes**: Full type safety with Go Router integration
-/// - **Complex Boolean Logic**: Support for any boolean expression
-/// - **Execution Order Control**: Choose how guards are executed
-/// - **Performance Optimized**: Short-circuit evaluation and parallel execution
-/// - **Simple API**: Easy to use with minimal boilerplate
+/// ## Advanced Features
+///
+/// ### Inclusion vs Exclusion Logic
+/// 
+/// - **Inclusion Rules**: If provided, guards ONLY apply to matching routes
+/// - **Exclusion Rules**: If provided, guards apply to all routes EXCEPT
+///   matching ones
+/// - **Priority**: Exclusion takes precedence over inclusion
+/// - **Default**: No inclusion rules means apply to all routes (unless
+///   excluded)
+///
+/// ### Combining Guards
+/// ```dart
+/// RouteGuard get complexGuard => Guards.all([
+///   AuthGuard(),
+///   Guards.anyOf([
+///     RoleGuard(['admin']),
+///     RoleGuard(['moderator']),
+///   ]),
+/// ]);
+/// ```
+///
+/// ## Migration from Other Guard Systems
+///
+/// This library is designed to be a drop-in replacement for other guard
+/// systems while providing additional flexibility and Go Router integration.
+///
 library;
 
 export 'src/go_router_guards.dart';

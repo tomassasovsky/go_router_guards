@@ -15,7 +15,7 @@ part 'manual_test_app.g.dart';
 /// Run this with: flutter run lib/manual_test_app.dart
 
 // Enhanced Guards for testing
-class EnhancedAuthGuard extends RouteGuardEnhanced {
+class EnhancedAuthGuard extends RouteGuard {
   @override
   FutureOr<void> onNavigation(
     NavigationResolver resolver,
@@ -34,7 +34,7 @@ class EnhancedAuthGuard extends RouteGuardEnhanced {
   }
 }
 
-class EnhancedRoleGuard extends RouteGuardEnhanced {
+class EnhancedRoleGuard extends RouteGuard {
   const EnhancedRoleGuard(this.requiredRoles);
 
   final List<String> requiredRoles;
@@ -56,7 +56,7 @@ class EnhancedRoleGuard extends RouteGuardEnhanced {
   }
 }
 
-class BusinessHoursGuard extends RouteGuardEnhanced {
+class BusinessHoursGuard extends RouteGuard {
   @override
   FutureOr<void> onNavigation(
     NavigationResolver resolver,
@@ -87,7 +87,6 @@ class BusinessHoursGuard extends RouteGuardEnhanced {
     TypedGoRoute<FlexibleAccessRoute>(path: '/flexible-access'),
     TypedGoRoute<AsyncGuardRoute>(path: '/async-guard'),
     TypedGoRoute<BlockingRoute>(path: '/blocking'),
-    TypedGoRoute<LegacyGuardRoute>(path: '/legacy'),
   ],
 )
 class HomeRoute extends GoRouteData with _$HomeRoute {
@@ -115,7 +114,7 @@ class FactoryGuardsRoute extends GoRouteData
   const FactoryGuardsRoute();
 
   @override
-  RouteGuardEnhanced get guards => GuardsEnhanced.all([
+  RouteGuard get guards => Guards.all([
     EnhancedAuthGuard(),
     EnhancedRoleGuard(['admin', 'moderator']),
   ]);
@@ -135,8 +134,8 @@ class CustomLogicRoute extends GoRouteData
   const CustomLogicRoute();
 
   @override
-  RouteGuardEnhanced get guards =>
-      GuardsEnhanced.all([EnhancedAuthGuard(), BusinessHoursGuard()]);
+  RouteGuard get guards =>
+      Guards.all([EnhancedAuthGuard(), BusinessHoursGuard()]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -154,8 +153,8 @@ class ConditionalRoute extends GoRouteData
   final String section;
 
   @override
-  RouteGuardEnhanced get guards => section == 'admin'
-      ? GuardsEnhanced.all([
+  RouteGuard get guards => section == 'admin'
+      ? Guards.all([
           EnhancedAuthGuard(),
           EnhancedRoleGuard(['admin']),
         ])
@@ -172,7 +171,7 @@ class ConditionalRoute extends GoRouteData
   }
 }
 
-class HolidayGuard extends RouteGuardEnhanced {
+class HolidayGuard extends RouteGuard {
   const HolidayGuard();
 
   @override
@@ -195,7 +194,7 @@ class FlexibleAccessRoute extends GoRouteData
   const FlexibleAccessRoute();
 
   @override
-  RouteGuardEnhanced get guards => GuardsEnhanced.anyOf([
+  RouteGuard get guards => Guards.anyOf([
     EnhancedRoleGuard(['admin']),
     EnhancedRoleGuard(['premium']),
     HolidayGuard(),
@@ -211,7 +210,7 @@ class FlexibleAccessRoute extends GoRouteData
   }
 }
 
-class SubscriptionGuard extends RouteGuardEnhanced {
+class SubscriptionGuard extends RouteGuard {
   const SubscriptionGuard();
 
   @override
@@ -249,8 +248,8 @@ class AsyncGuardRoute extends GoRouteData with _$AsyncGuardRoute, GuardedRoute {
   const AsyncGuardRoute();
 
   @override
-  RouteGuardEnhanced get guards =>
-      GuardsEnhanced.all([EnhancedAuthGuard(), SubscriptionGuard()]);
+  RouteGuard get guards =>
+      Guards.all([EnhancedAuthGuard(), SubscriptionGuard()]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -262,7 +261,7 @@ class AsyncGuardRoute extends GoRouteData with _$AsyncGuardRoute, GuardedRoute {
   }
 }
 
-class MaintenanceGuard extends RouteGuardEnhanced {
+class MaintenanceGuard extends RouteGuard {
   const MaintenanceGuard();
 
   @override
@@ -285,7 +284,7 @@ class BlockingRoute extends GoRouteData with _$BlockingRoute, GuardedRoute {
   const BlockingRoute();
 
   @override
-  RouteGuardEnhanced get guards => MaintenanceGuard();
+  RouteGuard get guards => MaintenanceGuard();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -293,27 +292,6 @@ class BlockingRoute extends GoRouteData with _$BlockingRoute, GuardedRoute {
       title: 'Blocking Guard Demo',
       description:
           'This route blocks access during odd minutes using resolver.block().',
-    );
-  }
-}
-
-// Legacy compatibility route
-class LegacyGuardRoute extends GoRouteData
-    with _$LegacyGuardRoute, GuardedRoute {
-  const LegacyGuardRoute();
-
-  @override
-  RouteGuard get guards => Guards.all([
-    AuthenticationGuard(),
-    EnhancedRoleGuard(['user']),
-  ]);
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const TestScreen(
-      title: 'Legacy Guards Demo',
-      description:
-          'This route uses the original Guards.all() with legacy guard classes.',
     );
   }
 }
@@ -727,47 +705,18 @@ final manualTestRouter = GoRouter(routes: $appRoutes);
 // );
 
 // Legacy guards for compatibility testing
-class AuthenticationGuard implements RouteGuard {
+class AuthenticationGuard extends RouteGuard {
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+  FutureOr<void> onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
     final isAuthenticated = context.read<AuthCubit>().state.isAuthenticated;
     if (!isAuthenticated) {
-      return LoginRoute().location;
+      resolver.redirect('/login');
+    } else {
+      resolver.next();
     }
-    return null;
   }
 }
-
-// class EnhancedRoleGuard extends RouteGuardEnhanced {
-//   const EnhancedRoleGuard(this.requiredRoles);
-
-//   final List<String> requiredRoles;
-
-//   @override
-//   FutureOr<void> onNavigation(
-//     NavigationResolver resolver,
-//     BuildContext context,
-//     GoRouterState state,
-//   ) async {
-//     final userRoles = context.read<UserCubit>().state.roles;
-//     final hasRequiredRole = requiredRoles.any(userRoles.contains);
-//     if (!hasRequiredRole) {
-//       resolver.block();
-//     } else {
-//       resolver.next();
-//     }
-//   }
-// }
-
-// class EnhancedRoleGuard extends RouteGuardEnhanced {
-//   const EnhancedRoleGuard(this.requiredRoles);
-//   final List<String> requiredRoles;
-//   FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-//     final userRoles = context.read<UserCubit>().state.roles;
-//     final hasRequiredRole = requiredRoles.any(userRoles.contains);
-//     if (!hasRequiredRole) {
-//       return ;
-//     }
-//     return null;
-//   }
-// }

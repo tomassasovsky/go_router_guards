@@ -103,15 +103,6 @@ class NavigationResolver {
     _completer.complete(result);
   }
 
-  /// Redirect to a different path and block current navigation
-  /// Returns a future that can be awaited for the redirect completion
-  Future<T?> redirectTo<T extends Object?>(String path) async {
-    redirect(path);
-    // In go_router, we can't easily track the redirect completion
-    // like auto_route does, so we return null
-    return null;
-  }
-
   /// Navigate back if the guard fails
   void nextOrBack([bool continueNavigation = true]) {
     if (continueNavigation) {

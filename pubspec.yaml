@@ -17,7 +17,6 @@ dependencies:
       url: https://github.com/tomassasovsky/packages.git
       ref: feat/go-router-context-redirect
       path: packages/go_router
-  meta: ^1.16.0
 
 dev_dependencies:
   build_runner: ^2.4.15
