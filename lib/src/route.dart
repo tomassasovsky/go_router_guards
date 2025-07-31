@@ -9,17 +9,23 @@ import 'package:go_router_guards/go_router_guards.dart';
 /// Override the `guards` getter to define route protection.
 /// The guards will be automatically executed when the route is accessed.
 ///
-/// Example:
+/// Example with enhanced guards:
 /// ```dart
 /// @TypedGoRoute<ProtectedRoute>(path: '/protected')
 /// class ProtectedRoute extends GoRouteData with GuardedRoute {
 ///   const ProtectedRoute();
 ///
 ///   @override
-///   RouteGuard get guards => Guards.all([
-///     AuthenticationGuard(),
-///     RoleGuard(['admin']),
-///   ]);
+///   RouteGuardEnhanced get guards => GuardsEnhanced.simple(
+///     (resolver, context, state) async {
+///       final isAuth = await checkAuth();
+///       if (isAuth) {
+///         resolver.next();
+///       } else {
+///         resolver.redirect('/login');
+///       }
+///     }
+///   );
 ///
 ///   @override
 ///   Widget build(BuildContext context, GoRouterState state) {
@@ -27,18 +33,43 @@ import 'package:go_router_guards/go_router_guards.dart';
 ///   }
 /// }
 /// ```
+///
+/// Example with legacy guards (backward compatible):
+/// ```dart
+/// @override
+/// RouteGuard get guards => Guards.all([
+///   AuthenticationGuard(),
+///   RoleGuard(['admin']),
+/// ]);
+/// ```
 mixin GuardedRoute on GoRouteData {
   /// The guard to execute when accessing this route.
   ///
   /// Override this getter to define route protection.
   /// Defaults to allowing all access.
+  ///
+  /// You can return either a legacy [RouteGuard] or enhanced
+  /// [RouteGuardEnhanced].
   RouteGuard get guards => Guards.allow();
 
-  /// Executes the guards for this route.
+  /// Executes the guards for this route using the enhanced guard system.
   ///
   /// Returns a redirect path if access is denied, null if access is granted.
-  FutureOr<String?> executeGuards(BuildContext context, GoRouterState state) {
-    return guards.redirect(context, state);
+  /// This method automatically handles both legacy and enhanced guards.
+  FutureOr<String?> executeGuards(
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final guard = guards;
+
+    // If it's an enhanced guard, use the resolver pattern
+    if (guard is RouteGuardEnhanced) {
+      final result = await guard.executeWithResolver(context, state);
+      return result.redirectPath;
+    }
+
+    // Otherwise, use legacy redirect method
+    return guard.redirect(context, state);
   }
 
   /// Redirect method for backward compatibility.

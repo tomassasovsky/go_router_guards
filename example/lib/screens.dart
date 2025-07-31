@@ -147,8 +147,15 @@ class UserCubit extends Cubit<UserState> {
 
   void toggleAdmin() {
     final newRoles = state.roles.contains('admin')
-        ? ['user']
-        : ['user', 'admin'];
+        ? state.roles.where((role) => role != 'admin').toList()
+        : [...state.roles, 'admin'];
+    emit(UserState(roles: newRoles));
+  }
+
+  void togglePremium() {
+    final newRoles = state.roles.contains('premium')
+        ? state.roles.where((role) => role != 'premium').toList()
+        : [...state.roles, 'premium'];
     emit(UserState(roles: newRoles));
   }
 }
