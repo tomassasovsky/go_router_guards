@@ -62,9 +62,10 @@ mixin GuardedRoute on GoRouteData {
   }
 }
 
-/// Mixin for Go Router type-safe routes to explicitly disable global guards.
+/// Mixin for Go Router type-safe routes to explicitly disable router-level
+/// guards.
 ///
-/// Use this mixin when you want to opt-out of global guards that are applied
+/// Use this mixin when you want to opt-out of guards that are applied
 /// via the router's `redirect` parameter. This is useful for routes like
 /// login, registration, or public pages that should bypass authentication.
 ///
@@ -81,11 +82,11 @@ mixin GuardedRoute on GoRouteData {
 /// }
 /// ```
 ///
-/// Note: This mixin only affects global guards applied via the router's
+/// Note: This mixin only affects router-level guards applied via the router's
 /// `redirect` parameter. It does not affect guards applied directly to
 /// individual routes.
 mixin UnguardedRoute on GoRouteData {
-  /// Always allows navigation, effectively bypassing any global guards.
+  /// Always allows navigation, effectively bypassing any router-level guards.
   ///
   /// This method returns null, which tells Go Router to continue with
   /// the navigation without any redirects.

@@ -8,8 +8,8 @@
 ///   allow navigation
 /// - **Guard Combinations**: Combine multiple guards with `Guards.all()`,
 ///   `Guards.anyOf()`, `Guards.oneOf()`
-/// - **Global Guards**: Apply guards to all routes with fine-grained control
-///   over which routes are affected
+/// - **Conditional Guards**: Apply guards with fine-grained control over
+///   which routes are affected
 /// - **Inclusion & Exclusion**: Specify exactly which routes should have
 ///   guards applied
 /// - **Type-Safe Integration**: Full support for Go Router's type-safe routing
@@ -38,12 +38,12 @@
 /// }
 /// ```
 ///
-/// ### Global Guards with Inclusion
+/// ### Conditional Guards with Inclusion
 /// ```dart
 /// final router = GoRouter(
 ///   routes: [...],
 ///   redirect: RouteGuardUtils.createGuardRedirect(
-///     GlobalGuard(
+///     ConditionalGuard(
 ///       guard: AuthGuard(),
 ///       // Only apply to specific routes
 ///       includedPatterns: [
@@ -56,12 +56,12 @@
 /// );
 /// ```
 ///
-/// ### Global Guards with Exclusion
+/// ### Conditional Guards with Exclusion
 /// ```dart
 /// final router = GoRouter(
 ///   routes: [...],
 ///   redirect: RouteGuardUtils.createGuardRedirect(
-///     GlobalGuard(
+///     ConditionalGuard(
 ///       guard: AuthGuard(),
 ///       // Apply to all routes except these
 ///       excludedPatterns: [RegExp(r'^/public/.*')],
@@ -86,7 +86,7 @@
 /// }
 /// ```
 ///
-/// ### Opting Out of Global Guards
+/// ### Opting Out of Router-Level Guards
 /// ```dart
 /// @TypedGoRoute<LoginRoute>(path: '/login')
 /// class LoginRoute extends GoRouteData with UnguardedRoute {
@@ -98,7 +98,7 @@
 /// ## Advanced Features
 ///
 /// ### Inclusion vs Exclusion Logic
-/// 
+///
 /// - **Inclusion Rules**: If provided, guards ONLY apply to matching routes
 /// - **Exclusion Rules**: If provided, guards apply to all routes EXCEPT
 ///   matching ones

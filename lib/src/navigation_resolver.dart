@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// {@template guard_result}
-/// Result of a guard navigation resolution
+/// Result of a guard navigation resolution.
 /// {@endtemplate}
 class GuardResult {
   /// {@macro guard_result}
@@ -13,38 +13,30 @@ class GuardResult {
     this.reevaluateOnChange = false,
   });
 
-  /// Factory for allowing navigation to continue
+  /// Factory for allowing navigation to continue.
   const GuardResult.allow({this.reevaluateOnChange = false})
       : continueNavigation = true,
         redirectPath = null;
 
-  /// Factory for blocking navigation with redirect
+  /// Factory for blocking navigation with redirect.
   const GuardResult.redirect(String path, {this.reevaluateOnChange = false})
       : continueNavigation = false,
         redirectPath = path;
 
-  /// Factory for blocking navigation by redirecting to current location
-  ///
-  /// Note: In practice, use [NavigationResolver.block()] which will
-  /// automatically redirect to the current location to achieve blocking.
-  @Deprecated('Use NavigationResolver.block() instead')
-  const GuardResult.block({this.reevaluateOnChange = false})
-      : continueNavigation = false,
-        redirectPath = null;
-
-  /// Whether to continue with the navigation
+  /// Whether to continue with the navigation.
   final bool continueNavigation;
 
-  /// Optional redirect path if navigation should be redirected
+  /// Optional redirect path if navigation should be redirected.
   final String? redirectPath;
 
-  /// Whether this guard should be reevaluated on state changes
+  /// Whether this guard should be reevaluated on state changes.
   final bool reevaluateOnChange;
 }
 
 /// {@template navigation_resolver}
-/// Navigation resolver that provides control over the navigation flow
-/// Similar to auto_route's NavigationResolver but adapted for go_router
+/// Navigation resolver that provides control over the navigation flow.
+///
+/// Similar to auto_route's NavigationResolver but adapted for go_router.
 /// {@endtemplate}
 class NavigationResolver {
   /// {@macro navigation_resolver}
@@ -54,16 +46,16 @@ class NavigationResolver {
   final GoRouterState _state;
   final Completer<GuardResult> _completer = Completer<GuardResult>();
 
-  /// The current route being navigated to
+  /// The current route being navigated to.
   GoRouterState get state => _state;
 
-  /// The context for the navigation
+  /// The context for the navigation.
   BuildContext get context => _context;
 
-  /// Whether this resolver has been resolved
+  /// Whether this resolver has been resolved.
   bool get isResolved => _completer.isCompleted;
 
-  /// The future that completes when the guard resolves
+  /// The future that completes when the guard resolves.
   Future<GuardResult> get future => _completer.future;
 
   /// Continue navigation (allow access)
@@ -85,37 +77,41 @@ class NavigationResolver {
     ));
   }
 
-  /// Block navigation by redirecting to current location
+  /// If you don't want to redirect to a specific path, but rather
+  /// keep the current location, you can use this method.
+  ///
+  /// This is useful when you want to block navigation to a specific route
+  /// and keep the current location.
+  ///
+  /// For example, if you want to block navigation to a protected route and
+  /// keep the current location, you can use this method.
   void block({bool reevaluateOnChange = false}) {
     if (isResolved) return;
     final currentLocation =
         GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
-    // Block by redirecting to current location
     _completer.complete(GuardResult.redirect(
       currentLocation,
       reevaluateOnChange: reevaluateOnChange,
     ));
   }
 
-  /// Complete with a custom result
+  /// Complete with a custom result.
   void resolve(GuardResult result) {
     if (isResolved) return;
     _completer.complete(result);
   }
 
-  /// Navigate back if the guard fails
+  /// Navigate back if the guard fails.
   void nextOrBack([bool continueNavigation = true]) {
     if (continueNavigation) {
       next();
     } else {
       block();
-      // Note: In go_router, we can't automatically go back here
-      // The calling code would need to handle this
     }
   }
 }
 
-/// Signature for the enhanced guard navigation callback
+/// Signature for the enhanced guard navigation callback.
 typedef OnGuardNavigation = FutureOr<void> Function(
   NavigationResolver resolver,
   BuildContext context,

@@ -16,7 +16,7 @@ import 'package:go_router_guards/go_router_guards.dart';
 ///
 /// **Pure Inclusion** (recommended for targeted protection):
 /// ```dart
-/// GlobalGuard(
+/// ConditionalGuard(
 ///   guard: AuthGuard(),
 ///   includedPatterns: [RegExp(r'^/user/.*')], // Only user routes
 /// )
@@ -24,7 +24,7 @@ import 'package:go_router_guards/go_router_guards.dart';
 ///
 /// **Pure Exclusion** (recommended for global protection with exceptions):
 /// ```dart
-/// GlobalGuard(
+/// ConditionalGuard(
 ///   guard: AuthGuard(),
 ///   excludedPaths: ['/login', '/register'], // Everywhere except these
 /// )
@@ -34,7 +34,7 @@ import 'package:go_router_guards/go_router_guards.dart';
 /// Use when you need to apply guards to a pattern but exclude specific routes
 /// within that pattern.
 /// ```dart
-/// GlobalGuard(
+/// ConditionalGuard(
 ///   guard: AdminGuard(),
 ///   includedPatterns: [RegExp(r'^/admin/.*')], // All admin routes
 ///   excludedPaths: ['/admin/status'], // Except public monitoring
@@ -59,8 +59,9 @@ import 'package:go_router_guards/go_router_guards.dart';
 /// internally
 /// - **Route Restructuring**: Organize routes so simpler patterns work
 ///
-class GlobalGuard extends RouteGuard {
-  /// Creates a global guard with the specified inclusion and exclusion rules.
+class ConditionalGuard extends RouteGuard {
+  /// Creates a conditional guard with the specified inclusion and exclusion
+  /// rules.
   ///
   /// [guard] - The underlying guard to execute when conditions are met
   /// [includedPaths] - Exact paths where the guard should apply (if empty,
@@ -71,7 +72,7 @@ class GlobalGuard extends RouteGuard {
   /// precedence over inclusion)
   /// [excludedPatterns] - Regular expression patterns for paths to exclude
   /// (takes precedence over inclusion)
-  const GlobalGuard({
+  const ConditionalGuard({
     required this.guard,
     this.includedPaths = const [],
     this.includedPatterns = const [],

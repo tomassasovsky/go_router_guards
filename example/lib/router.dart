@@ -45,7 +45,7 @@ class RoleGuard extends RouteGuard {
 
     final hasRequiredRole = requiredRoles.any(userRoles.contains);
     if (!hasRequiredRole) {
-      resolver.redirect(UnauthorizedRoute().location);
+      resolver.block();
     } else {
       resolver.next();
     }
@@ -85,8 +85,8 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   }
 }
 
-/// Example of using UnguardedRoute to opt-out of global guards
-/// This route will bypass any global guards applied to the router
+/// Example of using UnguardedRoute to opt-out of router-level guards
+/// This route will bypass any router-level guards applied to the router
 class LoginRoute extends GoRouteData with _$LoginRoute, UnguardedRoute {
   const LoginRoute();
 
@@ -119,3 +119,33 @@ class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
     return const UnauthorizedScreen();
   }
 }
+
+/// Example router using inclusion patterns with ConditionalGuard
+/// Only applies authentication to protected and admin routes
+final router = GoRouter(
+  routes: $appRoutes,
+  redirect: RouteGuardUtils.createGuardRedirect(
+    ConditionalGuard(
+      guard: AuthenticationGuard(),
+      // Only apply authentication to specific routes
+      includedPatterns: [RegExp(r'^/protected.*'), RegExp(r'^/admin.*')],
+      // Exclude specific maintenance routes even if they match inclusion patterns
+      excludedPaths: ['/admin/debug'],
+    ),
+  ),
+);
+
+/// Alternative router using exclusion (traditional approach)
+final globalRouter = GoRouter(
+  routes: $appRoutes,
+  redirect: RouteGuardUtils.createGuardRedirect(
+    ConditionalGuard(
+      guard: AuthenticationGuard(),
+      // Exclude public and auth routes from authentication
+      excludedPaths: ['/login', '/unauthorized'],
+    ),
+  ),
+);
+
+/// Router with no router-level guards - relies on individual route guards only
+final individualGuardsRouter = GoRouter(routes: $appRoutes);
