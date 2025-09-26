@@ -1,0 +1,28 @@
+name: go_router_guards
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/go_router_guards.yaml"
+      - "packages/go_router_guards/lib/**"
+      - "packages/go_router_guards/test/**"
+      - "packages/go_router_guards/pubspec.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/go_router_guards.yaml"
+      - "packages/go_router_guards/lib/**"
+      - "packages/go_router_guards/test/**"
+      - "packages/go_router_guards/pubspec.yaml"
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    with:
+      working_directory: packages/go_router_guards
+
+  pana:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/go_router_guards

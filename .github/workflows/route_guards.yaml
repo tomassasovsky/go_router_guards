@@ -1,0 +1,28 @@
+name: route_guards
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/route_guards.yaml"
+      - "packages/route_guards/lib/**"
+      - "packages/route_guards/test/**"
+      - "packages/route_guards/pubspec.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/route_guards.yaml"
+      - "packages/route_guards/lib/**"
+      - "packages/route_guards/test/**"
+      - "packages/route_guards/pubspec.yaml"
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/dart_package.yml@v1
+    with:
+      working_directory: packages/route_guards
+
+  pana:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      working_directory: packages/route_guards

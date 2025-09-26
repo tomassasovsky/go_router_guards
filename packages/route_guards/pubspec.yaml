@@ -1,0 +1,16 @@
+name: route_guards
+description: A flexible and extensible core guard system for navigation that provides middleware-style route protection with guard composition capabilities.
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  meta: ^1.16.0
+
+dev_dependencies:
+  mocktail: ^1.0.4
+  test: ^1.25.0
+  very_good_analysis: ^10.0.0

@@ -1,11 +1,31 @@
 version: 2
-enable-beta-ecosystems: true
 updates:
+  # GitHub Actions Dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-  - package-ecosystem: "pub"
-    directory: "/"
+      interval: "monthly"
+    groups:
+      gh-deps:
+        patterns:
+          - "*"
+  # NPM Dependencies
+  - package-ecosystem: "npm"
+    directory: "/docs"
     schedule:
-      interval: "daily"
+      interval: "monthly"
+    groups:
+      npm-deps:
+        patterns:
+          - "*"
+  # Dart Dependencies
+  - package-ecosystem: pub
+    directories:
+      - /packages/route_guards
+      - /packages/go_router_guards
+    schedule:
+      interval: monthly
+    groups:
+      dart-deps:
+        patterns:
+          - "*"

@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -15,10 +19,10 @@ part 'manual_test_app.g.dart';
 /// Run this with: flutter run lib/manual_test_app.dart
 
 // Enhanced Guards for testing
-class EnhancedAuthGuard extends RouteGuard {
+class EnhancedAuthGuard extends GoRouterGuard {
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -34,14 +38,14 @@ class EnhancedAuthGuard extends RouteGuard {
   }
 }
 
-class EnhancedRoleGuard extends RouteGuard {
+class EnhancedRoleGuard extends GoRouterGuard {
   const EnhancedRoleGuard(this.requiredRoles);
 
   final List<String> requiredRoles;
 
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -56,10 +60,10 @@ class EnhancedRoleGuard extends RouteGuard {
   }
 }
 
-class BusinessHoursGuard extends RouteGuard {
+class BusinessHoursGuard extends GoRouterGuard {
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -114,7 +118,7 @@ class FactoryGuardsRoute extends GoRouteData
   const FactoryGuardsRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard<Object, Object> get guards => Guards.all([
     EnhancedAuthGuard(),
     EnhancedRoleGuard(['admin', 'moderator']),
   ]);
@@ -134,7 +138,7 @@ class CustomLogicRoute extends GoRouteData
   const CustomLogicRoute();
 
   @override
-  RouteGuard get guards =>
+  RouteGuard<Object, Object> get guards =>
       Guards.all([EnhancedAuthGuard(), BusinessHoursGuard()]);
 
   @override
@@ -153,7 +157,7 @@ class ConditionalRoute extends GoRouteData
   final String section;
 
   @override
-  RouteGuard get guards => section == 'admin'
+  RouteGuard<Object, Object> get guards => section == 'admin'
       ? Guards.all([
           EnhancedAuthGuard(),
           EnhancedRoleGuard(['admin']),
@@ -171,12 +175,12 @@ class ConditionalRoute extends GoRouteData
   }
 }
 
-class HolidayGuard extends RouteGuard {
+class HolidayGuard extends GoRouterGuard {
   const HolidayGuard();
 
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -194,7 +198,7 @@ class FlexibleAccessRoute extends GoRouteData
   const FlexibleAccessRoute();
 
   @override
-  RouteGuard get guards => Guards.anyOf([
+  RouteGuard<Object, Object> get guards => Guards.anyOf([
     EnhancedRoleGuard(['admin']),
     EnhancedRoleGuard(['premium']),
     HolidayGuard(),
@@ -210,12 +214,12 @@ class FlexibleAccessRoute extends GoRouteData
   }
 }
 
-class SubscriptionGuard extends RouteGuard {
+class SubscriptionGuard extends GoRouterGuard {
   const SubscriptionGuard();
 
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -248,7 +252,7 @@ class AsyncGuardRoute extends GoRouteData with _$AsyncGuardRoute, GuardedRoute {
   const AsyncGuardRoute();
 
   @override
-  RouteGuard get guards =>
+  RouteGuard<Object, Object> get guards =>
       Guards.all([EnhancedAuthGuard(), SubscriptionGuard()]);
 
   @override
@@ -261,12 +265,12 @@ class AsyncGuardRoute extends GoRouteData with _$AsyncGuardRoute, GuardedRoute {
   }
 }
 
-class MaintenanceGuard extends RouteGuard {
+class MaintenanceGuard extends GoRouterGuard {
   const MaintenanceGuard();
 
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -284,7 +288,7 @@ class BlockingRoute extends GoRouteData with _$BlockingRoute, GuardedRoute {
   const BlockingRoute();
 
   @override
-  RouteGuard get guards => MaintenanceGuard();
+  RouteGuard<Object, Object> get guards => MaintenanceGuard();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -705,10 +709,10 @@ final manualTestRouter = GoRouter(routes: $appRoutes);
 // );
 
 // Legacy guards for compatibility testing
-class AuthenticationGuard extends RouteGuard {
+class AuthenticationGuard extends GoRouterGuard {
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {

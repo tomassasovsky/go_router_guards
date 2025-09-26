@@ -1,6 +1,31 @@
-# go_router_guards
+# Go Router Guards
 
 A flexible and extensible guard system for Go Router that enables type-safe route protection with complex boolean logic support.
+
+## 📦 Packages
+
+This repository contains two packages following the `bloc` + `flutter_bloc` pattern:
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| [`route_guards`](packages/route_guards) | Framework-agnostic core guard system | 1.0.0 |
+| [`go_router_guards`](packages/go_router_guards) | Go Router specific integration | 1.0.0+2 |
+
+### 🔧 Core Package: `route_guards`
+
+The base package that provides framework-agnostic guard functionality:
+- Core guard abstractions and interfaces
+- Guard composition utilities (`Guards.all()`, `Guards.anyOf()`, `Guards.oneOf()`)
+- Navigation resolver pattern
+- No dependencies on Flutter or Go Router
+
+### 🎯 Integration Package: `go_router_guards`
+
+Go Router specific implementation and utilities:
+- Type-safe route mixins (`GuardedRoute`, `UnguardedRoute`)
+- Go Router integration utilities (`RouteGuardUtils`, `ConditionalGuard`)
+- Enhanced Go Router specific functionality
+- Re-exports all core functionality for seamless usage
 
 [![ci][ci_badge]][ci_link]
 [![coverage][coverage_badge]][ci_link]
@@ -23,11 +48,18 @@ A flexible and extensible guard system for Go Router that enables type-safe rout
 
 ### Installation
 
-Add `go_router_guards` to your `pubspec.yaml`:
+For most users, you'll want the complete Go Router integration:
 
 ```yaml
 dependencies:
-  go_router_guards: ^1.0.0+1
+  go_router_guards: ^1.0.0+2
+```
+
+If you only need the core guard system (framework-agnostic):
+
+```yaml
+dependencies:
+  route_guards: ^1.0.0
 ```
 
 ### Type-Safe Routes with Guard Expressions

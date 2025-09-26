@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -9,13 +13,12 @@ import 'screens.dart';
 
 part 'router.g.dart';
 
-// Simple authentication guard
-class AuthenticationGuard extends RouteGuard {
+class AuthenticationGuard extends GoRouterGuard {
   const AuthenticationGuard();
 
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -30,14 +33,14 @@ class AuthenticationGuard extends RouteGuard {
 }
 
 // Role-based guard
-class RoleGuard extends RouteGuard {
+class RoleGuard extends GoRouterGuard {
   const RoleGuard(this.requiredRoles);
 
   final List<String> requiredRoles;
 
   @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
     BuildContext context,
     GoRouterState state,
   ) async {
@@ -74,7 +77,7 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   const ProtectedRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard<Object, Object> get guards => Guards.all([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -100,7 +103,7 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard<Object, Object> get guards => Guards.all([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -120,32 +123,13 @@ class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
   }
 }
 
-/// Example router using inclusion patterns with ConditionalGuard
-/// Only applies authentication to protected and admin routes
+/// Router that excludes authentication from public and auth routes.
 final router = GoRouter(
   routes: $appRoutes,
   redirect: RouteGuardUtils.createGuardRedirect(
     ConditionalGuard(
       guard: AuthenticationGuard(),
-      // Only apply authentication to specific routes
-      includedPatterns: [RegExp(r'^/protected.*'), RegExp(r'^/admin.*')],
-      // Exclude specific maintenance routes even if they match inclusion patterns
-      excludedPaths: ['/admin/debug'],
-    ),
-  ),
-);
-
-/// Alternative router using exclusion (traditional approach)
-final globalRouter = GoRouter(
-  routes: $appRoutes,
-  redirect: RouteGuardUtils.createGuardRedirect(
-    ConditionalGuard(
-      guard: AuthenticationGuard(),
-      // Exclude public and auth routes from authentication
       excludedPaths: ['/login', '/unauthorized'],
     ),
   ),
 );
-
-/// Router with no router-level guards - relies on individual route guards only
-final individualGuardsRouter = GoRouter(routes: $appRoutes);

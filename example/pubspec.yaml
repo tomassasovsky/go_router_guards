@@ -16,7 +16,7 @@ dependencies:
       ref: feat/go-router-context-redirect
       path: packages/go_router
   go_router_guards:
-    path: ../
+    path: ../packages/go_router_guards
   flutter_bloc: ^8.1.4
   bloc: ^8.1.3
   flutter_web_plugins:

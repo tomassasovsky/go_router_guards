@@ -1,0 +1,14 @@
+name: license/route_guards
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/route_guards/pubspec.yaml"
+
+jobs:
+  license:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/license_check.yml@v1
+    with:
+      working_directory: packages/route_guards

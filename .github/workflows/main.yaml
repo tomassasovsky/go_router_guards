@@ -7,10 +7,10 @@ concurrency:
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   semantic_pull_request:
@@ -22,6 +22,8 @@ jobs:
       includes: "**/*.md"
       modified_files_only: false
 
-  build:
-    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
-
+  pana:
+    runs-on: ubuntu-latest
+    steps:
+      - name: noop
+        run: echo 'noop'

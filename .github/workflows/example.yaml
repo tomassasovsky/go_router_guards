@@ -1,0 +1,39 @@
+name: example
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "example/pubspec.yaml"
+      - "example/lib/**"
+      - "example/test/**"
+      - ".github/workflows/example.yaml"
+      - "packages/go_router_guards/lib/**"
+      - "packages/go_router_guards/pubspec.yaml"
+      - "packages/route_guards/lib/**"
+      - "packages/route_guards/pubspec.yaml"
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths:
+      - "example/pubspec.yaml"
+      - "example/lib/**"
+      - "example/test/**"
+      - ".github/workflows/example.yaml"
+      - "packages/go_router_guards/lib/**"
+      - "packages/go_router_guards/pubspec.yaml"
+      - "packages/route_guards/lib/**"
+      - "packages/route_guards/pubspec.yaml"
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    with:
+      working_directory: example
+      analyze_directories: "lib test"
+      report_on: "lib"

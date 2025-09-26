@@ -1,0 +1,28 @@
+name: go_router_guards
+description: A flexible and extensible guard system for Go Router that allows you to create middleware-style navigation guards with inclusion and exclusion capabilities.
+version: 1.0.0+2
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router:
+    git:
+      url: https://github.com/tomassasovsky/packages.git
+      ref: feat/go-router-context-redirect
+      path: packages/go_router
+  meta: ^1.16.0
+  route_guards:
+    path: ../route_guards
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  go_router_builder: ^4.1.0
+  mocktail: ^1.0.4
+  very_good_analysis: ^10.0.0

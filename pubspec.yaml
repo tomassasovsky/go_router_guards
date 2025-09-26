@@ -1,29 +1,9 @@
-name: go_router_guards
-description: A flexible and extensible guard system for Go Router that allows you to chain multiple guards together for route protection.
-version: 1.0.0+2
-homepage: https://github.com/tomassasovsky/go_router_guards
-repository: https://github.com/tomassasovsky/go_router_guards
-issue_tracker: https://github.com/tomassasovsky/go_router_guards/issues
+name: route_guards
+publish_to: none
 
 environment:
   sdk: ^3.5.0
-  flutter: ">=3.19.0"
 
-dependencies:
-  flutter:
-    sdk: flutter
-  go_router:
-    git:
-      url: https://github.com/tomassasovsky/packages.git
-      ref: feat/go-router-context-redirect
-      path: packages/go_router
-  meta: ^1.16.0
-
-dev_dependencies:
-  build_runner: ^2.4.15
-  flutter_test:
-    sdk: flutter
-  go_router_builder: ^3.0.1
-  mocktail: ^1.0.4
-  test: ^1.25.8
-  very_good_analysis: ^9.0.0
+workspace:
+  - packages/route_guards
+  - packages/go_router_guards
