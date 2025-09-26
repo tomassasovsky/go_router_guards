@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:route_guards/src/navigation_resolver.dart';
+import 'package:route_guards/route_guards.dart';
 
 /// {@template guard}
 /// Route guard that supports middleware-style navigation control.

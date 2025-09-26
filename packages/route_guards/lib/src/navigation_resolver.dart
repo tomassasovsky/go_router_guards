@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:route_guards/route_guards.dart';
+
 /// {@template guard_result}
 /// Result of a guard navigation resolution.
 /// {@endtemplate}
@@ -87,11 +89,14 @@ class NavigationResolver<TContext, TState> {
   ///
   /// This is a framework-agnostic block method. The specific implementation
   /// of what "blocking" means depends on the router integration.
+  ///
+  /// Uses the global fallback configured via [RouteGuardConfig.instance] when
+  /// there's no previous route to stay at (e.g., direct navigation).
   void block({bool reevaluateOnChange = false}) {
     if (isResolved) return;
     _completer.complete(
       GuardResult.redirect(
-        '#blocked', // Placeholder - will be handled by router integration
+        RouteGuardConfig.instance.fallbackPath,
         reevaluateOnChange: reevaluateOnChange,
       ),
     );

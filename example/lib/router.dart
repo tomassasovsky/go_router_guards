@@ -13,6 +13,11 @@ import 'screens.dart';
 
 part 'router.g.dart';
 
+// Configure global fallback for blocked navigation
+void _configureGlobalFallback() {
+  RouteGuardConfig.instance.fallbackPath = UnauthorizedRoute().location;
+}
+
 class AuthenticationGuard extends GoRouterGuard {
   const AuthenticationGuard();
 
@@ -32,7 +37,7 @@ class AuthenticationGuard extends GoRouterGuard {
   }
 }
 
-// Role-based guard
+// Role-based guard with simple blocking that defaults to root
 class RoleGuard extends GoRouterGuard {
   const RoleGuard(this.requiredRoles);
 
@@ -48,6 +53,7 @@ class RoleGuard extends GoRouterGuard {
 
     final hasRequiredRole = requiredRoles.any(userRoles.contains);
     if (!hasRequiredRole) {
+      // Block using global fallback
       resolver.block();
     } else {
       resolver.next();
@@ -124,12 +130,17 @@ class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
 }
 
 /// Router that excludes authentication from public and auth routes.
-final router = GoRouter(
-  routes: $appRoutes,
-  redirect: RouteGuardUtils.createGuardRedirect(
-    ConditionalGuard(
-      guard: AuthenticationGuard(),
-      excludedPaths: ['/login', '/unauthorized'],
+final router = (() {
+  // Configure global fallback before creating router
+  _configureGlobalFallback();
+
+  return GoRouter(
+    routes: $appRoutes,
+    redirect: RouteGuardUtils.createGuardRedirect(
+      ConditionalGuard(
+        guard: AuthenticationGuard(),
+        excludedPaths: ['/login', '/unauthorized'],
+      ),
     ),
-  ),
-);
+  );
+})();

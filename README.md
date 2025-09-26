@@ -130,6 +130,65 @@ mixin RouteGuard {
 - Return `null` to allow access
 - Return a route location (e.g., `LoginRoute().location`) to redirect
 
+### Direct Navigation Handling
+
+Guards automatically handle direct navigation scenarios (when users type URLs directly):
+
+```dart
+class RoleGuard extends GoRouterGuard {
+  @override
+  FutureOr<void> onGoRouterNavigation(
+    GoRouterNavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    if (!hasRequiredRole) {
+      // Block using global fallback
+      resolver.block();
+      // OR redirect directly to a specific route
+      resolver.redirect('/unauthorized');
+    } else {
+      resolver.next();
+    }
+  }
+}
+```
+
+### Global Fallback Configuration
+
+Configure a global fallback path that all guards use when blocking without specifying a fallback:
+
+```dart
+void main() {
+  // Set global fallback - used when guards call block() without fallbackPath
+  GlobalFallback.instance.setFallbackPath('/access-denied');
+  
+  runApp(MyApp());
+}
+
+class MyGuard extends GoRouterGuard {
+  @override
+  FutureOr<void> onGoRouterNavigation(resolver, context, state) async {
+    if (!hasAccess) {
+      resolver.block(); // Uses global fallback '/access-denied'
+    }
+  }
+}
+```
+
+If you need custom fallback behavior, use redirect instead:
+
+```dart
+class CustomGuard extends GoRouterGuard {
+  @override
+  FutureOr<void> onGoRouterNavigation(resolver, context, state) async {
+    if (!hasAccess) {
+      resolver.redirect('/custom-error'); // Custom redirect
+    }
+  }
+}
+```
+
 ### Guard Expressions with Logical Operators
 
 Create complex guard logic using boolean expressions:

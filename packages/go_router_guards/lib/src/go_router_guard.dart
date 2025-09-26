@@ -69,20 +69,26 @@ class GoRouterNavigationResolver
     super._state,
   );
 
-  /// The current Go Router state being navigated to.
-  GoRouterState get goRouterState => state;
-
-  /// The Build context for the navigation.
-  BuildContext get buildContext => context;
-
   /// Block navigation by staying at the current location.
   ///
   /// This uses Go Router's current location to implement blocking behavior.
+  ///
+  /// If there's no valid current location (e.g., direct navigation),
+  /// it will use the global fallback configured via
+  /// [RouteGuardConfig.instance].
   @override
   void block({bool reevaluateOnChange = false}) {
     if (isResolved) return;
-    final currentLocation =
-        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
+    final router = GoRouter.of(context);
+    var currentLocation = router.routerDelegate.currentConfiguration.fullPath;
+
+    // Handle case where there's no valid current location (direct navigation)
+    if (currentLocation.isEmpty ||
+        currentLocation == state.uri.path ||
+        !router.canPop()) {
+      currentLocation = RouteGuardConfig.instance.fallbackPath;
+    }
+
     redirect(currentLocation, reevaluateOnChange: reevaluateOnChange);
   }
 }
