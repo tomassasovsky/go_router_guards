@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: go-router-guards-docs:latest
     ports:
       - "4321:80"
     environment:
