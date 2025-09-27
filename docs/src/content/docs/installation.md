@@ -21,9 +21,9 @@ Go Router Guards consists of two packages that you can install based on your nee
   <TabItem label="Both Packages (Recommended)">
     Install both packages for full functionality:
 
-    ```bash
-    flutter pub add go_router_guards route_guards
-    ```
+```bash
+flutter pub add go_router_guards route_guards
+```
 
     This gives you both the core guard system and Go Router integration.
   </TabItem>
@@ -31,9 +31,9 @@ Go Router Guards consists of two packages that you can install based on your nee
   <TabItem label="Go Router Integration Only">
     If you only need Go Router integration:
 
-    ```bash
-    flutter pub add go_router_guards
-    ```
+```bash
+flutter pub add go_router_guards
+```
 
     This automatically includes `route_guards` as a dependency.
   </TabItem>
@@ -41,9 +41,9 @@ Go Router Guards consists of two packages that you can install based on your nee
   <TabItem label="Core Guards Only">
     For framework-agnostic usage:
 
-    ```bash
-    flutter pub add route_guards
-    ```
+```bash
+flutter pub add route_guards
+```
 
     Use this if you're building your own router integration.
   </TabItem>

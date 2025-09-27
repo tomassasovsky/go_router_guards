@@ -24,33 +24,33 @@ A guard is a middleware-style function that decides whether navigation should:
 
    <Tabs>
      <TabItem label="Go Router Guard">
-       ```dart
-       class MyGuard extends GoRouterGuard {
-         @override
-         FutureOr<void> onGoRouterNavigation(
-           NavigationResolver resolver,
-           BuildContext context,
-           GoRouterState state,
-         ) async {
-           // Your guard logic here
-         }
-       }
-       ```
+```dart
+class MyGuard extends GoRouterGuard {
+  @override
+  FutureOr<void> onGoRouterNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    // Your guard logic here
+  }
+}
+```
      </TabItem>
      
      <TabItem label="Framework Agnostic Guard">
-       ```dart
-       class MyGuard extends RouteGuard {
-         @override
-         FutureOr<void> onNavigation(
-           NavigationResolver resolver,
-           Object context,
-           Object state,
-         ) async {
-           // Your guard logic here
-         }
-       }
-       ```
+```dart
+class MyGuard extends RouteGuard {
+  @override
+  FutureOr<void> onNavigation(
+    NavigationResolver resolver,
+    Object context,
+    Object state,
+  ) async {
+    // Your guard logic here
+  }
+}
+```
      </TabItem>
    </Tabs>
 

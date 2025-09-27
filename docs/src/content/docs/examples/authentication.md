@@ -345,213 +345,213 @@ class GuestGuard extends GoRouterGuard {
 
 <Tabs>
   <TabItem label="Type-Safe Routes">
-    ```dart
-    // lib/routes/app_routes.dart
-    import 'package:flutter/material.dart';
-    import 'package:go_router/go_router.dart';
-    import 'package:go_router_guards/go_router_guards.dart';
-    import '../guards/auth_guard.dart';
-    import '../screens/screens.dart';
+```dart
+// lib/routes/app_routes.dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:go_router_guards/go_router_guards.dart';
+import '../guards/auth_guard.dart';
+import '../screens/screens.dart';
 
-    part 'app_routes.g.dart';
+part 'app_routes.g.dart';
 
-    // Public routes
-    @TypedGoRoute<HomeRoute>(
-      path: '/',
-      routes: [
-        TypedGoRoute<LoginRoute>(path: '/login'),
-        TypedGoRoute<RegisterRoute>(path: '/register'),
-        TypedGoRoute<LoadingRoute>(path: '/loading'),
-        TypedGoRoute<UnauthorizedRoute>(path: '/unauthorized'),
-      ],
-    )
-    class HomeRoute extends GoRouteData {
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const HomeScreen();
-      }
-    }
+// Public routes
+@TypedGoRoute<HomeRoute>(
+  path: '/',
+  routes: [
+    TypedGoRoute<LoginRoute>(path: '/login'),
+    TypedGoRoute<RegisterRoute>(path: '/register'),
+    TypedGoRoute<LoadingRoute>(path: '/loading'),
+    TypedGoRoute<UnauthorizedRoute>(path: '/unauthorized'),
+  ],
+)
+class HomeRoute extends GoRouteData {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const HomeScreen();
+  }
+}
 
-    // Login route (guests only)
-    class LoginRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => const GuestGuard();
+// Login route (guests only)
+class LoginRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => const GuestGuard();
 
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const LoginScreen();
-      }
-    }
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const LoginScreen();
+  }
+}
 
-    // Register route (guests only)
-    class RegisterRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => const GuestGuard();
+// Register route (guests only)
+class RegisterRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => const GuestGuard();
 
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const RegisterScreen();
-      }
-    }
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RegisterScreen();
+  }
+}
 
-    // Loading route (no guards)
-    class LoadingRoute extends GoRouteData with UnguardedRoute {
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const LoadingScreen();
-      }
-    }
+// Loading route (no guards)
+class LoadingRoute extends GoRouteData with UnguardedRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const LoadingScreen();
+  }
+}
 
-    // Unauthorized route (no guards)
-    class UnauthorizedRoute extends GoRouteData with UnguardedRoute {
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const UnauthorizedScreen();
-      }
-    }
+// Unauthorized route (no guards)
+class UnauthorizedRoute extends GoRouteData with UnguardedRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const UnauthorizedScreen();
+  }
+}
 
-    // Protected routes
-    @TypedGoRoute<DashboardRoute>(
-      path: '/dashboard',
-      routes: [
-        TypedGoRoute<ProfileRoute>(path: '/profile'),
-        TypedGoRoute<SettingsRoute>(path: '/settings'),
-        TypedGoRoute<AdminRoute>(path: '/admin'),
-      ],
-    )
-    class DashboardRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => const AuthGuard();
+// Protected routes
+@TypedGoRoute<DashboardRoute>(
+  path: '/dashboard',
+  routes: [
+    TypedGoRoute<ProfileRoute>(path: '/profile'),
+    TypedGoRoute<SettingsRoute>(path: '/settings'),
+    TypedGoRoute<AdminRoute>(path: '/admin'),
+  ],
+)
+class DashboardRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => const AuthGuard();
 
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const DashboardScreen();
-      }
-    }
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DashboardScreen();
+  }
+}
 
-    // User profile (authenticated users)
-    class ProfileRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => const AuthGuard();
+// User profile (authenticated users)
+class ProfileRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => const AuthGuard();
 
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const ProfileScreen();
-      }
-    }
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProfileScreen();
+  }
+}
 
-    // Settings (authenticated users)
-    class SettingsRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => const AuthGuard();
+// Settings (authenticated users)
+class SettingsRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => const AuthGuard();
 
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const SettingsScreen();
-      }
-    }
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SettingsScreen();
+  }
+}
 
-    // Admin panel (admin users only)
-    class AdminRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => Guards.all([
-        const AuthGuard(),
-        const RoleGuard(['admin']),
-      ]);
+// Admin panel (admin users only)
+class AdminRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => Guards.all([
+    const AuthGuard(),
+    const RoleGuard(['admin']),
+  ]);
 
-      @override
-      Widget build(BuildContext context, GoRouterState state) {
-        return const AdminScreen();
-      }
-    }
-    ```
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AdminScreen();
+  }
+}
+```
   </TabItem>
   
   <TabItem label="Traditional Routes">
-    ```dart
-    // lib/routes/traditional_routes.dart
-    import 'package:flutter/material.dart';
-    import 'package:go_router/go_router.dart';
-    import 'package:go_router_guards/go_router_guards.dart';
-    import '../guards/auth_guard.dart';
-    import '../screens/screens.dart';
+```dart
+// lib/routes/traditional_routes.dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:go_router_guards/go_router_guards.dart';
+import '../guards/auth_guard.dart';
+import '../screens/screens.dart';
 
-    final appRouter = GoRouter(
-      initialLocation: '/',
-      routes: [
-        // Public routes
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        
-        // Guest-only routes
-        GoRoute(
-          path: '/login',
-          builder: (context, state) => const LoginScreen(),
-          redirect: RouteGuardUtils.createGuardRedirect(
-            const GuestGuard(),
-          ),
-        ),
-        
-        GoRoute(
-          path: '/register',
-          builder: (context, state) => const RegisterScreen(),
-          redirect: RouteGuardUtils.createGuardRedirect(
-            const GuestGuard(),
-          ),
-        ),
-        
-        // Unguarded utility routes
-        GoRoute(
-          path: '/loading',
-          builder: (context, state) => const LoadingScreen(),
-        ),
-        
-        GoRoute(
-          path: '/unauthorized',
-          builder: (context, state) => const UnauthorizedScreen(),
-        ),
-        
-        // Protected routes
-        GoRoute(
-          path: '/dashboard',
-          builder: (context, state) => const DashboardScreen(),
-          redirect: RouteGuardUtils.createGuardRedirect(
-            const AuthGuard(),
-          ),
-        ),
-        
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-          redirect: RouteGuardUtils.createGuardRedirect(
-            const AuthGuard(),
-          ),
-        ),
-        
-        GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsScreen(),
-          redirect: RouteGuardUtils.createGuardRedirect(
-            const AuthGuard(),
-          ),
-        ),
-        
-        // Admin-only route
-        GoRoute(
-          path: '/admin',
-          builder: (context, state) => const AdminScreen(),
-          redirect: RouteGuardUtils.createGuardRedirect(
-            Guards.all([
-              const AuthGuard(),
-              const RoleGuard(['admin']),
-            ]),
-          ),
-        ),
-      ],
-    );
-    ```
+final appRouter = GoRouter(
+  initialLocation: '/',
+  routes: [
+    // Public routes
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const HomeScreen(),
+    ),
+    
+    // Guest-only routes
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
+      redirect: RouteGuardUtils.createGuardRedirect(
+        const GuestGuard(),
+      ),
+    ),
+    
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => const RegisterScreen(),
+      redirect: RouteGuardUtils.createGuardRedirect(
+        const GuestGuard(),
+      ),
+    ),
+    
+    // Unguarded utility routes
+    GoRoute(
+      path: '/loading',
+      builder: (context, state) => const LoadingScreen(),
+    ),
+    
+    GoRoute(
+      path: '/unauthorized',
+      builder: (context, state) => const UnauthorizedScreen(),
+    ),
+    
+    // Protected routes
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const DashboardScreen(),
+      redirect: RouteGuardUtils.createGuardRedirect(
+        const AuthGuard(),
+      ),
+    ),
+    
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
+      redirect: RouteGuardUtils.createGuardRedirect(
+        const AuthGuard(),
+      ),
+    ),
+    
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+      redirect: RouteGuardUtils.createGuardRedirect(
+        const AuthGuard(),
+      ),
+    ),
+    
+    // Admin-only route
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminScreen(),
+      redirect: RouteGuardUtils.createGuardRedirect(
+        Guards.all([
+          const AuthGuard(),
+          const RoleGuard(['admin']),
+        ]),
+      ),
+    ),
+  ],
+);
+```
   </TabItem>
 </Tabs>
 

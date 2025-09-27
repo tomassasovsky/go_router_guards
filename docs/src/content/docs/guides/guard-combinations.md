@@ -46,33 +46,33 @@ final superAdminGuard = Guards.all([
 
 <Tabs>
   <TabItem label="Type-Safe Routes">
-    ```dart
-    @TypedGoRoute<AdminDashboardRoute>(path: '/admin/dashboard')
-    class AdminDashboardRoute extends GoRouteData with GuardedRoute {
-      @override
-      RouteGuard get guards => Guards.all([
-        AuthGuard(),
-        RoleGuard(['admin']),
-        PermissionGuard(['dashboard_access']),
-      ]);
-    }
-    ```
+```dart
+@TypedGoRoute<AdminDashboardRoute>(path: '/admin/dashboard')
+class AdminDashboardRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guards => Guards.all([
+    AuthGuard(),
+    RoleGuard(['admin']),
+    PermissionGuard(['dashboard_access']),
+  ]);
+}
+```
   </TabItem>
   
   <TabItem label="Traditional Routes">
-    ```dart
-    GoRoute(
-      path: '/admin/dashboard',
-      builder: (context, state) => const AdminDashboard(),
-      redirect: RouteGuardUtils.createGuardRedirect(
-        Guards.all([
-          AuthGuard(),
-          RoleGuard(['admin']),
-          PermissionGuard(['dashboard_access']),
-        ]),
-      ),
-    )
-    ```
+```dart
+GoRoute(
+  path: '/admin/dashboard',
+  builder: (context, state) => const AdminDashboard(),
+  redirect: RouteGuardUtils.createGuardRedirect(
+    Guards.all([
+      AuthGuard(),
+      RoleGuard(['admin']),
+      PermissionGuard(['dashboard_access']),
+    ]),
+  ),
+)
+```
   </TabItem>
 </Tabs>
 

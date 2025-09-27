@@ -15,42 +15,42 @@ Each guard should have one clear, focused responsibility:
 
 <Tabs>
   <TabItem label="✅ Good">
-    ```dart
-    // Each guard has a single, clear purpose
-    class AuthGuard extends GoRouterGuard { /* Authentication only */ }
-    class RoleGuard extends GoRouterGuard { /* Role checking only */ }
-    class SubscriptionGuard extends GoRouterGuard { /* Subscription only */ }
-    
-    // Combine for complex scenarios
-    final adminGuard = Guards.all([
-      AuthGuard(),
-      RoleGuard(['admin']),
-    ]);
-    ```
+```dart
+// Each guard has a single, clear purpose
+class AuthGuard extends GoRouterGuard { /* Authentication only */ }
+class RoleGuard extends GoRouterGuard { /* Role checking only */ }
+class SubscriptionGuard extends GoRouterGuard { /* Subscription only */ }
+
+// Combine for complex scenarios
+final adminGuard = Guards.all([
+  AuthGuard(),
+  RoleGuard(['admin']),
+]);
+```
   </TabItem>
   
   <TabItem label="❌ Bad">
-    ```dart
-    // Single guard doing too many things
-    class MegaGuard extends GoRouterGuard {
-      @override
-      FutureOr<void> onGoRouterNavigation(...) async {
-        // Check authentication
-        if (!await isAuthenticated()) return redirect('/login');
-        
-        // Check role
-        if (!await hasRole('admin')) return redirect('/unauthorized');
-        
-        // Check subscription
-        if (!await hasSubscription()) return redirect('/subscribe');
-        
-        // Check feature flags
-        if (!await featureEnabled()) return redirect('/not-available');
-        
-        // ... too much responsibility
-      }
-    }
-    ```
+```dart
+// Single guard doing too many things
+class MegaGuard extends GoRouterGuard {
+  @override
+  FutureOr<void> onGoRouterNavigation(...) async {
+    // Check authentication
+    if (!await isAuthenticated()) return redirect('/login');
+    
+    // Check role
+    if (!await hasRole('admin')) return redirect('/unauthorized');
+    
+    // Check subscription
+    if (!await hasSubscription()) return redirect('/subscribe');
+    
+    // Check feature flags
+    if (!await featureEnabled()) return redirect('/not-available');
+    
+    // ... too much responsibility
+  }
+}
+```
   </TabItem>
 </Tabs>
 
@@ -60,36 +60,36 @@ Use guard combinations instead of complex inheritance hierarchies:
 
 <Tabs>
   <TabItem label="✅ Good">
-    ```dart
-    // Composable guards
-    class AppGuards {
-      static RouteGuard get authenticated => AuthGuard();
-      
-      static RouteGuard get admin => Guards.all([
-        authenticated,
-        RoleGuard(['admin']),
-      ]);
-      
-      static RouteGuard get premiumUser => Guards.all([
-        authenticated,
-        Guards.anyOf([
-          SubscriptionGuard(['premium']),
-          RoleGuard(['staff', 'admin']),
-        ]),
-      ]);
-    }
-    ```
+```dart
+// Composable guards
+class AppGuards {
+  static RouteGuard get authenticated => AuthGuard();
+  
+  static RouteGuard get admin => Guards.all([
+    authenticated,
+    RoleGuard(['admin']),
+  ]);
+  
+  static RouteGuard get premiumUser => Guards.all([
+    authenticated,
+    Guards.anyOf([
+      SubscriptionGuard(['premium']),
+      RoleGuard(['staff', 'admin']),
+    ]),
+  ]);
+}
+```
   </TabItem>
   
   <TabItem label="❌ Bad">
-    ```dart
-    // Complex inheritance
-    abstract class BaseGuard extends GoRouterGuard { /* ... */ }
-    abstract class AuthenticatedGuard extends BaseGuard { /* ... */ }
-    abstract class RoleBasedGuard extends AuthenticatedGuard { /* ... */ }
-    class AdminGuard extends RoleBasedGuard { /* ... */ }
-    class ModeratorGuard extends RoleBasedGuard { /* ... */ }
-    ```
+```dart
+// Complex inheritance
+abstract class BaseGuard extends GoRouterGuard { /* ... */ }
+abstract class AuthenticatedGuard extends BaseGuard { /* ... */ }
+abstract class RoleBasedGuard extends AuthenticatedGuard { /* ... */ }
+class AdminGuard extends RoleBasedGuard { /* ... */ }
+class ModeratorGuard extends RoleBasedGuard { /* ... */ }
+```
   </TabItem>
 </Tabs>
 
