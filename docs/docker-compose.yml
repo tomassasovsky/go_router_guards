@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     image: go-router-guards-docs:latest
     ports:
-      - "${DOCS_PORT:-4321}:80"
+      - "4321:80"
     environment:
       - NODE_ENV=production
     restart: unless-stopped
