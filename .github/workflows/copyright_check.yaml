@@ -1,0 +1,61 @@
+name: Copyright Header Check
+
+on:
+  pull_request:
+    paths:
+      - "**/*.dart"
+      - "scripts/check_copyright.dart"
+      - ".github/workflows/copyright_check.yaml"
+  push:
+    branches: [main, master]
+    paths:
+      - "**/*.dart"
+      - "scripts/check_copyright.dart"
+      - ".github/workflows/copyright_check.yaml"
+
+jobs:
+  copyright-check:
+    name: Check Copyright Headers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Make script executable
+        run: chmod +x scripts/check_copyright.dart
+
+      - name: Check copyright headers
+        run: dart scripts/check_copyright.dart
+
+      - name: Comment PR if headers missing
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ❌ Copyright Headers Missing
+              
+              Some Dart files are missing the required copyright header. 
+              
+              **Expected header:**
+              \`\`\`dart
+              // Copyright 2025 Tomás Sasovsky
+              // Use of this source code is governed by a MIT-style license that can be
+              // found in the LICENSE file.
+              \`\`\`
+              
+              **To fix this:**
+              1. Run \`dart scripts/add_copyright.dart\` to add headers to all files
+              2. Or manually add the header to the beginning of each file
+              
+              Please ensure all Dart files have the proper copyright header before merging.`
+            })

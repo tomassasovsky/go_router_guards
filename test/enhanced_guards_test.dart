@@ -28,7 +28,7 @@ void main() {
 
     group('NavigationResolver', () {
       test('should resolve with next()', () async {
-        final resolver = NavigationResolver(mockContext, mockState)..next();
+        final resolver = NavigationResolver(mockContext)..next();
 
         final result = await resolver.future;
         expect(result.continueNavigation, isTrue);
@@ -36,7 +36,7 @@ void main() {
       });
 
       test('should resolve with redirect()', () async {
-        final resolver = NavigationResolver(mockContext, mockState)
+        final resolver = NavigationResolver(mockContext)
           ..redirect('/new-path');
 
         final result = await resolver.future;
@@ -45,7 +45,7 @@ void main() {
       });
 
       test('should handle block() correctly', () async {
-        final resolver = NavigationResolver(mockContext, mockState)..block();
+        final resolver = NavigationResolver(mockContext)..block();
 
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
@@ -54,7 +54,7 @@ void main() {
       });
 
       test('should handle redirect()', () async {
-        final resolver = NavigationResolver(mockContext, mockState)
+        final resolver = NavigationResolver(mockContext)
           ..redirect('/redirect-path');
 
         final result = await resolver.future;
@@ -63,7 +63,7 @@ void main() {
       });
 
       test('should prevent multiple resolutions', () async {
-        final resolver = NavigationResolver(mockContext, mockState)
+        final resolver = NavigationResolver(mockContext)
           ..next()
           ..redirect('/should-be-ignored'); // This should be ignored
 

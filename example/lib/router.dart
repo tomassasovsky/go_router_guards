@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -74,7 +78,7 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   const ProtectedRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard get guard => Guards.all([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -100,7 +104,7 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard get guard => Guards.all([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);

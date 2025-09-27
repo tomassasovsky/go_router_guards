@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -114,7 +118,7 @@ class FactoryGuardsRoute extends GoRouteData
   const FactoryGuardsRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard get guard => Guards.all([
     EnhancedAuthGuard(),
     EnhancedRoleGuard(['admin', 'moderator']),
   ]);
@@ -134,7 +138,7 @@ class CustomLogicRoute extends GoRouteData
   const CustomLogicRoute();
 
   @override
-  RouteGuard get guards =>
+  RouteGuard get guard =>
       Guards.all([EnhancedAuthGuard(), BusinessHoursGuard()]);
 
   @override
@@ -153,7 +157,7 @@ class ConditionalRoute extends GoRouteData
   final String section;
 
   @override
-  RouteGuard get guards => section == 'admin'
+  RouteGuard get guard => section == 'admin'
       ? Guards.all([
           EnhancedAuthGuard(),
           EnhancedRoleGuard(['admin']),
@@ -194,7 +198,7 @@ class FlexibleAccessRoute extends GoRouteData
   const FlexibleAccessRoute();
 
   @override
-  RouteGuard get guards => Guards.anyOf([
+  RouteGuard get guard => Guards.anyOf([
     EnhancedRoleGuard(['admin']),
     EnhancedRoleGuard(['premium']),
     HolidayGuard(),
@@ -248,7 +252,7 @@ class AsyncGuardRoute extends GoRouteData with _$AsyncGuardRoute, GuardedRoute {
   const AsyncGuardRoute();
 
   @override
-  RouteGuard get guards =>
+  RouteGuard get guard =>
       Guards.all([EnhancedAuthGuard(), SubscriptionGuard()]);
 
   @override
@@ -284,7 +288,7 @@ class BlockingRoute extends GoRouteData with _$BlockingRoute, GuardedRoute {
   const BlockingRoute();
 
   @override
-  RouteGuard get guards => MaintenanceGuard();
+  RouteGuard get guard => MaintenanceGuard();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

@@ -1,0 +1,666 @@
+/* Custom styles for Route Guards documentation */
+@import '@fontsource-variable/figtree';
+
+:root {
+  /* Custom color palette for Route Guards - Extracted from our icon! */
+  --sl-font-system: 'Figtree Variable', var(--sl-font-system-mono);
+  
+  /* Route Guards color scheme - Using exact colors from our icon */
+  --icon-navy-darkest: #004777;    /* Darkest blue from icon */
+  --icon-navy-dark: #033C6E;       /* Dark navy from icon */
+  --icon-blue-medium: #035D96;     /* Medium blue from icon */
+  --icon-steel-blue: #0F5C8A;      /* Steel blue from icon */
+  --icon-bright-blue: #0F76B4;     /* Bright blue from icon */
+  --icon-sky-blue: #1792C9;        /* Sky blue from icon */
+  --icon-muted-blue: #357BAA;      /* Muted blue from icon */
+  --icon-light-blue: #DBECF3;      /* Light blue-gray from icon */
+  
+  /* Primary color scheme based on icon */
+  --guard-color-primary: var(--icon-sky-blue);
+  --guard-color-primary-light: var(--icon-light-blue);
+  --guard-color-primary-dark: var(--icon-navy-darkest);
+  
+  /* Override Starlight's accent colors with icon palette */
+  --sl-color-accent-low: var(--icon-navy-dark);
+  --sl-color-accent: var(--icon-sky-blue);
+  --sl-color-accent-high: var(--icon-bright-blue);
+  
+  /* Shield color accents from our icon palette */
+  --shield-dark: var(--icon-navy-darkest);
+  --shield-navy: var(--icon-navy-dark);
+  --shield-medium: var(--icon-blue-medium);
+  --shield-steel: var(--icon-steel-blue);
+  --shield-bright: var(--icon-bright-blue);
+  --shield-sky: var(--icon-sky-blue);
+  --shield-muted: var(--icon-muted-blue);
+  --shield-light: var(--icon-light-blue);
+  
+  /* Gradient overlay for hero sections */
+  --overlay-blue: hsla(208, 86%, 42%, 0.5); /* Based on sky blue */
+
+  /* Unified corner radius for cards/links */
+  --guard-radius: 16px; /* Base radius for UI cards/links */
+}
+
+/* Hero page background - Light theme with animated floating effect */
+[data-has-hero] .page {
+  background:
+    linear-gradient(215deg, rgba(23, 146, 201, 0.3), transparent 40%),
+    radial-gradient(rgba(23, 146, 201, 0.2), transparent 65%) no-repeat 50% calc(100% + 20rem) / 60rem 30rem;
+  animation: meshFloat 35s ease-in-out infinite;
+}
+
+@keyframes meshFloat {
+  0%, 100% { 
+    background-position: 0% 0%, 0% 0%;
+  }
+  25% { 
+    background-position: 3% 5%, -2% 3%;
+  }
+  50% { 
+    background-position: -2% 6%, 4% -3%;
+  }
+  75% { 
+    background-position: 5% -2%, -3% 5%;
+  }
+}
+
+[data-theme='dark'][data-has-hero] .page {
+  background:
+    linear-gradient(215deg, var(--overlay-blue), transparent 40%),
+    radial-gradient(var(--overlay-blue), transparent 65%) no-repeat 50% calc(100% + 20rem) / 60rem 30rem;
+  animation: meshFloat 35s ease-in-out infinite;
+}
+
+/* Header with transparent background and backdrop blur effect */
+[data-has-hero] header {
+  border-bottom: 1px solid transparent;
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+[data-theme='dark'][data-has-hero] header {
+  background-color: transparent;
+}
+
+/* Reduce spacing between logo and title */
+[data-has-hero] header .site-title,
+[data-has-hero] header .sl-nav-title {
+  margin-left: 0.5rem !important; /* Bring title closer to icon */
+}
+
+/* Ensure the header logo and title container is properly aligned */
+[data-has-hero] header .sl-nav-title-container,
+[data-has-hero] header .navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reduced gap between icon and title */
+}
+
+/* Light theme - Header title styling - use dark blue from icon palette */
+[data-has-hero] header .site-title,
+[data-has-hero] header .sl-nav-title {
+  color: var(--icon-navy-darkest) !important;
+}
+
+[data-has-hero] header .site-title a,
+[data-has-hero] header .sl-nav-title a {
+  color: var(--icon-navy-darkest) !important;
+  text-decoration: none;
+}
+
+/* Light theme - Make GitHub icon and other social icons dark blue in header */
+[data-has-hero] header .social-icons a,
+[data-has-hero] header .sl-social-icons a,
+[data-has-hero] header .social-links a {
+  color: var(--icon-navy-darkest) !important;
+}
+
+[data-has-hero] header .social-icons svg,
+[data-has-hero] header .sl-social-icons svg,
+[data-has-hero] header .social-links svg,
+[data-has-hero] header .icon svg {
+  color: var(--icon-navy-darkest) !important;
+  fill: var(--icon-navy-darkest) !important;
+}
+
+/* Dark theme only - Header title styling - make white */
+[data-theme='dark'][data-has-hero] header .site-title,
+[data-theme='dark'][data-has-hero] header .sl-nav-title {
+  color: white !important;
+}
+
+[data-theme='dark'][data-has-hero] header .site-title a,
+[data-theme='dark'][data-has-hero] header .sl-nav-title a {
+  color: white !important;
+  text-decoration: none;
+}
+
+/* Dark theme only - Make GitHub icon and other social icons white in header */
+[data-theme='dark'][data-has-hero] header .social-icons a,
+[data-theme='dark'][data-has-hero] header .sl-social-icons a,
+[data-theme='dark'][data-has-hero] header .social-links a {
+  color: white !important;
+}
+
+[data-theme='dark'][data-has-hero] header .social-icons svg,
+[data-theme='dark'][data-has-hero] header .sl-social-icons svg,
+[data-theme='dark'][data-has-hero] header .social-links svg,
+[data-theme='dark'][data-has-hero] header .icon svg {
+  color: white !important;
+  fill: white !important;
+}
+
+/* Hero section improvements with BLoC-style glowing effect */
+@media screen and (min-width: 50rem) {
+  [data-has-hero] .hero {
+    padding-block: clamp(2.5rem, calc(1rem + 10vmin), 4rem);
+  }
+
+  [data-has-hero] .hero > img {
+    filter: drop-shadow(0 0 5rem var(--icon-sky-blue));
+  }
+
+  [data-theme='dark'][data-has-hero] .hero > img {
+    filter: drop-shadow(0 0 5rem var(--icon-bright-blue));
+  }
+}
+
+/* Card improvements - Light cards with icon blue palette */
+[data-has-hero] .card {
+  border-radius: var(--guard-radius);
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 252, 254, 0.9) 100%);
+  border: 1px solid rgba(23, 146, 201, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 20px rgba(23, 146, 201, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  color: var(--icon-navy-darkest);
+  position: relative;
+  overflow: hidden; /* Ensure inner elements follow rounded corners */
+}
+
+[data-theme='dark'][data-has-hero] .card {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 71, 119, 0.5));
+  border: 1px solid rgba(23, 146, 201, 0.5);
+  color: var(--icon-light-blue);
+}
+
+[data-has-hero] .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 12px 30px rgba(23, 146, 201, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(23, 146, 201, 0.25);
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 248, 252, 0.95) 100%);
+}
+
+[data-theme='dark'][data-has-hero] .card:hover {
+  box-shadow: 0 10px 30px rgba(23, 146, 201, 0.4);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.75), rgba(0, 71, 119, 0.6));
+}
+
+/* Hero button styling - match BLoC exactly */
+.hero .actions {
+  display: flex !important;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+/* Hero text alignment - align to left like BLoC */
+.hero .copy {
+  text-align: left !important;
+  align-items: flex-start !important;
+}
+
+.hero .stack {
+  text-align: left !important;
+  align-items: flex-start !important;
+}
+
+/* On desktop, maintain left alignment */
+@media (min-width: 50rem) {
+  .hero .stack {
+    text-align: left !important;
+    align-items: flex-start !important;
+  }
+  
+  .hero .copy {
+    align-items: flex-start !important;
+  }
+  
+  .hero .actions {
+    justify-content: flex-start !important; /* Align buttons to left with text */
+  }
+}
+
+/* Override Starlight's default button styling completely */
+.hero .sl-link-button:where(.astro-xwgiixxa) {
+  border-radius: 999rem !important; /* Keep Starlight's pill shape like BLoC */
+  padding: 0.9375rem 1.25rem !important; /* Match Starlight's desktop padding */
+  font-size: var(--sl-text-base) !important;
+  font-weight: 500 !important; /* More subtle than our 600 */
+  gap: 0.5em !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important; /* Remove our custom shadow */
+}
+
+.hero .sl-link-button.primary:where(.astro-xwgiixxa) {
+  background: var(--sl-color-text-accent) !important; /* Use Starlight's accent */
+  border-color: var(--sl-color-text-accent) !important;
+  color: var(--sl-color-black) !important; /* BLoC uses dark text on light button */
+}
+
+.hero .sl-link-button.primary:where(.astro-xwgiixxa):hover {
+  background: var(--sl-color-text-accent) !important;
+  color: var(--sl-color-black) !important;
+  transform: none !important; /* Remove transform */
+  box-shadow: none !important;
+}
+
+/* Dark theme styling for primary button - white text and icon */
+[data-theme='dark'] .hero .sl-link-button.primary:where(.astro-xwgiixxa) {
+  color: var(--sl-color-white) !important; /* White text in dark theme */
+}
+
+[data-theme='dark'] .hero .sl-link-button.primary:where(.astro-xwgiixxa):hover {
+  color: var(--sl-color-white) !important; /* White text on hover in dark theme */
+}
+
+/* Ensure icons within buttons are also white in dark theme */
+[data-theme='dark'] .hero .sl-link-button.primary:where(.astro-xwgiixxa) svg,
+[data-theme='dark'] .hero .sl-link-button.primary:where(.astro-xwgiixxa) .icon {
+  color: var(--sl-color-white) !important;
+  fill: var(--sl-color-white) !important;
+}
+
+/* Secondary button styling - light theme with icon colors */
+.hero .sl-link-button.secondary:where(.astro-xwgiixxa) {
+  border: 1px solid var(--icon-navy-darkest) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: var(--icon-navy-darkest) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.hero .sl-link-button.secondary:where(.astro-xwgiixxa):hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--icon-navy-darkest) !important;
+  border-color: var(--icon-sky-blue) !important;
+  transform: none !important;
+  box-shadow: 0 4px 12px rgba(23, 146, 201, 0.2) !important;
+}
+
+/* Package badges with security theme using our icon colors */
+.package-badge {
+  display: inline-block;
+  padding: 0.375rem 1rem;
+  background: linear-gradient(135deg, var(--icon-sky-blue), var(--icon-bright-blue));
+  color: var(--sl-color-white);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.package-badge:hover {
+  background: linear-gradient(135deg, var(--icon-bright-blue), var(--icon-navy-dark));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Code blocks - keep theming only; let Expressive Code manage radius */
+.expressive-code {
+  box-shadow: 0 4px 12px rgba(23, 146, 201, 0.1);
+}
+
+/* Remove any radius/border overrides on inner elements */
+.expressive-code > *,
+.expressive-code pre,
+.expressive-code code {
+  border-radius: initial !important;
+}
+
+/* Let Expressive Code’s defaults handle structure; no radius overrides */
+.expressive-code .ec-wrapper,
+.expressive-code .ec-outer,
+.expressive-code .ec-viewport,
+.expressive-code .ec-scroller,
+.expressive-code .ec-inner,
+.expressive-code pre,
+.expressive-code code {
+  border-radius: initial !important;
+  box-sizing: border-box;
+}
+
+/* Keep default overflow behavior */
+
+/* Removed hard clip-path to allow larger radii without visual shrinkage */
+
+/* Keep defaults; avoid doubling borders */
+.expressive-code pre {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Light theme - use icon color palette (shadow only) */
+
+[data-theme='dark'] .expressive-code {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Allow horizontal scroll only if content actually overflows */
+.expressive-code .ec-viewport,
+.expressive-code .ec-scroller,
+.expressive-code pre {
+  overflow-x: auto !important;
+}
+
+/* Enhanced feature cards - Force 2x2 grid */
+.features-grid,
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Exactly 2 columns */
+  grid-template-rows: 1fr 1fr; /* Exactly 2 rows */
+  gap: 1.5rem;
+  margin: 3rem 0;
+  align-items: start !important;
+}
+
+/* Mobile: stack vertically */
+@media (max-width: 768px) {
+  .features-grid,
+  .card-grid,
+  .card-grid.stagger {
+    grid-template-columns: 1fr !important; /* Single column on mobile */
+    grid-template-rows: auto !important; /* Auto rows on mobile */
+  }
+}
+
+/* Fix Starlight's CardGrid stagger effect that causes elevation issues */
+.card-grid.stagger {
+  align-items: start !important;
+  --stagger-height: 0rem !important; /* Disable stagger height */
+  padding-bottom: 0 !important; /* Remove stagger padding */
+  grid-template-columns: 1fr 1fr !important; /* Force 2x2 grid even with stagger */
+  grid-template-rows: 1fr 1fr !important;
+}
+
+.card-grid.stagger > *:nth-child(2n) {
+  transform: none !important; /* Completely disable the stagger transform */
+}
+
+.card-grid.stagger .card {
+  transform: none !important; /* Remove any transform that causes elevation issues */
+  margin-top: 0 !important; /* Remove stagger margin */
+}
+
+.card-grid .card {
+  align-self: stretch !important; /* Stretch to fill grid cell for equal heights */
+  height: 100% !important; /* Fill the grid cell completely */
+  position: relative;
+  z-index: 1; /* Ensure consistent stacking */
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card {
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 252, 254, 0.8) 100%);
+  border: 1px solid rgba(23, 146, 201, 0.12);
+  border-radius: var(--guard-radius);
+  padding: 2rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  height: fit-content;
+  align-self: start;
+  position: relative;
+  z-index: 1;
+  transform: none;
+  box-shadow: 
+    0 6px 24px rgba(23, 146, 201, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  color: var(--icon-navy-darkest);
+  overflow: hidden; /* Clip children to rounded corners */
+}
+
+[data-theme='dark'] .feature-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: fit-content;
+  align-self: start;
+  position: relative;
+  z-index: 1;
+  transform: none;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card h3 {
+  color: var(--guard-color-primary);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+/* Quick links with modern styling */
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 3rem 0;
+}
+
+.quick-link {
+  display: block;
+  padding: 1.5rem;
+  background: 
+    /* Light glass morphism with icon blues */
+    linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.05) 100%),
+    linear-gradient(135deg, rgba(248, 252, 254, 0.6) 0%, rgba(240, 250, 255, 0.4) 100%);
+  border: 1px solid rgba(23, 146, 201, 0.15);
+  border-radius: var(--guard-radius);
+  text-decoration: none;
+  color: var(--icon-navy-darkest);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  box-shadow: 
+    0 8px 24px rgba(23, 146, 201, 0.08),
+    0 1px 3px rgba(23, 146, 201, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Modern border effect for quick links */
+.quick-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(135deg, 
+    rgba(23, 146, 201, 0.2) 0%, 
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(15, 118, 180, 0.15) 100%
+  );
+  border-radius: var(--guard-radius);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+[data-theme='dark'] .quick-link {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.6));
+}
+
+.quick-link:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 
+    0 16px 40px rgba(23, 146, 201, 0.15),
+    0 8px 16px rgba(23, 146, 201, 0.12),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px) saturate(190%);
+  -webkit-backdrop-filter: blur(16px) saturate(190%);
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.1) 100%),
+    linear-gradient(135deg, rgba(240, 250, 255, 0.8) 0%, rgba(225, 245, 255, 0.6) 100%);
+}
+
+.quick-link:hover::before {
+  background: linear-gradient(135deg, 
+    rgba(23, 146, 201, 0.4) 0%, 
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(15, 118, 180, 0.3) 100%
+  );
+}
+
+.quick-link h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--guard-color-primary);
+  font-weight: 600;
+}
+
+.quick-link p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--sl-color-gray-1);
+  opacity: 0.8;
+}
+
+/* API reference tables */
+.api-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.api-table th,
+.api-table td {
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+}
+
+.api-table th {
+  background: linear-gradient(135deg, var(--sl-color-gray-6), var(--sl-color-gray-5));
+  font-weight: 700;
+  color: var(--sl-color-white);
+}
+
+.api-table tbody tr:hover {
+  background-color: rgba(var(--guard-hue), 70%, 55%, 0.05);
+}
+
+/* Enhanced callouts */
+.callout {
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin: 2rem 0;
+  border-left: 4px solid;
+  backdrop-filter: blur(8px);
+}
+
+.callout.info {
+  background: linear-gradient(135deg, rgba(23, 146, 201, 0.1), rgba(219, 236, 243, 0.3));
+  border-color: var(--icon-sky-blue);
+  color: var(--icon-navy-darkest);
+}
+
+[data-theme='dark'] .callout.info {
+  color: var(--icon-light-blue);
+}
+
+.callout.warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+  border-color: #f59e0b;
+  color: hsl(35, 60%, 30%);
+}
+
+[data-theme='dark'] .callout.warning {
+  color: hsl(35, 60%, 80%);
+}
+
+.callout.success {
+  background: linear-gradient(135deg, rgba(15, 118, 180, 0.1), rgba(53, 123, 170, 0.2));
+  border-color: var(--icon-bright-blue);
+  color: var(--icon-steel-blue);
+}
+
+[data-theme='dark'] .callout.success {
+  color: var(--icon-muted-blue);
+}
+
+/* Typography improvements */
+h1, h2, h5, h6 {
+  font-family: 'Figtree Variable', sans-serif;
+}
+
+/* White backgrounds for text elements */
+code:not([class*="language"]) {
+  background: white !important;
+  color: var(--icon-navy-darkest) !important;
+  border: 1px solid rgba(23, 146, 201, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 0.125rem 0.375rem !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+[data-theme='dark'] code:not([class*="language"]) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--icon-light-blue) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Override any gray backgrounds in content with white */
+.sl-markdown-content :is(kbd, samp) {
+  background: white !important;
+  color: var(--icon-navy-darkest) !important;
+}
+
+[data-theme='dark'] .sl-markdown-content :is(kbd, samp) {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Light backgrounds for callouts and admonitions using icon palette */
+.starlight-aside {
+  background: rgba(248, 252, 254, 0.8) !important;
+  border: 1px solid rgba(23, 146, 201, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  color: var(--icon-navy-darkest) !important;
+}
+
+[data-theme='dark'] .starlight-aside {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+.hero .actions .sl-link-button:focus-visible,
+.quick-link:focus-visible {
+  outline: 3px solid var(--guard-color-primary);
+  outline-offset: 2px;
+}

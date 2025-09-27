@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -218,8 +222,7 @@ abstract class RouteGuardUtils {
     BuildContext context,
     GoRouterState state,
   ) async {
-    final resolver = NavigationResolver(context, state);
-
+    final resolver = NavigationResolver(context);
     await guard.onNavigation(resolver, context, state);
 
     final result = await resolver.future;

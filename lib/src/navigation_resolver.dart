@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,17 +44,10 @@ class GuardResult {
 /// {@endtemplate}
 class NavigationResolver {
   /// {@macro navigation_resolver}
-  NavigationResolver(this._context, this._state);
+  NavigationResolver(this._context);
 
   final BuildContext _context;
-  final GoRouterState _state;
   final Completer<GuardResult> _completer = Completer<GuardResult>();
-
-  /// The current route being navigated to.
-  GoRouterState get state => _state;
-
-  /// The context for the navigation.
-  BuildContext get context => _context;
 
   /// Whether this resolver has been resolved.
   bool get isResolved => _completer.isCompleted;
@@ -59,9 +56,9 @@ class NavigationResolver {
   Future<GuardResult> get future => _completer.future;
 
   /// Continue navigation (allow access)
-  void next([bool continueNavigation = true]) {
+  void next({bool continueNavigation = true}) {
     if (isResolved) return;
-    _completer.complete(
+    _resolve(
       GuardResult(
         continueNavigation: continueNavigation,
       ),
@@ -71,7 +68,7 @@ class NavigationResolver {
   /// Redirect to a different path
   void redirect(String path, {bool reevaluateOnChange = false}) {
     if (isResolved) return;
-    _completer.complete(GuardResult.redirect(
+    _resolve(GuardResult.redirect(
       path,
       reevaluateOnChange: reevaluateOnChange,
     ));
@@ -88,21 +85,21 @@ class NavigationResolver {
   void block({bool reevaluateOnChange = false}) {
     if (isResolved) return;
     final currentLocation =
-        GoRouter.of(context).routerDelegate.currentConfiguration.fullPath;
-    _completer.complete(GuardResult.redirect(
+        GoRouter.of(_context).routerDelegate.currentConfiguration.fullPath;
+    _resolve(GuardResult.redirect(
       currentLocation,
       reevaluateOnChange: reevaluateOnChange,
     ));
   }
 
   /// Complete with a custom result.
-  void resolve(GuardResult result) {
+  void _resolve(GuardResult result) {
     if (isResolved) return;
     _completer.complete(result);
   }
 
   /// Navigate back if the guard fails.
-  void nextOrBack([bool continueNavigation = true]) {
+  void nextOrBack({bool continueNavigation = true}) {
     if (continueNavigation) {
       next();
     } else {

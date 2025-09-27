@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 /// A flexible and extensible guard system for Go Router that allows you to
 /// create middleware-style navigation guards with inclusion and exclusion
 /// capabilities.

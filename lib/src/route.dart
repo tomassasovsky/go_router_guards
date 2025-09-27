@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -38,16 +42,16 @@ mixin GuardedRoute on GoRouteData {
   ///
   /// Override this getter to define route protection.
   /// Defaults to allowing all access.
-  RouteGuard get guards => const _AllowGuard();
+  RouteGuard get guard => const _AllowGuard();
 
   /// Executes the guards for this route using the enhanced guard system.
   ///
   /// Returns a redirect path if access is denied, null if access is granted.
-  FutureOr<String?> executeGuards(
+  FutureOr<String?> executeGuard(
     BuildContext context,
     GoRouterState state,
   ) async {
-    final guard = guards;
+    final guard = this.guard;
     final result = await guard.executeWithResolver(context, state);
     return result.redirectPath;
   }
@@ -58,7 +62,7 @@ mixin GuardedRoute on GoRouteData {
   /// It executes the guards and returns a redirect path if access is denied.
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    return executeGuards(context, state);
+    return executeGuard(context, state);
   }
 }
 
@@ -117,16 +121,16 @@ mixin GuardedShellRoute on ShellRouteData {
   ///
   /// Override this getter to define route protection.
   /// Defaults to allowing all access.
-  RouteGuard get guards => const _AllowGuard();
+  RouteGuard get guard => const _AllowGuard();
 
   /// Executes the guards for this route using the enhanced guard system.
   ///
   /// Returns a redirect path if access is denied, null if access is granted.
-  FutureOr<String?> executeGuards(
+  FutureOr<String?> executeGuard(
     BuildContext context,
     GoRouterState state,
   ) async {
-    final guard = guards;
+    final guard = this.guard;
     final result = await guard.executeWithResolver(context, state);
     return result.redirectPath;
   }
@@ -137,7 +141,7 @@ mixin GuardedShellRoute on ShellRouteData {
   /// It executes the guards and returns a redirect path if access is denied.
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    return executeGuards(context, state);
+    return executeGuard(context, state);
   }
 }
 
