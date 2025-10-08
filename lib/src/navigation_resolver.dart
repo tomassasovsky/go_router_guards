@@ -84,12 +84,22 @@ class NavigationResolver {
   /// keep the current location, you can use this method.
   void block({bool reevaluateOnChange = false}) {
     if (isResolved) return;
-    final currentLocation =
-        GoRouter.of(_context).routerDelegate.currentConfiguration.fullPath;
-    _resolve(GuardResult.redirect(
-      currentLocation,
-      reevaluateOnChange: reevaluateOnChange,
-    ));
+
+    final router = GoRouter.of(_context);
+    final currentLocation = router.routerDelegate.currentConfiguration.fullPath;
+    final targetLocation = router.routeInformationProvider.value.uri.toString();
+
+    // There's an edge case where the current location is the one the user
+    // is going to (e.g. deep linking). In this case, we should not 
+    // block-redirect to the current location, but rather redirect
+    // to the default location ("/").
+    if (currentLocation == targetLocation) {
+      _resolve(
+          GuardResult.redirect('/', reevaluateOnChange: reevaluateOnChange));
+    } else {
+      _resolve(GuardResult.redirect(currentLocation,
+          reevaluateOnChange: reevaluateOnChange));
+    }
   }
 
   /// Complete with a custom result.
