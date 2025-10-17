@@ -1,0 +1,37 @@
+name: example
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "example/pubspec.yaml"
+      - "example/lib/**"
+      - "example/test/**"
+      - ".github/workflows/example.yaml"
+      - "lib/**"
+      - "pubspec.yaml"
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "example/pubspec.yaml"
+      - "example/lib/**"
+      - "example/test/**"
+      - ".github/workflows/example.yaml"
+      - "lib/**"
+      - "pubspec.yaml"
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    with:
+      working_directory: example
+      analyze_directories: "lib test"
+      report_on: "lib"

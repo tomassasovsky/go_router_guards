@@ -7,9 +7,11 @@ concurrency:
 on:
   push:
     branches:
+      - main
       - master
   pull_request:
     branches:
+      - main
       - master
 
 jobs:
@@ -25,3 +27,11 @@ jobs:
   build:
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
 
+  pana:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+
+  license:
+    uses: tomassasovsky/very_good_workflows/.github/workflows/license_check.yml@main
+    with:
+      flutter_version: 3.35.6
+      skip_packages: "vector_math"

@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_guards_example/router.dart';
@@ -143,18 +147,35 @@ class AuthState {
 }
 
 class UserCubit extends Cubit<UserState> {
-  UserCubit() : super(const UserState(roles: ['user']));
+  UserCubit() : super(const UserState(roles: ['user'], permissions: []));
 
   void toggleAdmin() {
     final newRoles = state.roles.contains('admin')
-        ? ['user']
-        : ['user', 'admin'];
-    emit(UserState(roles: newRoles));
+        ? state.roles.where((role) => role != 'admin').toList()
+        : [...state.roles, 'admin'];
+    emit(UserState(roles: newRoles, permissions: state.permissions));
+  }
+
+  void togglePremium() {
+    final newRoles = state.roles.contains('premium')
+        ? state.roles.where((role) => role != 'premium').toList()
+        : [...state.roles, 'premium'];
+    emit(UserState(roles: newRoles, permissions: state.permissions));
+  }
+
+  void togglePermissions() {
+    final newPermissions = state.permissions.contains('reports_access')
+        ? state.permissions
+              .where((permission) => permission != 'reports_access')
+              .toList()
+        : [...state.permissions, 'reports_access'];
+    emit(UserState(roles: state.roles, permissions: newPermissions));
   }
 }
 
 class UserState {
-  const UserState({required this.roles});
+  const UserState({required this.roles, required this.permissions});
 
   final List<String> roles;
+  final List<String> permissions;
 }

@@ -1,3 +1,7 @@
+// Copyright 2025 Tomás Sasovsky
+// Use of this source code is governed by a MIT-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,35 +14,45 @@ import 'screens.dart';
 part 'router.g.dart';
 
 // Simple authentication guard
-class AuthenticationGuard implements RouteGuard {
+class AuthenticationGuard extends RouteGuard {
+  const AuthenticationGuard();
+
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+  FutureOr<void> onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
     final isAuthenticated = context.read<AuthCubit>().state.isAuthenticated;
 
     if (!isAuthenticated) {
-      return LoginRoute().location;
+      resolver.redirect(LoginRoute().location);
+    } else {
+      resolver.next();
     }
-
-    return null;
   }
 }
 
 // Role-based guard
-class RoleGuard implements RouteGuard {
+class RoleGuard extends RouteGuard {
   const RoleGuard(this.requiredRoles);
 
   final List<String> requiredRoles;
 
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+  FutureOr<void> onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
     final userRoles = context.read<UserCubit>().state.roles;
 
     final hasRequiredRole = requiredRoles.any(userRoles.contains);
     if (!hasRequiredRole) {
-      return UnauthorizedRoute().location;
+      resolver.block();
+    } else {
+      resolver.next();
     }
-
-    return null;
   }
 }
 
@@ -64,7 +78,7 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   const ProtectedRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard get guard => guardAll([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -88,7 +102,7 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  RouteGuard get guards => Guards.all([
+  RouteGuard get guard => guardAll([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -108,4 +122,28 @@ class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
   }
 }
 
-final router = GoRouter(routes: $appRoutes);
+/// Example router using inclusion patterns with ConditionalGuard
+/// Only applies authentication to protected and admin routes
+final router = GoRouter(
+  routes: $appRoutes,
+  redirect: ConditionalGuard(
+    guard: AuthenticationGuard(),
+    // Only apply authentication to specific routes
+    includedPatterns: [RegExp(r'^/protected.*'), RegExp(r'^/admin.*')],
+    // Exclude specific maintenance routes even if they match inclusion patterns
+    excludedPaths: ['/admin/debug'],
+  ).toRedirect(),
+);
+
+/// Alternative router using exclusion (traditional approach)
+final globalRouter = GoRouter(
+  routes: $appRoutes,
+  redirect: ConditionalGuard(
+    guard: AuthenticationGuard(),
+    // Exclude public and auth routes from authentication
+    excludedPaths: ['/login', '/unauthorized'],
+  ).toRedirect(),
+);
+
+/// Router with no router-level guards - relies on individual route guards only
+final individualGuardsRouter = GoRouter(routes: $appRoutes);

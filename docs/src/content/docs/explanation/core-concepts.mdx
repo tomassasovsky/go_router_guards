@@ -1,0 +1,39 @@
+---
+title: Core Concepts
+description: Key ideas that power go_router_guards
+---
+
+This page outlines the core building blocks you will use when protecting navigation with go_router_guards.
+
+## RouteGuard
+
+Guards encapsulate logic that decides whether navigation should continue, be redirected, or be blocked.
+
+- Implement a guard by extending `RouteGuard` and overriding `onNavigation`.
+- Use `resolver.next()`, `resolver.redirect('/path')`, or `resolver.block()`.
+
+## NavigationResolver
+
+The `NavigationResolver` mediates control flow between guards and the router, enabling middleware‑style composition.
+
+## Guard composition
+
+Compose multiple guards into one with helpers:
+
+- `guardAll([...])` — all must pass
+- `guardAnyOf([...], { fallbackRedirect })` — at least one must pass
+- `guardOneOf([...], { fallbackRedirect })` — exactly one must pass
+
+## Route mixins
+
+For type‑safe routes, mix in `GuardedRoute` or `GuardedShellRoute` and provide a `guard`.
+
+## ConditionalGuard
+
+Target or exclude specific paths with `ConditionalGuard` while keeping logic in a single guard.
+
+---
+
+See the [API Reference](/reference/api-overview) for full types, and follow the [Get Started](/tutorials/get-started/) guide to try these concepts in code.
+
+

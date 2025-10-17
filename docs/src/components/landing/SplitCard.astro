@@ -1,0 +1,75 @@
+---
+import { Card } from "@astrojs/starlight/components";
+export type Props = Parameters<typeof Card>[0];
+---
+
+<div class="card--fullwidth">
+  <Card {...Astro.props}>
+    <div class="split">
+      <slot />
+    </div>
+  </Card>
+</div>
+
+<style>
+  .card--fullwidth {
+    --card-bg: rgba(23, 25, 30, 0.8);
+    grid-column: 1 / -1;
+  }
+  :global(:root[data-theme="light"]) .card--fullwidth {
+    --card-bg: rgba(255, 255, 255, 0.5);
+  }
+
+  .split {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0 1rem;
+    color: var(--sl-color-white);
+  }
+
+  .card--fullwidth :global(.card) {
+    background: var(--card-bg);
+    position: relative;
+    box-shadow: none;
+    border: none !important;
+    border-color: transparent !important;
+    transition: none;
+  }
+
+  /* Remove hover visuals */
+  .card--fullwidth :global(.card:hover),
+  .card--fullwidth :global(.card:focus-within:hover),
+  .card--fullwidth :global(.card:focus-within),
+  .card--fullwidth :global(.card:focus),
+  .card--fullwidth :global(.card:focus-visible),
+  .card--fullwidth :global(.card:active) {
+    box-shadow: none !important;
+    border: none !important;
+    outline: none;
+    transform: none;
+    filter: none;
+  }
+
+  .card--fullwidth :global(.card *),
+  .card--fullwidth :global(.card) {
+    transition: none !important;
+  }
+
+  @media screen and (min-width: 78rem) {
+    .split {
+      flex-direction: row;
+      gap: 2.5rem;
+    }
+    .split > :global(*) {
+      margin-top: 0 !important;
+      flex: 1;
+    }
+  }
+
+  @media screen and (min-width: 50rem) {
+    .card--fullwidth :global(.card) {
+      background: var(--card-bg);
+    }
+  }
+</style>

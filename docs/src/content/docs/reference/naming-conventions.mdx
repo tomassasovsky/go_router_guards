@@ -1,0 +1,16 @@
+---
+title: Naming Conventions
+description: Consistent names for guards, routes, and helpers
+---
+
+Adopt clear, intention‑revealing names to keep guard logic readable.
+
+- Guard classes: `AuthGuard`, `RoleGuard`, `NetworkGuard`
+- Composed guards: `authOrNetworkGuard = guardAnyOf([...])`
+- Conditional guards: `ConditionalGuard(includePaths: ['/admin'])`
+- Type‑safe routes: `ProfileRoute with GuardedRoute`
+- Redirect helpers: `toRedirect()`
+
+Prefer full words over abbreviations and align names with the behavior being enforced.
+
+
