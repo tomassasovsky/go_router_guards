@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:go_router_guards/go_router_guards.dart';
 import 'package:go_router_guards/src/internal/shared_guards.dart';
-import 'package:go_router_guards/src/navigation_resolver.dart';
 import 'package:meta/meta.dart';
 
 /// {@template guard}
@@ -72,7 +72,16 @@ abstract class RouteGuard {
     BuildContext context,
     GoRouterState state,
   ) async {
-    final router = GoRouter.of(context);
+    GoRouter router;
+
+    try {
+      router = GoRouter.of(context);
+      // this method can throw a FlutterError if the router is not mounted
+      // ignore: avoid_catching_errors
+    } on FlutterError {
+      throw const RouterNotMountedException();
+    }
+
     final resolver = NavigationResolver(router);
     await onNavigation(resolver, context, state);
     return resolver.future;

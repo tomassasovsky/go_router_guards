@@ -4,6 +4,7 @@
 
 export 'conditional_guards.dart' show ConditionalGuard;
 export 'core.dart' show RouteGuard;
+export 'exceptions.dart' show RouteGuardsException, RouterNotMountedException;
 export 'guard_pipes.dart'
     show
         GuardsIterableRedirectExtensions,

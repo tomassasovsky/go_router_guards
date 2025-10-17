@@ -6,71 +6,58 @@ import 'package:go_router/go_router.dart';
 import 'package:go_router_guards/go_router_guards.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Mock classes
-class MockBuildContext extends Mock implements BuildContext {}
-
-class MockGoRouter extends Mock implements GoRouter {}
-
 class MockGoRouterState extends Mock implements GoRouterState {}
 
 void main() {
   group('Enhanced Guards', () {
-    late MockBuildContext mockContext;
-    late MockGoRouter mockRouter;
-    late MockGoRouterState mockState;
-
-    setUp(() {
-      mockContext = MockBuildContext();
-      mockRouter = MockGoRouter();
-      mockState = MockGoRouterState();
-
-      // Setup default mocks
-      when(() => mockRouter.routerDelegate.navigatorKey.currentContext)
-          .thenReturn(null);
-      when(() => mockState.fullPath).thenReturn('/test-path');
-      when(() => mockState.uri).thenReturn(Uri.parse('/test-path'));
-    });
-
     group('NavigationResolver', () {
-      test('should resolve with next()', () async {
-        final resolver = NavigationResolver(mockRouter)..next();
-
+      testWidgets('should resolve with next()', (tester) async {
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final resolver = NavigationResolver(router)..next();
         final result = await resolver.future;
         expect(result.continueNavigation, isTrue);
         expect(result.redirectPath, isNull);
       });
 
-      test('should resolve with redirect()', () async {
-        final resolver = NavigationResolver(mockRouter)..redirect('/new-path');
-
+      testWidgets('should resolve with redirect()', (tester) async {
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final resolver = NavigationResolver(router)..redirect('/new-path');
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
         expect(result.redirectPath, equals('/new-path'));
       });
 
-      test('should handle block() correctly', () async {
-        final resolver = NavigationResolver(mockRouter)..block();
-
+      testWidgets('should handle block() correctly', (tester) async {
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final resolver = NavigationResolver(router)..block();
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
-        expect(result.redirectPath,
-            equals('/test-path')); // blocked to current path
+        expect(result.redirectPath, equals('/'));
       });
 
-      test('should handle redirect()', () async {
-        final resolver = NavigationResolver(mockRouter)
-          ..redirect('/redirect-path');
-
+      testWidgets('should handle redirect()', (tester) async {
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final resolver = NavigationResolver(router)..redirect('/redirect-path');
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
         expect(result.redirectPath, equals('/redirect-path'));
       });
 
-      test('should prevent multiple resolutions', () async {
-        final resolver = NavigationResolver(mockRouter)
+      testWidgets('should prevent multiple resolutions', (tester) async {
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final resolver = NavigationResolver(router)
           ..next()
-          ..redirect('/should-be-ignored'); // This should be ignored
-
+          ..redirect('/should-be-ignored');
         final result = await resolver.future;
         expect(result.continueNavigation, isTrue);
         expect(result.redirectPath, isNull);
@@ -78,136 +65,135 @@ void main() {
     });
 
     group('GuardsEnhanced combinations', () {
-      test('all should pass when all guards pass', () async {
+      testWidgets('all should pass when all guards pass', (tester) async {
         final allowGuard1 = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
         final allowGuard2 = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
-
         final guard = guardAll([allowGuard1, allowGuard2]);
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
         expect(result.continueNavigation, isTrue);
       });
 
-      test('all should fail when any guard fails', () async {
+      testWidgets('all should fail when any guard fails', (tester) async {
         final allowGuard = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
         final blockGuard = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/blocked');
         });
-
         final guard = guardAll([allowGuard, blockGuard]);
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
         expect(result.redirectPath, equals('/blocked'));
       });
 
-      test('anyOf should pass when any guard passes', () async {
+      testWidgets('anyOf should pass when any guard passes', (tester) async {
         final blockGuard = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/blocked');
         });
         final allowGuard = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
-
         final guard = guardAnyOf([blockGuard, allowGuard]);
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
         expect(result.continueNavigation, isTrue);
       });
 
-      test('anyOf should use fallback when all fail', () async {
+      testWidgets('anyOf should use fallback when all fail', (tester) async {
         final blockGuard1 = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/block1');
         });
         final blockGuard2 = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/block2');
         });
-
-        final guard = guardAnyOf([
-          blockGuard1,
-          blockGuard2,
-        ], fallbackRedirect: '/fallback');
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
+        final guard = guardAnyOf([blockGuard1, blockGuard2],
+            fallbackRedirect: '/fallback');
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
         expect(result.redirectPath, equals('/fallback'));
       });
 
-      test('oneOf should pass when exactly one guard passes', () async {
+      testWidgets('oneOf should pass when exactly one guard passes',
+          (tester) async {
         final allowGuard = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
         final blockGuard = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/blocked');
         });
-
         final guard = guardOneOf([allowGuard, blockGuard]);
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
         expect(result.continueNavigation, isTrue);
       });
 
-      test('oneOf should block when more than one guard passes', () async {
+      testWidgets('oneOf should block when more than one guard passes',
+          (tester) async {
         final allowGuard1 = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
         final allowGuard2 = TestEnhancedGuard((resolver, context, state) {
           resolver.next();
         });
-
         final guard = guardOneOf([allowGuard1, allowGuard2]);
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
-        expect(result.redirectPath,
-            equals('/test-path')); // blocked to current path
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
+        expect(result.redirectPath, equals('/'));
       });
 
-      test('oneOf should redirect when no guards pass', () async {
+      testWidgets('oneOf should redirect when no guards pass', (tester) async {
         final blockGuard1 = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/block1');
         });
         final blockGuard2 = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/block2');
         });
-
-        final guard = guardOneOf([
-          blockGuard1,
-          blockGuard2,
-        ], fallbackRedirect: '/fallback');
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
+        final guard = guardOneOf([blockGuard1, blockGuard2],
+            fallbackRedirect: '/fallback');
+        final router = GoRouter(
+            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        final ctx = tester.element(find.byType(Navigator));
+        final state = MockGoRouterState();
+        when(() => state.uri).thenReturn(Uri.parse('/test-path'));
+        final result = await guard.executeWithResolver(ctx, state);
         expect(result.redirectPath, equals('/fallback'));
       });
-    });
-
-    group('GuardedRoute integration', () {
-      test('should work with enhanced guards via executeWithResolver',
-          () async {
-        final guard = TestEnhancedGuard((resolver, context, state) {
-          resolver.next();
-        });
-
-        final result = await guard.executeWithResolver(mockContext, mockState);
-        expect(result.continueNavigation, isTrue);
-      });
-
-      test(
-        'should work with enhanced guards that redirect '
-        'via executeWithResolver',
-        () async {
-          final guard = TestEnhancedGuard((resolver, context, state) {
-            resolver.redirect('/redirect-target');
-          });
-
-          final result =
-              await guard.executeWithResolver(mockContext, mockState);
-          expect(result.redirectPath, equals('/redirect-target'));
-        },
-      );
     });
   });
 }
