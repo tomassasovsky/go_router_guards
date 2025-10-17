@@ -31,6 +31,6 @@ jobs:
     uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
 
   license:
-    uses: tomassasovsky/very_good_workflows/.github/workflows/license_check.yml
+    uses: tomassasovsky/very_good_workflows/.github/workflows/license_check.yml@main
     with:
       flutter_version: 3.35.6
