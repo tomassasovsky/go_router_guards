@@ -32,3 +32,5 @@ jobs:
 
   license:
     uses: tomassasovsky/very_good_workflows/.github/workflows/license_check.yml@v1
+    with:
+      flutter_version: 3.35.6
