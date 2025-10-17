@@ -1,0 +1,56 @@
+:root {
+  --brand: var(--sl-color-accent);
+}
+
+/* Use plain CSS instead of Tailwind @apply to avoid variant issues */
+.landing-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .landing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .landing-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.landing-cta {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--brand) 12%, white);
+  color: color-mix(in oklab, var(--brand) 70%, black);
+  padding: .25rem .75rem;
+  font-size: .75rem;
+  font-weight: 500;
+}
+
+/* Bloc-like hero gradient using our theme */
+[data-has-hero] .page {
+  background: linear-gradient(to right, color-mix(in oklab, var(--brand) 12%, white), color-mix(in oklab, var(--brand) 10%, white), color-mix(in oklab, var(--brand) 8%, white), color-mix(in oklab, var(--brand) 6%, white));
+}
+
+[data-theme='dark'][data-has-hero] .page {
+  background: linear-gradient(215deg, color-mix(in oklab, var(--brand) 30%, transparent), transparent 40%), radial-gradient(color-mix(in oklab, var(--brand) 30%, transparent), transparent 65%) no-repeat 50% calc(100% + 20rem) / 60rem 30rem;
+}
+
+[data-has-hero] header {
+  border-bottom: 1px solid transparent;
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}

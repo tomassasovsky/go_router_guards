@@ -1,0 +1,26 @@
+---
+const { title = "Sponsors", items = [] } = Astro.props;
+---
+
+<section aria-labelledby="sponsors-title" class="mt-12">
+  <h2
+    id="sponsors-title"
+    class="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
+  >
+    {title}
+  </h2>
+  <div class="mt-4 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
+    {
+      items.map((s) => (
+        <a
+          href={s.href}
+          target="_blank"
+          rel="noopener"
+          class="flex items-center justify-center rounded-md border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <img src={s.src} alt={s.alt} class="max-h-8 opacity-80" />
+        </a>
+      ))
+    }
+  </div>
+</section>

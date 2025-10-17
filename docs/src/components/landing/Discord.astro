@@ -1,0 +1,52 @@
+---
+export type Props = {
+  joinCta?: string;
+  href?: string;
+};
+
+import { LinkCard } from "@astrojs/starlight/components";
+
+const {
+  joinCta = "Join our community",
+  href = "https://github.com/tomassasovsky/go_router_guards",
+} = Astro.props as Props;
+---
+
+<style>
+  .discord {
+    margin: 0 auto;
+    padding: 4rem 0;
+    text-align: center;
+  }
+
+  .discord h2 {
+    font-size: var(--sl-text-2xl) !important;
+    font-weight: 400;
+  }
+
+  .discord .cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .badge {
+    margin-bottom: -1rem;
+    width: 7rem;
+    height: 7rem;
+    border-radius: 1rem;
+  }
+
+  @media screen and (min-width: 50rem) {
+    .glow {
+      filter: drop-shadow(0 0 0.5rem var(--sl-color-accent));
+    }
+  }
+</style>
+
+<div class="discord">
+  <div class="cta">
+    <img src="/icon.png" alt="go_router_guards" class="badge glow" />
+    <LinkCard title={joinCta} href={href} />
+  </div>
+</div>

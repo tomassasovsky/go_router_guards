@@ -5,6 +5,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:go_router_guards/src/exceptions.dart';
+
+/// Signature for the enhanced guard navigation callback.
+typedef OnGuardNavigation = FutureOr<void> Function(
+  NavigationResolver resolver,
+  BuildContext context,
+  GoRouterState state,
+);
 
 /// {@template guard_result}
 /// Result of a guard navigation resolution.
@@ -14,16 +22,15 @@ class GuardResult {
   const GuardResult({
     required this.continueNavigation,
     this.redirectPath,
-    this.reevaluateOnChange = false,
   });
 
   /// Factory for allowing navigation to continue.
-  const GuardResult.allow({this.reevaluateOnChange = false})
+  const GuardResult.allow()
       : continueNavigation = true,
         redirectPath = null;
 
   /// Factory for blocking navigation with redirect.
-  const GuardResult.redirect(String path, {this.reevaluateOnChange = false})
+  const GuardResult.redirect(String path)
       : continueNavigation = false,
         redirectPath = path;
 
@@ -32,22 +39,29 @@ class GuardResult {
 
   /// Optional redirect path if navigation should be redirected.
   final String? redirectPath;
-
-  /// Whether this guard should be reevaluated on state changes.
-  final bool reevaluateOnChange;
 }
 
 /// {@template navigation_resolver}
 /// Navigation resolver that provides control over the navigation flow.
-///
-/// Similar to auto_route's NavigationResolver but adapted for go_router.
 /// {@endtemplate}
 class NavigationResolver {
   /// {@macro navigation_resolver}
-  NavigationResolver(this._context);
+  NavigationResolver(this._router);
 
-  final BuildContext _context;
+  final GoRouter _router;
   final Completer<GuardResult> _completer = Completer<GuardResult>();
+
+  /// Returns the current [BuildContext].
+  ///
+  /// Be-aware build context can be null if the navigator is not yet mounted
+  /// this happens if you're guarding the first route in the app
+  BuildContext get context {
+    final context = _router.routerDelegate.navigatorKey.currentContext;
+    if (context == null) {
+      throw const RouterNotMountedException();
+    }
+    return context;
+  }
 
   /// Whether this resolver has been resolved.
   bool get isResolved => _completer.isCompleted;
@@ -56,71 +70,36 @@ class NavigationResolver {
   Future<GuardResult> get future => _completer.future;
 
   /// Continue navigation (allow access)
-  void next({bool continueNavigation = true}) {
+  void next() {
     if (isResolved) return;
-    _resolve(
-      GuardResult(
-        continueNavigation: continueNavigation,
-      ),
-    );
+    _completer.complete(const GuardResult.allow());
   }
 
   /// Redirect to a different path
-  void redirect(String path, {bool reevaluateOnChange = false}) {
+  void redirect(String path) {
     if (isResolved) return;
-    _resolve(GuardResult.redirect(
-      path,
-      reevaluateOnChange: reevaluateOnChange,
-    ));
+    _completer.complete(GuardResult.redirect(path));
   }
 
+  /// Block navigation entirely.
+  ///
   /// If you don't want to redirect to a specific path, but rather
   /// keep the current location, you can use this method.
   ///
-  /// This is useful when you want to block navigation to a specific route
-  /// and keep the current location.
-  ///
-  /// For example, if you want to block navigation to a protected route and
-  /// keep the current location, you can use this method.
-  void block({bool reevaluateOnChange = false}) {
+  /// If the current location is the one the user is going to
+  /// (e.g. deep linking), this method will redirect to the default location ("/").
+  void block() {
     if (isResolved) return;
 
-    final router = GoRouter.of(_context);
-    final currentLocation = router.routerDelegate.currentConfiguration.fullPath;
-    final targetLocation = router.routeInformationProvider.value.uri.toString();
+    final currentLocation =
+        _router.routerDelegate.currentConfiguration.fullPath;
+    final targetLocation =
+        _router.routeInformationProvider.value.uri.toString();
 
-    // There's an edge case where the current location is the one the user
-    // is going to (e.g. deep linking). In this case, we should not 
-    // block-redirect to the current location, but rather redirect
-    // to the default location ("/").
     if (currentLocation == targetLocation) {
-      _resolve(
-          GuardResult.redirect('/', reevaluateOnChange: reevaluateOnChange));
+      _completer.complete(const GuardResult.redirect('/'));
     } else {
-      _resolve(GuardResult.redirect(currentLocation,
-          reevaluateOnChange: reevaluateOnChange));
-    }
-  }
-
-  /// Complete with a custom result.
-  void _resolve(GuardResult result) {
-    if (isResolved) return;
-    _completer.complete(result);
-  }
-
-  /// Navigate back if the guard fails.
-  void nextOrBack({bool continueNavigation = true}) {
-    if (continueNavigation) {
-      next();
-    } else {
-      block();
+      _completer.complete(GuardResult.redirect(currentLocation));
     }
   }
 }
-
-/// Signature for the enhanced guard navigation callback.
-typedef OnGuardNavigation = FutureOr<void> Function(
-  NavigationResolver resolver,
-  BuildContext context,
-  GoRouterState state,
-);

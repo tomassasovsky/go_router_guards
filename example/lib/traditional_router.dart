@@ -69,16 +69,14 @@ final traditionalRouter = GoRouter(
     ),
   ],
   // Apply authentication globally, but exclude auth-related routes
-  redirect: RouteGuardUtils.createGuardRedirect(
-    Guards.all([
-      ConditionalGuard(
-        guard: AuthenticationGuard(),
-        excludedPaths: ['/login', '/'],
-      ),
-      ConditionalGuard(
-        guard: RoleGuard(['admin']),
-        includedPatterns: [RegExp(r'^/admin.*')],
-      ),
-    ]),
-  ),
+  redirect: guardAll([
+    ConditionalGuard(
+      guard: AuthenticationGuard(),
+      excludedPaths: ['/login', '/'],
+    ),
+    ConditionalGuard(
+      guard: RoleGuard(['admin']),
+      includedPatterns: [RegExp(r'^/admin.*')],
+    ),
+  ]).toRedirect(),
 );

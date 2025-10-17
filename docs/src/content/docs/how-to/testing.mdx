@@ -1,0 +1,29 @@
+---
+title: Testing
+description: Strategies and examples for testing guards and navigation
+---
+
+This guide shows simple patterns to test guards and composed pipelines.
+
+## Unit testing a guard
+
+Focus on `onNavigation` behavior and assert resolver interactions.
+
+```dart
+test('AuthGuard redirects when unauthenticated', () async {
+  final resolver = _FakeResolver();
+  final guard = AuthGuard(isAuthenticated: () async => false);
+
+  await guard.onNavigation(resolver, _ctx, _state);
+
+  expect(resolver.redirectedTo, '/login');
+});
+```
+
+## Testing composed guards
+
+Wrap guards with `guardAll`, `guardAnyOf`, or `guardOneOf` and assert final outcome using a fake resolver.
+
+See also: [API Reference](/reference/api-overview) and [Core Concepts](/explanation/core-concepts).
+
+

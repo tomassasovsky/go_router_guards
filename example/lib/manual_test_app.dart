@@ -118,7 +118,7 @@ class FactoryGuardsRoute extends GoRouteData
   const FactoryGuardsRoute();
 
   @override
-  RouteGuard get guard => Guards.all([
+  RouteGuard get guard => guardAll([
     EnhancedAuthGuard(),
     EnhancedRoleGuard(['admin', 'moderator']),
   ]);
@@ -138,8 +138,7 @@ class CustomLogicRoute extends GoRouteData
   const CustomLogicRoute();
 
   @override
-  RouteGuard get guard =>
-      Guards.all([EnhancedAuthGuard(), BusinessHoursGuard()]);
+  RouteGuard get guard => guardAll([EnhancedAuthGuard(), BusinessHoursGuard()]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -158,7 +157,7 @@ class ConditionalRoute extends GoRouteData
 
   @override
   RouteGuard get guard => section == 'admin'
-      ? Guards.all([
+      ? guardAll([
           EnhancedAuthGuard(),
           EnhancedRoleGuard(['admin']),
         ])
@@ -198,7 +197,7 @@ class FlexibleAccessRoute extends GoRouteData
   const FlexibleAccessRoute();
 
   @override
-  RouteGuard get guard => Guards.anyOf([
+  RouteGuard get guard => guardAnyOf([
     EnhancedRoleGuard(['admin']),
     EnhancedRoleGuard(['premium']),
     HolidayGuard(),
@@ -252,8 +251,7 @@ class AsyncGuardRoute extends GoRouteData with _$AsyncGuardRoute, GuardedRoute {
   const AsyncGuardRoute();
 
   @override
-  RouteGuard get guard =>
-      Guards.all([EnhancedAuthGuard(), SubscriptionGuard()]);
+  RouteGuard get guard => guardAll([EnhancedAuthGuard(), SubscriptionGuard()]);
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

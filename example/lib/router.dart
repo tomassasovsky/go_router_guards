@@ -78,7 +78,7 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   const ProtectedRoute();
 
   @override
-  RouteGuard get guard => Guards.all([
+  RouteGuard get guard => guardAll([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -89,9 +89,7 @@ class ProtectedRoute extends GoRouteData with _$ProtectedRoute, GuardedRoute {
   }
 }
 
-/// Example of using UnguardedRoute to opt-out of router-level guards
-/// This route will bypass any router-level guards applied to the router
-class LoginRoute extends GoRouteData with _$LoginRoute, UnguardedRoute {
+class LoginRoute extends GoRouteData with _$LoginRoute {
   const LoginRoute();
 
   @override
@@ -104,7 +102,7 @@ class AdminRoute extends GoRouteData with _$AdminRoute, GuardedRoute {
   const AdminRoute();
 
   @override
-  RouteGuard get guard => Guards.all([
+  RouteGuard get guard => guardAll([
     AuthenticationGuard(),
     RoleGuard(['admin']),
   ]);
@@ -128,27 +126,23 @@ class UnauthorizedRoute extends GoRouteData with _$UnauthorizedRoute {
 /// Only applies authentication to protected and admin routes
 final router = GoRouter(
   routes: $appRoutes,
-  redirect: RouteGuardUtils.createGuardRedirect(
-    ConditionalGuard(
-      guard: AuthenticationGuard(),
-      // Only apply authentication to specific routes
-      includedPatterns: [RegExp(r'^/protected.*'), RegExp(r'^/admin.*')],
-      // Exclude specific maintenance routes even if they match inclusion patterns
-      excludedPaths: ['/admin/debug'],
-    ),
-  ),
+  redirect: ConditionalGuard(
+    guard: AuthenticationGuard(),
+    // Only apply authentication to specific routes
+    includedPatterns: [RegExp(r'^/protected.*'), RegExp(r'^/admin.*')],
+    // Exclude specific maintenance routes even if they match inclusion patterns
+    excludedPaths: ['/admin/debug'],
+  ).toRedirect(),
 );
 
 /// Alternative router using exclusion (traditional approach)
 final globalRouter = GoRouter(
   routes: $appRoutes,
-  redirect: RouteGuardUtils.createGuardRedirect(
-    ConditionalGuard(
-      guard: AuthenticationGuard(),
-      // Exclude public and auth routes from authentication
-      excludedPaths: ['/login', '/unauthorized'],
-    ),
-  ),
+  redirect: ConditionalGuard(
+    guard: AuthenticationGuard(),
+    // Exclude public and auth routes from authentication
+    excludedPaths: ['/login', '/unauthorized'],
+  ).toRedirect(),
 );
 
 /// Router with no router-level guards - relies on individual route guards only

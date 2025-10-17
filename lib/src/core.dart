@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:go_router_guards/src/internal/shared_guards.dart';
 import 'package:go_router_guards/src/navigation_resolver.dart';
 import 'package:meta/meta.dart';
 
@@ -38,11 +39,23 @@ abstract class RouteGuard {
   /// {@macro guard}
   const RouteGuard();
 
+  /// Creates a guard from a navigation callback.
+  factory RouteGuard.from(OnGuardNavigation onNavigation) =>
+      CallbackGuard(onNavigation);
+
+  /// A guard that always allows navigation.
+  factory RouteGuard.allow() => const AllowGuard();
+
+  /// A guard that always redirects to the provided [path].
+  factory RouteGuard.redirectTo(String path) => RedirectGuard(path);
+
   /// Middleware-style navigation method.
   ///
   /// Override this method to implement guard logic using the resolver pattern.
+  ///
   /// Call [resolver.next()] to allow navigation, [resolver.redirect(path)] to
-  /// redirect, or [resolver.block()] to block navigation.
+  /// redirect to a different path, or [resolver.block()] to block navigation
+  /// entirely.
   @mustBeOverridden
   FutureOr<void> onNavigation(
     NavigationResolver resolver,
@@ -59,8 +72,25 @@ abstract class RouteGuard {
     BuildContext context,
     GoRouterState state,
   ) async {
-    final resolver = NavigationResolver(context);
+    final router = GoRouter.of(context);
+    final resolver = NavigationResolver(router);
     await onNavigation(resolver, context, state);
     return resolver.future;
+  }
+
+  /// Returns a redirect callback suitable for GoRouter's `redirect`.
+  ///
+  /// Example:
+  /// ```dart
+  /// final router = GoRouter(
+  ///   routes: [...],
+  ///   redirect: AuthGuard().toRedirect(),
+  /// );
+  /// ```
+  GoRouterRedirect toRedirect() {
+    return (context, state) async {
+      final result = await executeWithResolver(context, state);
+      return result.continueNavigation ? null : result.redirectPath;
+    };
   }
 }

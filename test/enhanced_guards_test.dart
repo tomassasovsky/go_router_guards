@@ -9,26 +9,31 @@ import 'package:mocktail/mocktail.dart';
 // Mock classes
 class MockBuildContext extends Mock implements BuildContext {}
 
+class MockGoRouter extends Mock implements GoRouter {}
+
 class MockGoRouterState extends Mock implements GoRouterState {}
 
 void main() {
   group('Enhanced Guards', () {
     late MockBuildContext mockContext;
+    late MockGoRouter mockRouter;
     late MockGoRouterState mockState;
 
     setUp(() {
       mockContext = MockBuildContext();
+      mockRouter = MockGoRouter();
       mockState = MockGoRouterState();
 
       // Setup default mocks
-      when(() => mockContext.mounted).thenReturn(true);
+      when(() => mockRouter.routerDelegate.navigatorKey.currentContext)
+          .thenReturn(null);
       when(() => mockState.fullPath).thenReturn('/test-path');
       when(() => mockState.uri).thenReturn(Uri.parse('/test-path'));
     });
 
     group('NavigationResolver', () {
       test('should resolve with next()', () async {
-        final resolver = NavigationResolver(mockContext)..next();
+        final resolver = NavigationResolver(mockRouter)..next();
 
         final result = await resolver.future;
         expect(result.continueNavigation, isTrue);
@@ -36,8 +41,7 @@ void main() {
       });
 
       test('should resolve with redirect()', () async {
-        final resolver = NavigationResolver(mockContext)
-          ..redirect('/new-path');
+        final resolver = NavigationResolver(mockRouter)..redirect('/new-path');
 
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
@@ -45,7 +49,7 @@ void main() {
       });
 
       test('should handle block() correctly', () async {
-        final resolver = NavigationResolver(mockContext)..block();
+        final resolver = NavigationResolver(mockRouter)..block();
 
         final result = await resolver.future;
         expect(result.continueNavigation, isFalse);
@@ -54,7 +58,7 @@ void main() {
       });
 
       test('should handle redirect()', () async {
-        final resolver = NavigationResolver(mockContext)
+        final resolver = NavigationResolver(mockRouter)
           ..redirect('/redirect-path');
 
         final result = await resolver.future;
@@ -63,7 +67,7 @@ void main() {
       });
 
       test('should prevent multiple resolutions', () async {
-        final resolver = NavigationResolver(mockContext)
+        final resolver = NavigationResolver(mockRouter)
           ..next()
           ..redirect('/should-be-ignored'); // This should be ignored
 
@@ -82,7 +86,7 @@ void main() {
           resolver.next();
         });
 
-        final guard = Guards.all([allowGuard1, allowGuard2]);
+        final guard = guardAll([allowGuard1, allowGuard2]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.continueNavigation, isTrue);
@@ -96,7 +100,7 @@ void main() {
           resolver.redirect('/blocked');
         });
 
-        final guard = Guards.all([allowGuard, blockGuard]);
+        final guard = guardAll([allowGuard, blockGuard]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.redirectPath, equals('/blocked'));
@@ -110,7 +114,7 @@ void main() {
           resolver.next();
         });
 
-        final guard = Guards.anyOf([blockGuard, allowGuard]);
+        final guard = guardAnyOf([blockGuard, allowGuard]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.continueNavigation, isTrue);
@@ -124,7 +128,7 @@ void main() {
           resolver.redirect('/block2');
         });
 
-        final guard = Guards.anyOf([
+        final guard = guardAnyOf([
           blockGuard1,
           blockGuard2,
         ], fallbackRedirect: '/fallback');
@@ -141,7 +145,7 @@ void main() {
           resolver.redirect('/blocked');
         });
 
-        final guard = Guards.oneOf([allowGuard, blockGuard]);
+        final guard = guardOneOf([allowGuard, blockGuard]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.continueNavigation, isTrue);
@@ -155,7 +159,7 @@ void main() {
           resolver.next();
         });
 
-        final guard = Guards.oneOf([allowGuard1, allowGuard2]);
+        final guard = guardOneOf([allowGuard1, allowGuard2]);
 
         final result = await guard.executeWithResolver(mockContext, mockState);
         expect(result.redirectPath,
@@ -170,7 +174,7 @@ void main() {
           resolver.redirect('/block2');
         });
 
-        final guard = Guards.oneOf([
+        final guard = guardOneOf([
           blockGuard1,
           blockGuard2,
         ], fallbackRedirect: '/fallback');

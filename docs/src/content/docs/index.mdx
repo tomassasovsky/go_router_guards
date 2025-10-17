@@ -1,205 +1,62 @@
 ---
-title: Route Guards
-description: Flexible and extensible guard system for navigation protection with framework integrations
+title: Documentation
+description: Tutorials, How‑to guides, Reference, and Explanation
 template: splash
 hero:
-  title: Route Guards
-  tagline: Middleware-style route protection for modern applications.
-  image:
-    alt: Route Guards - Security shield protecting navigation paths
-    file: ~/assets/icon.png
+  title: Go Router Guards <sup><span style="font-size:0.4em">v1.0.0+2</span></sup>
+  tagline: Middleware-style route guards for Flutter's Go Router
   actions:
     - text: Get Started
-      link: /installation/
+      link: /tutorials/get-started/
       variant: primary
       icon: rocket
     - text: View on GitHub
       link: https://github.com/tomassasovsky/go_router_guards
-      icon: github
       variant: secondary
+      icon: github
+  image:
+    alt: go_router_guards logo
+    file: ~/assets/icon.png
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { CardGrid } from '@astrojs/starlight/components';
+import Card from '~/components/landing/Card.astro';
+import ListCard from '~/components/landing/ListCard.astro';
+import SplitCard from '~/components/landing/SplitCard.astro';
+import Discord from '~/components/landing/Discord.astro';
+import '~/styles/landing.css';
 
-## What are Route Guards?
-
-Route Guards provide **middleware-style navigation protection** for your applications. Think of them as security checkpoints that can **allow**, **redirect**, or **block** navigation based on your custom logic.
-
-<CardGrid>
-  <Card title="🛡️ Middleware Pattern" icon="information">
-    Clean, composable guards that intercept navigation attempts before they reach your screens.
-  </Card>
-  
-  <Card title="🔧 Framework Agnostic" icon="setting">
-    Core guard logic works with any routing system. Framework-specific integrations provide seamless developer experience.
-  </Card>
-  
-  <Card title="⚡ Composable Logic" icon="star">
-    Combine simple guards into complex protection schemes with logical operators: AND, OR, XOR.
-  </Card>
-  
-  <Card title="🎯 Precise Control" icon="approve-check">
-    Fine-grained control over which routes are protected, with inclusion/exclusion patterns and conditional logic.
-  </Card>
-</CardGrid>
-
-## Core Concept
-
-Every guard implements a simple middleware pattern:
-
-```dart
-class AuthGuard extends RouteGuard {
-  @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
-    Object context,
-    Object state,
-  ) async {
-    if (await isAuthenticated()) {
-      resolver.next(); // ✅ Allow navigation
-    } else {
-      resolver.redirect('/login'); // 🔀 Redirect to login
-    }
-  }
-}
-```
-
-Guards receive a **resolver** that controls the navigation flow:
-- `resolver.next()` - Allow navigation to continue
-- `resolver.redirect('/path')` - Redirect to a different route  
-- `resolver.block()` - Block navigation entirely
-
-## Architecture
-
-### route_guards
-
-Framework-agnostic foundation providing:
-- Base `RouteGuard` class
-- `NavigationResolver` pattern
-- Guard composition utilities
-- **Works with any router**
-
-### Framework Packages
-
-Specialized integrations for popular frameworks:
-- **go_router_guards** - Flutter Go Router integration
-- More integrations coming soon...
-
-## Guard Composition
-
-Combine guards to create sophisticated protection:
-
-```dart
-// All guards must pass (AND logic)
-final adminGuard = Guards.all([
-  AuthGuard(),
-  RoleGuard(['admin']),
-  PermissionGuard(['manage_users']),
-]);
-
-// Any guard can pass (OR logic)  
-final accessGuard = Guards.anyOf([
-  SubscriptionGuard(),
-  StaffAccessGuard(),
-  BetaTesterGuard(),
-]);
-
-// Exactly one guard must pass (XOR logic)
-final exclusiveGuard = Guards.oneOf([
-  DevelopmentModeGuard(),
-  ProductionAccessGuard(),
-]);
-```
-
-## Real-World Use Cases
+<hr />
 
 <CardGrid>
-  <Card title="Authentication" icon="star">
-    Protect authenticated routes, handle login flows, manage session validation.
-  </Card>
-  
-  <Card title="Authorization" icon="setting">
-    Role-based access control, permission systems, organizational hierarchies.
-  </Card>
-  
-  <Card title="Business Logic" icon="information">
-    Subscription gates, feature flags, trial limitations, geographic restrictions.
-  </Card>
-  
-  <Card title="Security" icon="approve-check">
-    Rate limiting, device verification, suspicious activity detection, compliance checks.
-  </Card>
-  
-  <Card title="Multi-Tenant" icon="star">
-    Tenant isolation, cross-tenant security, workspace-specific access control.
-  </Card>
-  
-  <Card title="A/B Testing" icon="setting">
-    Experiment-based routing, feature rollouts, user segmentation.
-  </Card>
+
+<SplitCard title="Get Started" icon="rocket">
+  ```sh
+  # Add go_router_guards to your project.
+  dart pub add go_router_guards
+  ```
+
+  Our [getting started guide](/tutorials/get-started/) has step‑by‑step instructions on how to start using go_router_guards in just a few minutes.
+
+</SplitCard>
+
+<Card title="Take a guided tour" icon="star">
+  From zero to protected routes fast. Take the [guided tour](/tutorials/get-started/) to learn the essentials, see guard pipelines in action, and ship with confidence.
+</Card>
+
+<Card title="Build with Guards" icon="laptop">
+  See it in action with a complete example app—auth flows, async checks, and conditional redirects included. Explore the [repository](https://github.com/tomassasovsky/go_router_guards).
+</Card>
+
 </CardGrid>
 
-## Framework Integration Example
+<ListCard title="Learn" icon="open-book">
 
-Here's how it looks with Go Router integration:
+  - [Why go_router_guards?](/explanation/why-go-router-guards)
+  - [Core Concepts](/explanation/core-concepts)
+  - [Testing](/how-to/testing)
+  - [Naming Conventions](/reference/naming-conventions)
 
-```dart
-// Type-safe route with guards
-@TypedGoRoute<AdminRoute>(path: '/admin')
-class AdminRoute extends GoRouteData with GuardedRoute {
-  @override
-  RouteGuard get guards => Guards.all([
-    AuthGuard(),
-    RoleGuard(['admin']),
-  ]);
-  
-  @override
-  Widget build(context, state) => AdminScreen();
-}
+</ListCard>
 
-// Traditional route with guards
-GoRoute(
-  path: '/admin',
-  builder: (context, state) => AdminScreen(),
-  redirect: RouteGuardUtils.createGuardRedirect(
-    Guards.all([AuthGuard(), RoleGuard(['admin'])]),
-  ),
-)
-```
-
-## Key Benefits
-
-- **🔒 Security First**: Fail securely with proper error handling
-- **📦 Reusable**: Write once, use everywhere
-- **🧪 Testable**: Clean interfaces make testing straightforward  
-- **⚡ Performant**: Efficient execution with caching support
-- **🛠️ Developer Friendly**: Clear patterns and comprehensive documentation
-- **🌐 Production Ready**: Used in real applications with enterprise requirements
-
-## Get Started
-
-<div class="quick-links">
-  <a href="/installation/" class="quick-link">
-    <h4>📦 Installation</h4>
-    <p>Add route guards to your project</p>
-  </a>
-  
-  <a href="/quick-start/" class="quick-link">
-    <h4>⚡ Quick Start</h4>
-    <p>Create your first guard in 5 minutes</p>
-  </a>
-  
-  <a href="/packages/route-guards/" class="quick-link">
-    <h4>🏗️ Core Package</h4>
-    <p>Framework-agnostic foundation</p>
-  </a>
-  
-  <a href="/packages/go-router-guards/" class="quick-link">
-    <h4>🎯 Go Router</h4>
-    <p>Flutter Go Router integration</p>
-  </a>
-</div>
-
----
-
-**Route Guards** - Secure navigation made simple
+<Discord joinCta="Star us on GitHub" href="https://github.com/tomassasovsky/go_router_guards" />

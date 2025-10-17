@@ -5,35 +5,45 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:go_router_guards/go_router_guards.dart';
+import 'package:go_router_guards/src/core.dart';
+import 'package:go_router_guards/src/internal/shared_guards.dart';
+import 'package:meta/meta.dart';
 
-/// Mixin for Go Router type-safe routes to add guard functionality.
+/// Mixin for type-safe routes to add guard functionality.
 ///
-/// Override the `guards` getter to define route protection.
-/// The guards will be automatically executed when the route is accessed.
+/// Override the `guard` getter to define route protection. The guard is
+/// executed automatically when the route is accessed.
 ///
-/// Example with enhanced guards:
+/// Example (single guard):
 /// ```dart
-/// @TypedGoRoute<ProtectedRoute>(path: '/protected')
-/// class ProtectedRoute extends GoRouteData with GuardedRoute {
-///   const ProtectedRoute();
+/// @TypedGoRoute<ProfileRoute>(path: '/profile')
+/// class ProfileRoute extends GoRouteData with GuardedRoute {
+///   const ProfileRoute();
 ///
 ///   @override
-///   RouteGuardEnhanced get guards => GuardsEnhanced.simple(
-///     (resolver, context, state) async {
-///       final isAuth = await checkAuth();
-///       if (isAuth) {
-///         resolver.next();
-///       } else {
-///         resolver.redirect('/login');
-///       }
-///     }
-///   );
+///   RouteGuard get guard => AuthenticationGuard();
 ///
 ///   @override
-///   Widget build(BuildContext context, GoRouterState state) {
-///     return const ProtectedScreen();
-///   }
+///   Widget build(BuildContext context, GoRouterState state) =>
+///       const ProfileScreen();
+/// }
+/// ```
+///
+/// Example (multiple guards combined):
+/// ```dart
+/// @TypedGoRoute<AdminRoute>(path: '/admin')
+/// class AdminRoute extends GoRouteData with GuardedRoute {
+///   const AdminRoute();
+///
+///   @override
+///   RouteGuard get guard => [
+///     AuthenticationGuard(),
+///     RoleGuard(['admin']),
+///   ].all();
+///
+///   @override
+///   Widget build(BuildContext context, GoRouterState state) =>
+///       const AdminScreen();
 /// }
 /// ```
 ///
@@ -41,8 +51,9 @@ mixin GuardedRoute on GoRouteData {
   /// The guard to execute when accessing this route.
   ///
   /// Override this getter to define route protection.
+  ///
   /// Defaults to allowing all access.
-  RouteGuard get guard => const _AllowGuard();
+  RouteGuard get guard => const AllowGuard();
 
   /// Executes the guards for this route using the enhanced guard system.
   ///
@@ -59,69 +70,42 @@ mixin GuardedRoute on GoRouteData {
   /// Redirect method for backward compatibility.
   ///
   /// This method is called by Go Router when the route is accessed.
+  ///
   /// It executes the guards and returns a redirect path if access is denied.
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    return executeGuard(context, state);
-  }
+  @nonVirtual
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      executeGuard(context, state);
 }
 
-/// Mixin for Go Router type-safe routes to explicitly disable router-level
-/// guards.
+/// Mixin for type-safe shell routes to add guard functionality.
 ///
-/// Use this mixin when you want to opt-out of guards that are applied
-/// via the router's `redirect` parameter. This is useful for routes like
-/// login, registration, or public pages that should bypass authentication.
+/// Override the `guard` getter to define route protection for the shell.
+/// The guard is executed automatically when the shell route is accessed.
 ///
 /// Example:
-/// ```dart
-/// @TypedGoRoute<LoginRoute>(path: '/login')
-/// class LoginRoute extends GoRouteData with UnguardedRoute {
-///   const LoginRoute();
-///
-///   @override
-///   Widget build(BuildContext context, GoRouterState state) {
-///     return const LoginScreen();
-///   }
-/// }
-/// ```
-///
-/// Note: This mixin only affects router-level guards applied via the router's
-/// `redirect` parameter. It does not affect guards applied directly to
-/// individual routes.
-mixin UnguardedRoute on GoRouteData {
-  /// Always allows navigation, effectively bypassing any router-level guards.
-  ///
-  /// This method returns null, which tells Go Router to continue with
-  /// the navigation without any redirects.
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    // no-op: always allow navigation
-    return null;
-  }
-}
-
-/// Mixin for Go Router type-safe shell routes to add guard functionality.
-///
-/// Override the `guards` getter to define route protection.
-/// The guards will be automatically executed when the route is accessed.
-///
-/// Example with enhanced guards:
 /// ```dart
 /// @TypedGoRoute<AuthShell>(path: '/auth')
 /// class AuthShell extends ShellRouteData with GuardedShellRoute {
 ///   const AuthShell();
 ///
 ///   @override
-///   RouteGuardEnhanced get guards => GuardsEnhanced.all([
+///   RouteGuard get guard => guardAll([
 ///     AuthenticationGuard(),
 ///   ]);
+///
+///   @override
+///   Widget build(BuildContext context, GoRouterState state) =>
+///       const AuthShellScreen();
+/// }
+/// ```
+///
 mixin GuardedShellRoute on ShellRouteData {
   /// The guard to execute when accessing this route.
   ///
   /// Override this getter to define route protection.
   /// Defaults to allowing all access.
-  RouteGuard get guard => const _AllowGuard();
+  RouteGuard get guard => const AllowGuard();
 
   /// Executes the guards for this route using the enhanced guard system.
   ///
@@ -135,26 +119,15 @@ mixin GuardedShellRoute on ShellRouteData {
     return result.redirectPath;
   }
 
-  /// Redirect method for backward compatibility.
-  ///
   /// This method is called by Go Router when the route is accessed.
-  /// It executes the guards and returns a redirect path if access is denied.
+  ///
+  /// It executes the guard and returns a redirect path if navigation should be
+  /// blocked.
+  ///
+  /// This method is not virtual because it is called by Go Router directly, and
+  /// should not be overridden.
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    return executeGuard(context, state);
-  }
-}
-
-/// Default guard that allows all navigation
-class _AllowGuard extends RouteGuard {
-  const _AllowGuard();
-
-  @override
-  FutureOr<void> onNavigation(
-    NavigationResolver resolver,
-    BuildContext context,
-    GoRouterState state,
-  ) {
-    resolver.next();
-  }
+  @nonVirtual
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      executeGuard(context, state);
 }

@@ -1,0 +1,70 @@
+---
+title: Get Started
+description: Install, create a guard, and protect a route
+---
+
+import { Steps, Code } from '@astrojs/starlight/components';
+
+This tutorial guides you through installing the package, writing a simple guard, and applying it to both type‑safe and traditional routes.
+
+## Prerequisites
+
+- Flutter app using Go Router
+- Dart 3.5+, Flutter 3.19+
+
+<Steps>
+  <ol>
+    <li>
+      <h3>Install</h3>
+      <Code lang="bash" code={String.raw`flutter pub add go_router_guards`} />
+    </li>
+    <li>
+      <h3>Create your first guard</h3>
+      <Code lang="dart" code={String.raw`class AuthGuard extends RouteGuard {
+    const AuthGuard();
+
+    @override
+    FutureOr<void> onNavigation(
+      NavigationResolver resolver,
+      BuildContext context,
+      GoRouterState state,
+    ) async {
+      final isAuthenticated = await authService.isAuthenticated();
+      isAuthenticated ? resolver.next() : resolver.redirect('/login');
+    }
+}`} />
+    </li>
+    <li>
+      <h3>Protect a type‑safe route</h3>
+      <Code lang="dart" code={String.raw`@TypedGoRoute<ProfileRoute>(path: '/profile')
+class ProfileRoute extends GoRouteData with GuardedRoute {
+    const ProfileRoute();
+
+    @override
+    RouteGuard get guard => const AuthGuard();
+
+    @override
+    Widget build(BuildContext context, GoRouterState state) => const ProfileScreen();
+  }`} />
+      </li>
+      <li>
+        <h3>Protect a traditional route</h3>
+        <Code lang="dart" code={String.raw`final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+        redirect: const AuthGuard().toRedirect(),
+      ),
+    ],
+);`} />
+    </li>
+  </ol>
+</Steps>
+
+## Next steps
+
+- Compose multiple guards with `guardAll`, `guardAnyOf`, and `guardOneOf`.
+- Apply router‑level protection with `ConditionalGuard(...).toRedirect()`.
+
+

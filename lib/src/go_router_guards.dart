@@ -2,8 +2,15 @@
 // Use of this source code is governed by a MIT-style license that can be
 // found in the LICENSE file.
 
+export 'conditional_guards.dart' show ConditionalGuard;
 export 'core.dart' show RouteGuard;
-export 'enhanced_utilities.dart' show Guards;
-export 'navigation_resolver.dart' show GuardResult, NavigationResolver;
-export 'route.dart' show GuardedRoute, GuardedShellRoute, UnguardedRoute;
-export 'route_guard_utils.dart' show ConditionalGuard, RouteGuardUtils;
+export 'guard_pipes.dart'
+    show
+        GuardsIterableRedirectExtensions,
+        GuardsListExtensions,
+        guardAll,
+        guardAnyOf,
+        guardOneOf;
+export 'navigation_resolver.dart'
+    show GuardResult, NavigationResolver, OnGuardNavigation;
+export 'route.dart' show GuardedRoute, GuardedShellRoute;

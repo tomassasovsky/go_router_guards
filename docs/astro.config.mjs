@@ -1,9 +1,14 @@
 // @ts-check
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import tailwind from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://guards.aquiles.dev',
+	server: {
+		allowedHosts: ['guards.aquiles.dev', 'home-astro.aquiles.dev'],
+	},
 	integrations: [
 		starlight({
 			title: 'Route Guards',
@@ -22,54 +27,42 @@ export default defineConfig({
 			],
 			sidebar: [
 				{
-					label: 'Getting Started',
+					label: 'Tutorials',
 					items: [
-						{ label: 'Overview', slug: 'overview' },
-						{ label: 'Installation', slug: 'installation' },
-						{ label: 'Quick Start', slug: 'quick-start' },
+						{ label: 'Get Started', slug: 'tutorials/get-started' },
 					],
 				},
 				{
-					label: 'Core Package',
+					label: 'How‑to guides',
 					items: [
-						{ label: 'route_guards', slug: 'packages/route-guards' },
+						{ label: 'Router‑level guard', slug: 'how-to/router-level-guard' },
+                        { label: 'Compose guards', slug: 'how-to/compose-guards' },
+                        { label: 'Testing', slug: 'how-to/testing' },
 					],
 				},
 				{
-					label: 'Framework Integrations',
+					label: 'Reference',
 					items: [
-						{ label: 'go_router_guards', slug: 'packages/go-router-guards' },
+                        { label: 'API Reference', slug: 'reference/api-overview' },
+                        { label: 'Naming Conventions', slug: 'reference/naming-conventions' },
 					],
 				},
 				{
-					label: 'Guides',
+					label: 'Explanation',
 					items: [
-						{ label: 'Creating Guards', slug: 'guides/creating-guards' },
-						{ label: 'Type-Safe Routes', slug: 'guides/type-safe-routes' },
-						{ label: 'Traditional Routes', slug: 'guides/traditional-routes' },
-						{ label: 'Guard Combinations', slug: 'guides/guard-combinations' },
-						{ label: 'Conditional Guards', slug: 'guides/conditional-guards' },
-						{ label: 'Best Practices', slug: 'guides/best-practices' },
+                        { label: 'Architecture', slug: 'explanation/architecture' },
+                        { label: 'Why go_router_guards?', slug: 'explanation/why-go-router-guards' },
+                        { label: 'Core Concepts', slug: 'explanation/core-concepts' },
 					],
-				},
-				{
-					label: 'Examples',
-					items: [
-						{ label: 'Authentication', slug: 'examples/authentication' },
-						{ label: 'Role-Based Access', slug: 'examples/role-based-access' },
-						{ label: 'Permission Guards', slug: 'examples/permission-guards' },
-						{ label: 'Multi-Layer Protection', slug: 'examples/multi-layer-protection' },
-					],
-				},
-				{
-					label: 'API Reference',
-					autogenerate: { directory: 'reference' },
 				},
 			],
 			customCss: [
+				'./src/tailwind.css',
 				'./src/styles/custom.css',
+				'./src/styles/landing.css',
 				'@fontsource-variable/figtree',
 			],
 		}),
 	],
+	vite: { plugins: [tailwind()] },
 });

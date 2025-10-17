@@ -8,55 +8,54 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router_guards/go_router_guards.dart';
 
-/// Utility class for creating enhanced guard combinations with a fluent API.
-///
-/// Provides static methods to combine multiple guards with different execution
-/// strategies.
-abstract class Guards {
-  /// Creates a guard that requires all provided guards to pass
-  ///
-  /// Example:
-  /// ```dart
-  /// Guards.all([
-  ///   authenticationGuard,
-  ///   roleGuard,
-  /// ])
-  /// ```
-  static RouteGuard all(List<RouteGuard> guards) {
-    return _AllGuard(guards);
-  }
+/// Create a guard that requires all provided guards to pass.
+RouteGuard guardAll(List<RouteGuard> guards) => _AllGuard(guards);
 
-  /// Creates a guard that requires any of the provided guards to pass
-  ///
-  /// Example:
-  /// ```dart
-  /// Guards.anyOf([
-  ///   adminGuard,
-  ///   moderatorGuard,
-  /// ], fallbackRedirect: '/access-denied')
-  /// ```
-  static RouteGuard anyOf(
-    List<RouteGuard> guards, {
-    String? fallbackRedirect,
-  }) {
-    return _AnyOfGuard(guards, fallbackRedirect);
-  }
+/// Create a guard that requires any of the provided guards to pass.
+RouteGuard guardAnyOf(
+  List<RouteGuard> guards, {
+  String? fallbackRedirect,
+}) =>
+    _AnyOfGuard(guards, fallbackRedirect);
 
-  /// Creates a guard that requires exactly one of the provided guards to pass
-  ///
-  /// Example:
-  /// ```dart
-  /// Guards.oneOf([
-  ///   premiumUserGuard,
-  ///   trialUserGuard,
-  /// ], fallbackRedirect: '/subscription-required')
-  /// ```
-  static RouteGuard oneOf(
-    List<RouteGuard> guards, {
+/// Create a guard that requires exactly one of the provided guards to pass.
+RouteGuard guardOneOf(
+  List<RouteGuard> guards, {
+  String? fallbackRedirect,
+}) =>
+    _OneOfGuard(guards, fallbackRedirect);
+
+/// Lightweight extension to combine a list of guards ergonomically.
+extension GuardsListExtensions on List<RouteGuard> {
+  /// Combine guards so all must pass.
+  RouteGuard all() => guardAll(this);
+
+  /// Combine guards so any may pass.
+  RouteGuard anyOf({String? fallbackRedirect}) =>
+      guardAnyOf(this, fallbackRedirect: fallbackRedirect);
+
+  /// Combine guards so exactly one must pass.
+  RouteGuard oneOf({String? fallbackRedirect}) =>
+      guardOneOf(this, fallbackRedirect: fallbackRedirect);
+}
+
+/// Extensions for redirect builders directly from collections of guards.
+extension GuardsIterableRedirectExtensions on Iterable<RouteGuard> {
+  /// Build a redirect where all guards must pass.
+  FutureOr<String?> Function(BuildContext, GoRouterState) redirectAll() =>
+      guardAll(toList()).toRedirect();
+
+  /// Build a redirect where any guard may pass.
+  FutureOr<String?> Function(BuildContext, GoRouterState) redirectAnyOf({
     String? fallbackRedirect,
-  }) {
-    return _OneOfGuard(guards, fallbackRedirect);
-  }
+  }) =>
+      guardAnyOf(toList(), fallbackRedirect: fallbackRedirect).toRedirect();
+
+  /// Build a redirect where exactly one guard must pass.
+  FutureOr<String?> Function(BuildContext, GoRouterState) redirectOneOf({
+    String? fallbackRedirect,
+  }) =>
+      guardOneOf(toList(), fallbackRedirect: fallbackRedirect).toRedirect();
 }
 
 /// Implementation of Guards.all()
