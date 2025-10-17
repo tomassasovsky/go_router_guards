@@ -34,3 +34,4 @@ jobs:
     uses: tomassasovsky/very_good_workflows/.github/workflows/license_check.yml@main
     with:
       flutter_version: 3.35.6
+      skip_packages: "vector_math"
