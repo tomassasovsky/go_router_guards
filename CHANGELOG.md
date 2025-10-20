@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0+2] - 2025-10-20
+
+### Changed
+- Updated the README.md file to reflect the new API.
+- Updated the CHANGELOG.md file to reflect the new changes.
+- Updated the example code to reflect the new API.
+- Updated the test code to reflect the new API.
+- Updated the documentation to reflect the new API.
+
 ## [2.0.0+1] - 2025-10-19
 
 ### Added

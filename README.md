@@ -43,7 +43,7 @@ This package provides a middleware-style approach to route protection, allowing 
 
 ```yaml
 dependencies:
-  go_router_guards: ^2.0.0+1
+  go_router_guards: ^2.0.0+2
 ```
 
 ### Creating a Guard
