@@ -16,39 +16,13 @@ jobs:
       - name: 📚 Git Checkout
         uses: actions/checkout@v4
 
-      - name: 🎯 Setup Dart
-        if: inputs.flutter_version == ''
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{inputs.dart_sdk}}
-
       - name: 🎯 Setup Flutter
-        if: inputs.flutter_version != ''
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{inputs.flutter_version}}
+          flutter-version: stable
 
       - name: 📦 Install Dependencies
-        working-directory: ${{ inputs.working_directory }}
-        shell: ${{ inputs.shell }}
-        run: |
-          if [ -f "pubspec.yaml" ] && grep -q "flutter:" pubspec.yaml; then
-            flutter pub get
-          else
-            dart pub get
-          fi
-
-      - name: 🧪 Test
-        if: inputs.run_tests == 'true'
-        working-directory: ${{ inputs.working_directory }}
-        shell: ${{ inputs.shell }}
-        run: |
-          dart pub global activate coverage
-          if [ -f "pubspec.yaml" ] && grep -q "flutter:" pubspec.yaml; then
-            flutter test -j ${{inputs.concurrency}} --coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=${{inputs.report_on}} --check-ignore
-          else
-            dart test -j ${{inputs.concurrency}} --coverage=coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=${{inputs.report_on}} --check-ignore
-          fi
+        run: flutter pub get
 
       - name: 🚀 Publish Package
         run: dart pub publish --force
