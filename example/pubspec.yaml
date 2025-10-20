@@ -1,29 +1,26 @@
-name: go_router_guards_example
-description: Example app demonstrating go_router_guards usage
-publish_to: none
-
-version: 1.0.0+1
+name: simple_example
+description: A simple example showcasing go_router_guards main use cases
+version: 1.0.0
+publish_to: "none"
 
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  go_router: ">=16.2.5 <17.0.0"
+  go_router: ^16.2.5
   go_router_guards:
     path: ../
-  flutter_bloc: ^8.1.4
-  bloc: ^8.1.3
-  flutter_web_plugins:
-    sdk: flutter
+  flutter_bloc: ^9.1.1
+  bloc: ^9.1.0
+
+flutter:
+  uses-material-design: true
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  go_router_builder: ^3.0.1
-  build_runner: ^2.4.15
-
-flutter:
-  uses-material-design: true
+  flutter_lints: ^6.0.0
+  build_runner: ^2.6.0
+  go_router_builder: ^4.1.0

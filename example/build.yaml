@@ -1,0 +1,5 @@
+targets:
+  $default:
+    builders:
+      go_router_builder:
+        enabled: true
