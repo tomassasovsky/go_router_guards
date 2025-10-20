@@ -1,0 +1,103 @@
+---
+import { Card as StarlightCard } from "@astrojs/starlight/components";
+export type Props = Parameters<typeof StarlightCard>[0];
+---
+
+<div class="landing-card">
+  <StarlightCard {...Astro.props}><slot /></StarlightCard>
+</div>
+
+<style>
+  .landing-card {
+    --card-bg: rgba(23, 25, 30, 0.8);
+    display: contents;
+    color: var(--sl-color-white);
+  }
+
+  :global(:root[data-theme="light"]) .landing-card {
+    --card-bg: rgba(255, 255, 255, 0.4);
+  }
+
+  .landing-card :global(.card) {
+    overflow: hidden;
+    background: var(--card-bg);
+    position: relative;
+  }
+
+  .landing-card :global(.card > *) {
+    z-index: 1;
+  }
+
+  .landing-card :global(.card) {
+    background: var(--card-bg);
+    position: relative;
+  }
+
+  .landing-card :global(.card) {
+    --sl-card-bg: var(--sl-color-blue-low);
+    --sl-card-border: var(--sl-color-blue-high);
+    --landing-card-accent: hsl(185, 90%, 46%);
+  }
+
+  .landing-card:nth-child(2n) :global(.card) {
+    --sl-card-bg: var(--sl-color-green-low);
+    --sl-card-border: var(--sl-color-green-high);
+    --landing-card-accent: var(--sl-color-green);
+  }
+
+  /* Flatten card appearance: no elevation, border, or glow (keep solid bg) */
+  .landing-card :global(.card) {
+    --sl-card-bg: var(--card-bg);
+    --sl-card-border: transparent;
+    --sl-card-bg-hover: var(--card-bg);
+    --sl-card-border-hover: transparent;
+    --sl-card-shadow-hover: none;
+    background: var(--card-bg);
+    box-shadow: none;
+    border: none !important;
+    border-color: transparent !important;
+    transition: none;
+  }
+  .landing-card :global(.card::before) {
+    display: none;
+  }
+
+  /* Icon theming to match Starlight defaults (like the Get Started card) */
+  .landing-card :global(.card .icon) {
+    border: 1px solid var(--sl-card-border) !important;
+    background-color: var(--sl-card-bg) !important;
+    padding: 0.2em;
+    border-radius: 0.25rem;
+  }
+
+  /* Remove hover/active/focus visuals without changing background */
+  .landing-card :global(.card:hover),
+  .landing-card :global(.card:focus-within:hover),
+  .landing-card :global(.card:focus-within),
+  .landing-card :global(.card:focus),
+  .landing-card :global(.card:focus-visible),
+  .landing-card :global(.card:active) {
+    box-shadow: none !important;
+    border: none !important;
+    outline: none;
+    transform: none;
+    filter: none;
+  }
+
+  /* Disable transitions to prevent subtle hover animations */
+  .landing-card :global(.card *),
+  .landing-card :global(.card) {
+    transition: none !important;
+  }
+
+  @media screen and (min-width: 50rem) {
+    /* Ensure overrides persist on wide screens */
+    .landing-card :global(.card) {
+      --sl-card-bg: var(--card-bg);
+      --sl-card-border: transparent;
+      background: var(--card-bg);
+      box-shadow: none;
+      border: none;
+    }
+  }
+</style>

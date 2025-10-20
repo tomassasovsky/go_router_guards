@@ -1,0 +1,62 @@
+---
+title: Documentation
+description: Tutorials, How‑to guides, Reference, and Explanation
+template: splash
+hero:
+  title: Go Router Guards <sup><span style="font-size:0.4em">v2.0.0+1</span></sup>
+  tagline: Middleware-style route guards for Flutter's Go Router
+  actions:
+    - text: Get Started
+      link: /tutorials/get-started/
+      variant: primary
+      icon: rocket
+    - text: View on GitHub
+      link: https://github.com/tomassasovsky/go_router_guards
+      variant: secondary
+      icon: github
+  image:
+    alt: go_router_guards logo
+    file: ~/assets/icon.png
+---
+
+import { CardGrid } from '@astrojs/starlight/components';
+import Card from '~/components/landing/Card.astro';
+import ListCard from '~/components/landing/ListCard.astro';
+import SplitCard from '~/components/landing/SplitCard.astro';
+import Discord from '~/components/landing/Discord.astro';
+import '~/styles/landing.css';
+
+<hr />
+
+<CardGrid>
+
+<SplitCard title="Get Started" icon="rocket">
+  ```sh
+  # Add go_router_guards to your project.
+  dart pub add go_router_guards
+  ```
+
+  Our [getting started guide](/tutorials/get-started/) has step‑by‑step instructions on how to start using go_router_guards in just a few minutes.
+
+</SplitCard>
+
+<Card title="Take a guided tour" icon="star">
+  From zero to protected routes fast. Take the [guided tour](/tutorials/get-started/) to learn the essentials, see guard pipelines in action, and ship with confidence.
+</Card>
+
+<Card title="Build with Guards" icon="laptop">
+  See it in action with a complete example app—auth flows, async checks, and conditional redirects included. Explore the [repository](https://github.com/tomassasovsky/go_router_guards).
+</Card>
+
+</CardGrid>
+
+<ListCard title="Learn" icon="open-book">
+
+  - [Why go_router_guards?](/explanation/why-go-router-guards)
+  - [Core Concepts](/explanation/core-concepts)
+  - [Testing](/how-to/testing)
+  - [Naming Conventions](/reference/naming-conventions)
+
+</ListCard>
+
+<Discord joinCta="Star us on GitHub" href="https://github.com/tomassasovsky/go_router_guards" />

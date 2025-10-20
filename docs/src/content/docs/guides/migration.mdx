@@ -1,0 +1,441 @@
+---
+title: Migration Guide
+description: Step-by-step guide for migrating from v1.x to v2.x
+---
+
+This guide will help you migrate from go_router_guards v1.x to v2.x, which introduces a new middleware-style API with the resolver pattern.
+
+## What Changed?
+
+Version 2.x introduces several breaking changes:
+
+1. **RouteGuard Interface**: Changed from returning `String?` to using `NavigationResolver`
+2. **Guard Composition**: New functions replace the old expression system
+3. **GuardedRoute Mixin**: Changed from `guards` (plural) to `guard` (singular)
+4. **Type Safety**: Sealed `GuardResult` class for exhaustive pattern matching
+
+## Step-by-Step Migration
+
+### 1. Update Your Package Version
+
+```yaml
+dependencies:
+  go_router_guards: ^2.0.0+1
+```
+
+### 2. Migrate Guard Implementation
+
+The core change is moving from a function that returns `String?` to one that uses `NavigationResolver`.
+
+**Before (v1.x):**
+```dart
+class AuthGuard implements RouteGuard {
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    final isAuthenticated = await checkAuth();
+    if (!isAuthenticated) {
+      return '/login';  // Redirect
+    }
+    return null;  // Allow
+  }
+}
+```
+
+**After (v2.x):**
+```dart
+class AuthGuard extends RouteGuard {
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final isAuthenticated = await checkAuth();
+    if (isAuthenticated) {
+      resolver.next();  // Allow navigation
+    } else {
+      resolver.redirect('/login');  // Redirect
+    }
+  }
+}
+```
+
+**Key Changes:**
+- Change `implements` to `extends`
+- Change method signature from `redirect()` to `onNavigation()`
+- Add `NavigationResolver resolver` as the first parameter
+- Replace `return null` with `resolver.next()`
+- Replace `return '/path'` with `resolver.redirect('/path')`
+
+### 3. Migrate Guard Composition
+
+**Before (v1.x):**
+```dart
+// Using Guards utility class
+Guards.all([
+  Guards.guard(AuthGuard()),
+  Guards.guard(RoleGuard(['admin'])),
+])
+```
+
+**After (v2.x):**
+```dart
+// Using top-level functions
+guardAll([
+  AuthGuard(),
+  RoleGuard(['admin']),
+])
+
+// Or using list extensions
+[
+  AuthGuard(),
+  RoleGuard(['admin']),
+].all()
+```
+
+### 4. Migrate GuardedRoute Mixin
+
+**Before (v1.x):**
+```dart
+@TypedGoRoute<AdminRoute>(path: '/admin')
+class AdminRoute extends GoRouteData with GuardedRoute {
+  @override
+  GuardExpression get guards => Guards.all([...]);  // Plural
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AdminScreen();
+  }
+}
+```
+
+**After (v2.x):**
+```dart
+@TypedGoRoute<AdminRoute>(path: '/admin')
+class AdminRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guard => guardAll([...]);  // Singular
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AdminScreen();
+  }
+}
+```
+
+### 5. Migrate Redirect Builders
+
+**Before (v1.x):**
+```dart
+GoRoute(
+  path: '/admin',
+  redirect: Guards.all([
+    Guards.guard(AuthGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  ]).execute,
+  builder: (context, state) => AdminScreen(),
+)
+```
+
+**After (v2.x):**
+```dart
+GoRoute(
+  path: '/admin',
+  redirect: [
+    AuthGuard(),
+    RoleGuard(['admin']),
+  ].redirectAll(),
+  builder: (context, state) => AdminScreen(),
+)
+```
+
+## Migration Patterns
+
+### Pattern 1: Simple Authentication Guard
+
+**Before:**
+```dart
+class AuthGuard implements RouteGuard {
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
+    final isAuth = context.read<AuthCubit>().state.isAuthenticated;
+    return isAuth ? null : '/login';
+  }
+}
+```
+
+**After:**
+```dart
+class AuthGuard extends RouteGuard {
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) {
+    final isAuth = context.read<AuthCubit>().state.isAuthenticated;
+    if (isAuth) {
+      resolver.next();
+    } else {
+      resolver.redirect('/login');
+    }
+  }
+}
+```
+
+### Pattern 2: Role-Based Guard
+
+**Before:**
+```dart
+class RoleGuard implements RouteGuard {
+  const RoleGuard(this.requiredRoles);
+  final List<String> requiredRoles;
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
+    final userRoles = context.read<UserCubit>().state.roles;
+    final hasRole = requiredRoles.any(userRoles.contains);
+    return hasRole ? null : '/unauthorized';
+  }
+}
+```
+
+**After:**
+```dart
+class RoleGuard extends RouteGuard {
+  const RoleGuard(this.requiredRoles);
+  final List<String> requiredRoles;
+
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) {
+    final userRoles = context.read<UserCubit>().state.roles;
+    final hasRole = requiredRoles.any(userRoles.contains);
+    if (hasRole) {
+      resolver.next();
+    } else {
+      resolver.redirect('/unauthorized');
+    }
+  }
+}
+```
+
+### Pattern 3: Complex Guard Composition
+
+**Before:**
+```dart
+// (auth & admin) || superAdmin
+final complexGuard = Guards.anyOf([
+  Guards.all([
+    Guards.guard(AuthGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  ]),
+  Guards.guard(SuperAdminGuard()),
+]);
+```
+
+**After:**
+```dart
+// (auth & admin) || superAdmin
+final complexGuard = guardAnyOf([
+  guardAll([
+    AuthGuard(),
+    RoleGuard(['admin']),
+  ]),
+  SuperAdminGuard(),
+]);
+
+// Or using extensions
+final complexGuard = [
+  [AuthGuard(), RoleGuard(['admin'])].all(),
+  SuperAdminGuard(),
+].anyOf();
+```
+
+## New Features in v2.x
+
+Take advantage of new features after migrating:
+
+### Conditional Guards
+
+Apply guards to specific routes with path-based rules:
+
+```dart
+// Include only specific routes
+final featureGuard = ConditionalGuard.including(
+  guard: AuthGuard(),
+  paths: ['/premium', RegExp(r'^/pro/.*')],
+);
+
+// Exclude routes from a global guard
+final authGuard = ConditionalGuard.excluding(
+  guard: AuthGuard(),
+  paths: ['/login', '/register', '/public'],
+);
+```
+
+### Factory Constructors
+
+Quick guard creation:
+
+```dart
+// Always allow
+RouteGuard.allow()
+
+// Always redirect
+RouteGuard.redirectTo('/login')
+
+// From callback
+RouteGuard.from((resolver, context, state) {
+  if (condition) {
+    resolver.next();
+  } else {
+    resolver.redirect('/error');
+  }
+})
+```
+
+### Block Method
+
+Stay on current route instead of redirecting:
+
+```dart
+class ValidationGuard extends RouteGuard {
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) {
+    if (isValid) {
+      resolver.next();
+    } else {
+      // Stay on current route, don't navigate
+      resolver.block();
+    }
+  }
+}
+```
+
+## Common Migration Issues
+
+### Issue 1: Missing `next()` Call
+
+**Problem:**
+```dart
+// This guard will never resolve!
+class BrokenGuard extends RouteGuard {
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) {
+    // Forgot to call resolver.next() or resolver.redirect()
+  }
+}
+```
+
+**Solution:**
+Always call either `resolver.next()`, `resolver.redirect()`, or `resolver.block()`.
+
+### Issue 2: Calling Multiple Resolver Methods
+
+**Problem:**
+```dart
+class BrokenGuard extends RouteGuard {
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) {
+    resolver.next();
+    resolver.redirect('/somewhere');  // This won't execute
+  }
+}
+```
+
+**Solution:**
+Only call one resolver method. The first call wins; subsequent calls are ignored.
+
+### Issue 3: Empty Guard Lists
+
+**Problem:**
+```dart
+// This throws ArgumentError in v2.x
+final guard = guardAnyOf([]);
+```
+
+**Solution:**
+Ensure guard lists are not empty. The library validates this at runtime.
+
+## Testing Migration
+
+Update your tests to work with the new API:
+
+**Before:**
+```dart
+test('guard redirects unauthenticated users', () async {
+  final guard = AuthGuard();
+  final result = await guard.redirect(mockContext, mockState);
+  expect(result, '/login');
+});
+```
+
+**After:**
+```dart
+testWidgets('guard redirects unauthenticated users', (tester) async {
+  final guard = AuthGuard();
+  
+  // Create a test router with the guard
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/protected',
+        redirect: guard.toRedirect(),
+        builder: (context, state) => Container(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => Container(),
+      ),
+    ],
+  );
+  
+  await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+  
+  // Test navigation behavior
+  router.go('/protected');
+  await tester.pumpAndSettle();
+  
+  expect(router.routerDelegate.currentConfiguration.uri.path, '/login');
+});
+```
+
+## Need Help?
+
+If you run into issues during migration:
+
+1. Check the [API Reference](/reference/api-overview/) for detailed documentation
+2. Look at the [examples](https://github.com/tomassasovsky/go_router_guards/tree/master/example) for working code
+3. [Open an issue](https://github.com/tomassasovsky/go_router_guards/issues) if you find a bug
+
+## Checklist
+
+Use this checklist to ensure you've migrated everything:
+
+- [ ] Updated package version to `^2.0.0+1`
+- [ ] Migrated all guard classes to use `NavigationResolver`
+- [ ] Updated guard composition from `Guards.all()` to `guardAll()` or list extensions
+- [ ] Changed `GuardedRoute.guards` to `GuardedRoute.guard` (singular)
+- [ ] Updated all redirect builders to use `.toRedirect()` or `.redirectAll()`
+- [ ] Ensured all guards call a resolver method (`next()`, `redirect()`, or `block()`)
+- [ ] Updated tests to work with new API
+- [ ] Removed any references to `Guards.guard()` wrapper
+- [ ] Tested all protected routes in your app
+- [ ] Updated documentation/comments in your codebase
+

@@ -1,0 +1,28 @@
+---
+title: Why go_router_guards?
+description: The purpose, problems solved, and when to use it
+---
+
+go_router_guards provides a middleware‑style guard system built for Go Router.
+
+## Why this package?
+
+- Unified guard model works for both type‑safe and traditional routes.
+- Composable pipelines (`guardAll`, `guardAnyOf`, `guardOneOf`) keep logic modular.
+- `ConditionalGuard` targets paths without duplicating logic.
+- Clear separation of concerns: guards decide, router executes.
+
+## When to use
+
+- Authentication/authorization checks before navigation.
+- Feature flags, maintenance mode, or runtime constraints.
+- Async rules (API checks, storage reads) that must resolve before continuing.
+
+## When not to use
+
+- Pure view‑only state changes (prefer in‑page logic).
+- If your app has no pre‑navigation constraints.
+
+See [Core Concepts](/explanation/core-concepts) and the [Get Started](/tutorials/get-started/) guide to try it out.
+
+
