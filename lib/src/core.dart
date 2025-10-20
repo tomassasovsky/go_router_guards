@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 /// ```dart
 /// class AuthGuard extends RouteGuard {
 ///   @override
-///   void onNavigation(
+///   FutureOr<void> onNavigation(
 ///     NavigationResolver resolver,
 ///     BuildContext context,
 ///     GoRouterState state,
@@ -53,9 +53,9 @@ abstract class RouteGuard {
   ///
   /// Override this method to implement guard logic using the resolver pattern.
   ///
-  /// Call [resolver.next()] to allow navigation, [resolver.redirect(path)] to
-  /// redirect to a different path, or [resolver.block()] to block navigation
-  /// entirely.
+  /// Call [NavigationResolver.next] to allow navigation,
+  /// [NavigationResolver.redirect] to redirect to a different path, or
+  /// [NavigationResolver.block] to block navigation entirely.
   @mustBeOverridden
   FutureOr<void> onNavigation(
     NavigationResolver resolver,

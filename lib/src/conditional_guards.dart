@@ -44,7 +44,12 @@ class ConditionalGuard extends RouteGuard {
     this.excludedPatterns = const [],
   });
 
-  /// {@macro conditional_guard_including}
+  /// Creates a [ConditionalGuard] that applies the guard only to specified
+  /// paths.
+  ///
+  /// The guard will only execute for paths matching the provided [paths]
+  /// patterns. Paths can be exact strings, glob patterns (with `*` or `?`),
+  /// or [RegExp].
   factory ConditionalGuard.including({
     required RouteGuard guard,
     List<Pattern> paths = const [],
@@ -57,7 +62,12 @@ class ConditionalGuard extends RouteGuard {
     );
   }
 
-  /// {@macro conditional_guard_excluding}
+  /// Creates a [ConditionalGuard] that applies the guard to all paths except
+  /// those specified.
+  ///
+  /// The guard will execute for all paths except those matching the provided
+  /// [paths] patterns. Paths can be exact strings, glob patterns (with `*` or
+  /// `?`), or [RegExp].
   factory ConditionalGuard.excluding({
     required RouteGuard guard,
     List<Pattern> paths = const [],
@@ -70,7 +80,7 @@ class ConditionalGuard extends RouteGuard {
     );
   }
 
-  /// {@macro conditional_guard_guard}
+  /// The guard to execute when conditions are met.
   final RouteGuard guard;
 
   /// List of exact paths where the guard should apply.
