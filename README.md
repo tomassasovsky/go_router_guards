@@ -1,6 +1,6 @@
 # go_router_guards
 
-A flexible and extensible guard system for Go Router that enables type-safe route protection with complex boolean logic support.
+A flexible and powerful guard system for Go Router with middleware-style navigation control, enabling elegant route protection with expressive guard composition.
 
 [![ci][ci_badge]][ci_link]
 [![coverage][coverage_badge]][ci_link]
@@ -25,148 +25,98 @@ Install:
 
 ```yaml
 dependencies:
-  go_router_guards: ^1.0.0
+  go_router_guards: ^2.0.0+1
 ```
 
-Type-safe route with a guard:
+Create a guard:
 
 ```dart
-@TypedGoRoute<ProtectedRoute>(path: '/protected')
-class ProtectedRoute extends GoRouteData with GuardedRoute {
-  const ProtectedRoute();
-
+class AuthGuard extends RouteGuard {
   @override
-  RouteGuard get guard => guardAll([
-    const AuthGuard(),
-    const RoleGuard(['admin']),
-  ]);
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const ProtectedScreen();
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final isAuthenticated = await checkAuth();
+    if (isAuthenticated) {
+      resolver.next();
+    } else {
+      resolver.redirect('/login');
+    }
+  }
 }
 ```
 
-Traditional GoRoute with a guard:
+Use with type-safe routes:
+
+```dart
+@TypedGoRoute<AdminRoute>(path: '/admin')
+class AdminRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guard => [
+    AuthGuard(),
+    RoleGuard(['admin']),
+  ].all();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AdminScreen();
+  }
+}
+```
+
+Or with traditional GoRouter:
 
 ```dart
 GoRoute(
-  path: '/protected',
-  builder: (context, state) => const ProtectedScreen(),
-  redirect: guardAll([
-    const AuthGuard(),
-    const RoleGuard(['admin']),
-  ]).toRedirect(),
+  path: '/admin',
+  redirect: [AuthGuard(), RoleGuard(['admin'])].redirectAll(),
+  builder: (context, state) => const AdminScreen(),
 )
 ```
 
-Compose guards:
+## Documentation
+
+📚 **Full documentation available at [https://guards.aquiles.dev](https://guards.aquiles.dev)**
+
+- [Getting Started Guide](https://guards.aquiles.dev/tutorials/get-started/)
+- [Core Concepts](https://guards.aquiles.dev/explanation/core-concepts/)
+- [API Reference](https://guards.aquiles.dev/reference/api-overview/)
+- [Migration Guide](https://guards.aquiles.dev/guides/migration/)
+- [How-To Guides](https://guards.aquiles.dev/how-to/compose-guards/)
+
+## Migrating from v1.x
+
+See the [Migration Guide](https://guards.aquiles.dev/guides/migration/) for detailed instructions on upgrading from v1.x to v2.x.
+
+Quick summary of breaking changes:
 
 ```dart
-final premiumGuard = guardAnyOf([
-  const SubscriptionGuard(),
-  const RoleGuard(['staff']),
-]);
-```
-
-## Best Practices
-
-### 1. Use Type-Safe Navigation
-
-Always use type-safe routes for navigation:
-
-```dart
-// ✅ Good - Type-safe
-context.go(ProtectedRoute().location);
-ProtectedRoute().go(context);
-
-// ❌ Bad - Hardcoded paths
-context.go('/protected');
-```
-
-### 2. Order Guards by Performance
-
-Order guards from fastest to slowest in ALL expressions:
-
-```dart
-Guards.all([
-  AppInitializationGuard(), // Fast check
-  AuthenticationGuard(),    // Medium check
-  AsyncGuard(),             // Slow async check
-])
-```
-
-### 3. Create Reusable Guard Expressions
-
-Extract common guard logic:
-
-```dart
-class PremiumFeatureGuard implements RouteGuard {
+// Before (v1.x)
+class MyGuard implements RouteGuard {
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    final userState = context.read<UserCubit>().state;
-    if (!userState.hasPremiumAccess) {
-      return UpgradeRoute().location;
-    }
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
+    if (condition) return '/redirect';
     return null;
   }
 }
 
-// Reusable expression
-final premiumGuard = PremiumFeatureGuard();
-final adminGuard = RoleGuard(['admin']);
-
-// Use in multiple routes
-final adminPremiumGuard = Guards.all([adminGuard, premiumGuard]);
-```
-
-### 4. Handle Guard Failures Gracefully
-
-```dart
-class RobustGuard implements RouteGuard {
+// After (v2.x)
+class MyGuard extends RouteGuard {
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
-    try {
-      final userState = context.read<UserCubit>().state;
-      if (!userState.isAuthenticated) {
-        return LoginRoute().location;
-      }
-      return null;
-    } catch (e) {
-      return ErrorRoute().location;
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) {
+    if (condition) {
+      resolver.redirect('/redirect');
+    } else {
+      resolver.next();
     }
   }
 }
-```
-
-## Testing
-
-### Unit Testing Guard Expressions
-```dart
-test('AND expression with both guards passing', () async {
-  final expression = Guards.all([
-    AuthenticationGuard(),
-    RoleGuard(['admin']),
-  ]);
-  
-  when(mockAuthCubit.state).thenReturn(AuthenticatedState());
-  when(mockUserCubit.state).thenReturn(UserState(roles: ['admin']));
-  
-  final result = await expression.execute(mockContext, mockState);
-  expect(result, isNull);
-});
-```
-
-### Integration Testing
-```dart
-testWidgets('complex guard expression redirects correctly', (tester) async {
-  await tester.pumpWidget(MyApp());
-  
-  await tester.tap(find.text('Premium Admin Route'));
-  await tester.pumpAndSettle();
-  
-  // Should redirect to login if not authenticated
-  expect(find.text('Login'), findsOneWidget);
-});
 ```
 
 ## Contributing

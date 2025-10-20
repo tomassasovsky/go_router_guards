@@ -1,6 +1,207 @@
 # Changelog
 
-## [2.0.0+1] - 2025-10-17
+## [2.0.0+1] - 2025-10-19
+
+### Added
+
+- **Middleware-Style Navigation Control**: Complete rewrite with resolver pattern
+  - **NavigationResolver**: New class providing `next()`, `redirect(path)`, and `block()` methods
+  - **GuardResult**: Sealed class with `AllowResult` and `RedirectResult` for type-safe guard outcomes
+  - Clearer mental model aligned with Express.js-style middleware
+
+- **Guard Composition Functions**: New top-level functions for combining guards
+  - `guardAll(guards)` - Requires all guards to pass (AND logic)
+  - `guardAnyOf(guards, fallbackRedirect)` - Requires at least one guard to pass (OR logic)
+  - `guardOneOf(guards, fallbackRedirect)` - Requires exactly one guard to pass (XOR logic)
+
+- **Ergonomic List Extensions**: Fluent API for guard composition
+  - `[guard1, guard2].all()` - Combine guards with AND logic
+  - `[guard1, guard2].anyOf(fallbackRedirect: '/login')` - Combine with OR logic
+  - `[guard1, guard2].oneOf(fallbackRedirect: '/error')` - Combine with XOR logic
+
+- **Direct Redirect Extensions**: Convert guard collections to GoRouter redirects
+  - `guards.redirectAll()` - Build redirect function from multiple guards
+  - `guards.redirectAnyOf(fallbackRedirect: '/login')` - Build OR redirect
+  - `guards.redirectOneOf(fallbackRedirect: '/error')` - Build XOR redirect
+
+- **Conditional Guards**: Simple condition-based guards without boilerplate
+  - `guardWhen(condition, redirect)` - Guard when condition is true
+  - `guardUnless(condition, redirect)` - Guard when condition is false
+  - Async condition support with futures
+
+- **Factory Constructors**: Convenient guard creation methods
+  - `RouteGuard.allow()` - Always allows navigation
+  - `RouteGuard.redirectTo(path)` - Always redirects to path
+  - `RouteGuard.from(callback)` - Create guard from callback function
+
+- **Enhanced Error Handling**
+  - Empty guard list validation for `anyOf` and `oneOf` (throws `ArgumentError`)
+  - `RouterNotMountedException` for better error messages
+  - Defensive null-safety throughout
+
+- **Route Guard Utils**: Helper functions for common patterns
+  - Utility functions for creating reusable guard compositions
+
+### Changed
+
+- **API Redesign**: Expression-based system replaced with middleware-style resolver pattern
+  - Guards now implement `onNavigation(resolver, context, state)` instead of `redirect(context, state)`
+  - More intuitive control flow with explicit `resolver.next()` calls
+  - Better separation of concerns between guard logic and navigation control
+
+- **Simplified Mental Model**: Removed complex expression tree in favor of straightforward function composition
+  - No more `Guards.guard()` wrapper - use guards directly
+  - Clearer semantics: "all must pass" vs "at least one must pass"
+  - Reduced API surface area for easier learning
+
+- **Improved Type Safety**: Sealed `GuardResult` class ensures exhaustive pattern matching
+  - Compile-time guarantees that all result types are handled
+  - No more nullable string returns
+
+- **Better Short-Circuit Logic**: Optimized execution with early returns
+  - `guardAll` stops at first redirect
+  - `guardAnyOf` stops at first allow
+  - `guardOneOf` optimally handles exactly-one semantics
+
+### Removed
+
+- **Expression-Based System**: Removed `GuardExpression` class hierarchy
+  - `Guards.guard()` - No longer needed, use guards directly
+  - `Guards.all()`, `Guards.anyOf()`, `Guards.oneOf()` - Replaced with top-level functions
+  - `ExecutionOrder` enum - Simplified to always use optimal execution order
+
+### Breaking Changes
+
+- **RouteGuard Interface Changed**
+  ```dart
+  // Before (v2.0)
+  class MyGuard implements RouteGuard {
+    @override
+    FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
+      if (condition) return '/redirect';
+      return null;
+    }
+  }
+  
+  // After (v2.1)
+  class MyGuard extends RouteGuard {
+    @override
+    FutureOr<void> onNavigation(
+      NavigationResolver resolver,
+      BuildContext context,
+      GoRouterState state,
+    ) {
+      if (condition) {
+        resolver.redirect('/redirect');
+      } else {
+        resolver.next();
+      }
+    }
+  }
+  ```
+
+- **Guard Composition Syntax**
+  ```dart
+  // Before (v2.0)
+  Guards.all([
+    Guards.guard(AuthGuard()),
+    Guards.guard(RoleGuard(['admin'])),
+  ])
+  
+  // After (v2.1)
+  guardAll([
+    AuthGuard(),
+    RoleGuard(['admin']),
+  ])
+  // or
+  [AuthGuard(), RoleGuard(['admin'])].all()
+  ```
+
+- **GuardedRoute Mixin**
+  ```dart
+  // Before (v2.0)
+  @override
+  GuardExpression get guards => Guards.all([...]);
+  
+  // After (v2.1)
+  @override
+  RouteGuard get guard => guardAll([...]);
+  ```
+
+### Migration Guide
+
+1. **Update Guard Implementation**
+   - Change from `redirect()` returning `String?` to `onNavigation()` using `NavigationResolver`
+   - Replace `return null` with `resolver.next()`
+   - Replace `return '/path'` with `resolver.redirect('/path')`
+
+2. **Update Guard Composition**
+   - Replace `Guards.all([Guards.guard(g1), ...])` with `guardAll([g1, ...])` or `[g1, ...].all()`
+   - Replace `Guards.anyOf([Guards.guard(g1), ...])` with `guardAnyOf([g1, ...])` or `[g1, ...].anyOf()`
+   - Replace `Guards.oneOf([Guards.guard(g1), ...])` with `guardOneOf([g1, ...])` or `[g1, ...].oneOf()`
+
+3. **Update Route Mixins**
+   - Change `GuardExpression get guards` to `RouteGuard get guard` (singular)
+   - Update guard composition to use new functions
+
+4. **Update Redirect Builders**
+   - Use `.toRedirect()` on any `RouteGuard` instance
+   - Or use `.redirectAll()`, `.redirectAnyOf()`, `.redirectOneOf()` on guard collections
+
+### Examples
+
+```dart
+// Middleware-style guard
+class AuthGuard extends RouteGuard {
+  @override
+  void onNavigation(
+    NavigationResolver resolver,
+    BuildContext context,
+    GoRouterState state,
+  ) async {
+    final isAuth = await checkAuth();
+    if (isAuth) {
+      resolver.next();
+    } else {
+      resolver.redirect('/login');
+    }
+  }
+}
+
+// Ergonomic composition with extensions
+final adminGuard = [
+  AuthGuard(),
+  RoleGuard(['admin']),
+].all();
+
+// Direct redirect builder
+GoRoute(
+  path: '/admin',
+  redirect: [AuthGuard(), RoleGuard(['admin'])].redirectAll(),
+  builder: (context, state) => AdminScreen(),
+)
+
+// Conditional guards
+final featureGuard = guardWhen(
+  () => featureFlags.isEnabled('premium'),
+  '/upgrade',
+);
+
+// Type-safe routes with guards
+@TypedGoRoute<AdminRoute>(path: '/admin')
+class AdminRoute extends GoRouteData with GuardedRoute {
+  @override
+  RouteGuard get guard => [
+    AuthGuard(),
+    RoleGuard(['admin']),
+  ].all();
+  
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AdminScreen();
+  }
+}
+```
 
 ## [1.0.0+2] - 2025-07-28
 
