@@ -35,3 +35,8 @@ jobs:
     with:
       flutter_version: 3.35.6
       skip_packages: "vector_math"
+
+  codecov:
+    uses: codecov/codecov-action@v5
+    with:
+      token: ${{ secrets.CODECOV_TOKEN }}
