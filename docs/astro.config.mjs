@@ -36,23 +36,29 @@ export default defineConfig({
 					label: 'How‑to guides',
 					items: [
 						{ label: 'Router‑level guard', slug: 'how-to/router-level-guard' },
-                        { label: 'Compose guards', slug: 'how-to/compose-guards' },
-                        { label: 'Testing', slug: 'how-to/testing' },
+						{ label: 'Compose guards', slug: 'how-to/compose-guards' },
+						{ label: 'Testing', slug: 'how-to/testing' },
+					],
+				},
+				{
+					label: 'Guides',
+					items: [
+						{ label: 'Migration Guide', slug: 'guides/migration' },
 					],
 				},
 				{
 					label: 'Reference',
 					items: [
-                        { label: 'API Reference', slug: 'reference/api-overview' },
-                        { label: 'Naming Conventions', slug: 'reference/naming-conventions' },
+						{ label: 'API Reference', slug: 'reference/api-overview' },
+						{ label: 'Naming Conventions', slug: 'reference/naming-conventions' },
 					],
 				},
 				{
 					label: 'Explanation',
 					items: [
-                        { label: 'Architecture', slug: 'explanation/architecture' },
-                        { label: 'Why go_router_guards?', slug: 'explanation/why-go-router-guards' },
-                        { label: 'Core Concepts', slug: 'explanation/core-concepts' },
+						{ label: 'Architecture', slug: 'explanation/architecture' },
+						{ label: 'Why go_router_guards?', slug: 'explanation/why-go-router-guards' },
+						{ label: 'Core Concepts', slug: 'explanation/core-concepts' },
 					],
 				},
 			],
