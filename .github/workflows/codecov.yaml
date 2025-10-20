@@ -29,7 +29,7 @@ jobs:
         run: flutter pub get
 
       - name: 🧪 Test
-        run: flutter test -j 4 --coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
+        run: flutter test -j 4 --coverage
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
