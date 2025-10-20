@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router_guards/src/core.dart';
 import 'package:go_router_guards/src/internal/shared_guards.dart';
+import 'package:go_router_guards/src/navigation_resolver.dart';
 import 'package:meta/meta.dart';
 
 /// Mixin for type-safe routes to add guard functionality.
@@ -64,7 +65,10 @@ mixin GuardedRoute on GoRouteData {
   ) async {
     final guard = this.guard;
     final result = await guard.executeWithResolver(context, state);
-    return result.redirectPath;
+    return switch (result) {
+      RedirectResult(:final path) => path,
+      _ => null,
+    };
   }
 
   /// Redirect method for backward compatibility.
@@ -116,7 +120,10 @@ mixin GuardedShellRoute on ShellRouteData {
   ) async {
     final guard = this.guard;
     final result = await guard.executeWithResolver(context, state);
-    return result.redirectPath;
+    return switch (result) {
+      RedirectResult(:final path) => path,
+      _ => null,
+    };
   }
 
   /// This method is called by Go Router when the route is accessed.

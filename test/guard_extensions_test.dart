@@ -76,13 +76,13 @@ void main() {
       final state = _FakeState(Uri.parse('/z'));
 
       final allRes = await all.executeWithResolver(ctx, state);
-      expect(allRes.continueNavigation, isTrue);
+      expect(allRes, isA<AllowResult>());
 
       final anyRes = await any.executeWithResolver(ctx, state);
-      expect(anyRes.continueNavigation, isTrue);
+      expect(anyRes, isA<AllowResult>());
 
       final oneRes = await one.executeWithResolver(ctx, state);
-      expect(oneRes.continueNavigation, isTrue);
+      expect(oneRes, isA<AllowResult>());
     });
 
     testWidgets('iterable redirect builders produce callbacks', (tester) async {
@@ -106,6 +106,33 @@ void main() {
       expect(resultOne, isNull); // exactly one allows
     });
 
+    testWidgets('anyOf without fallback redirects to first redirect path',
+        (tester) async {
+      final guard = [const _Block('/a'), const _Block('/b')].anyOf();
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+      final res =
+          await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/a');
+    });
+
+    testWidgets(
+        'oneOf without fallback redirects to first redirect when none pass',
+        (tester) async {
+      final guard = [const _Block('/x'), const _Block('/y')].oneOf();
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+      final res =
+          await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/x');
+    });
+
     testWidgets('anyOf without fallback and no redirect blocks to current path',
         (tester) async {
       final guard = [const _BlockNone(), const _BlockNone()].anyOf();
@@ -115,8 +142,8 @@ void main() {
       final ctx = tester.element(find.byType(Navigator));
       final res =
           await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/');
     });
 
     testWidgets('oneOf without fallback and no redirect blocks to current path',
@@ -128,8 +155,8 @@ void main() {
       final ctx = tester.element(find.byType(Navigator));
       final res =
           await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/');
     });
 
     testWidgets('all() uses block() when a guard fails without redirect',
@@ -141,8 +168,8 @@ void main() {
       final ctx = tester.element(find.byType(Navigator));
       final res =
           await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/');
     });
 
     testWidgets(
@@ -156,8 +183,8 @@ void main() {
       final ctx = tester.element(find.byType(Navigator));
       final res =
           await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/');
     });
 
     testWidgets(
@@ -171,8 +198,97 @@ void main() {
       final ctx = tester.element(find.byType(Navigator));
       final res =
           await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/');
+    });
+
+    testWidgets('anyOf with empty guards throws ArgumentError', (tester) async {
+      final guard = <RouteGuard>[].anyOf();
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+
+      expect(
+        () => guard.executeWithResolver(ctx, _FakeState(Uri.parse('/test'))),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    testWidgets('oneOf with empty guards throws ArgumentError', (tester) async {
+      final guard = <RouteGuard>[].oneOf();
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+
+      expect(
+        () => guard.executeWithResolver(ctx, _FakeState(Uri.parse('/test'))),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    testWidgets('all with empty guards allows navigation', (tester) async {
+      final guard = <RouteGuard>[].all();
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+      final res =
+          await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
+      expect(res, isA<AllowResult>());
+    });
+
+    testWidgets('anyOf extension with fallback parameter', (tester) async {
+      final guard = [const _Block('/a'), const _Block('/b')]
+          .anyOf(fallbackRedirect: '/fallback');
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+      final res =
+          await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/fallback');
+    });
+
+    testWidgets('oneOf extension with fallback parameter', (tester) async {
+      final guard = [const _Block('/x'), const _Block('/y')]
+          .oneOf(fallbackRedirect: '/custom');
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+      final res =
+          await guard.executeWithResolver(ctx, _FakeState(Uri.parse('/cur')));
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/custom');
+    });
+
+    testWidgets('redirectAnyOf with fallback parameter', (tester) async {
+      final guards = [const _Block('/a'), const _Block('/b')];
+      final redirect = guards.redirectAnyOf(fallbackRedirect: '/fallback');
+
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+
+      final result = await redirect(ctx, _FakeState(Uri.parse('/test')));
+      expect(result, '/fallback');
+    });
+
+    testWidgets('redirectOneOf with fallback parameter', (tester) async {
+      final guards = [const _Block('/x'), const _Block('/y')];
+      final redirect = guards.redirectOneOf(fallbackRedirect: '/custom');
+
+      final router = GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      final ctx = tester.element(find.byType(Navigator));
+
+      final result = await redirect(ctx, _FakeState(Uri.parse('/test')));
+      expect(result, '/custom');
     });
   });
 }

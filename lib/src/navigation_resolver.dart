@@ -17,28 +17,33 @@ typedef OnGuardNavigation = FutureOr<void> Function(
 /// {@template guard_result}
 /// Result of a guard navigation resolution.
 /// {@endtemplate}
-class GuardResult {
-  /// {@macro guard_result}
-  const GuardResult({
-    required this.continueNavigation,
-    this.redirectPath,
-  });
+sealed class GuardResult {
+  const GuardResult();
 
   /// Factory for allowing navigation to continue.
-  const GuardResult.allow()
-      : continueNavigation = true,
-        redirectPath = null;
+  const factory GuardResult.allow() = AllowResult;
 
-  /// Factory for blocking navigation with redirect.
-  const GuardResult.redirect(String path)
-      : continueNavigation = false,
-        redirectPath = path;
+  /// Factory for blocking navigation with redirect to a specific path.
+  const factory GuardResult.redirect(String path) = RedirectResult;
+}
 
-  /// Whether to continue with the navigation.
-  final bool continueNavigation;
+/// {@template allow_result}
+/// Result of a guard navigation resolution that allows navigation.
+/// {@endtemplate}
+class AllowResult extends GuardResult {
+  /// {@macro allow_result}
+  const AllowResult() : super();
+}
 
-  /// Optional redirect path if navigation should be redirected.
-  final String? redirectPath;
+/// {@template redirect_result}
+/// Result of a guard navigation resolution that redirects to a specific path.
+/// {@endtemplate}
+class RedirectResult extends GuardResult {
+  /// {@macro redirect_result}
+  const RedirectResult(this.path) : super();
+
+  /// The path to redirect to.
+  final String path;
 }
 
 /// {@template navigation_resolver}
@@ -96,10 +101,8 @@ class NavigationResolver {
     final targetLocation =
         _router.routeInformationProvider.value.uri.toString();
 
-    if (currentLocation == targetLocation) {
-      _completer.complete(const GuardResult.redirect('/'));
-    } else {
-      _completer.complete(GuardResult.redirect(currentLocation));
-    }
+    final redirectPath =
+        currentLocation == targetLocation ? '/' : currentLocation;
+    _completer.complete(GuardResult.redirect(redirectPath));
   }
 }

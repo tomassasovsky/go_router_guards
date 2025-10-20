@@ -72,22 +72,25 @@ class _AllGuard extends RouteGuard {
   ) async {
     for (final guard in guards) {
       final result = await guard.executeWithResolver(context, state);
-      if (!result.continueNavigation) {
-        if (result.redirectPath != null) {
-          resolver.redirect(result.redirectPath!);
-        } else {
-          resolver.block();
-        }
-        return;
+      switch (result) {
+        case AllowResult():
+          continue;
+        case RedirectResult(:final path):
+          resolver.redirect(path);
+          return;
       }
     }
+
     resolver.next();
   }
 }
 
 /// Implementation of Guards.anyOf()
 class _AnyOfGuard extends RouteGuard {
-  const _AnyOfGuard(this.guards, this.fallbackRedirect);
+  const _AnyOfGuard(
+    this.guards,
+    this.fallbackRedirect,
+  );
 
   final List<RouteGuard> guards;
   final String? fallbackRedirect;
@@ -98,24 +101,28 @@ class _AnyOfGuard extends RouteGuard {
     BuildContext context,
     GoRouterState state,
   ) async {
-    String? firstRedirectPath;
+    if (guards.isEmpty) {
+      throw ArgumentError.value(guards, 'guards', 'guards cannot be empty');
+    }
+
+    RedirectResult? firstRedirectResult;
 
     for (final guard in guards) {
       final result = await guard.executeWithResolver(context, state);
-      if (result.continueNavigation) {
-        resolver.next();
-        return;
+
+      switch (result) {
+        case AllowResult():
+          resolver.next();
+          return;
+        case RedirectResult():
+          firstRedirectResult ??= result;
       }
-      firstRedirectPath ??= result.redirectPath;
     }
 
-    // All guards failed
-    final redirectPath = fallbackRedirect ?? firstRedirectPath;
-    if (redirectPath != null) {
-      resolver.redirect(redirectPath);
-    } else {
-      resolver.block();
-    }
+    assert(firstRedirectResult != null, 'anyOf: no redirect result');
+
+    final path = fallbackRedirect ?? firstRedirectResult!.path;
+    resolver.redirect(path);
   }
 }
 
@@ -132,33 +139,35 @@ class _OneOfGuard extends RouteGuard {
     BuildContext context,
     GoRouterState state,
   ) async {
-    var passedCount = 0;
-    String? firstRedirectPath;
+    if (guards.isEmpty) {
+      throw ArgumentError.value(guards, 'guards', 'guards cannot be empty');
+    }
+
+    var passed = 0;
+    RedirectResult? firstRedirectResult;
 
     for (final guard in guards) {
       final result = await guard.executeWithResolver(context, state);
-      if (result.continueNavigation) {
-        passedCount++;
-        if (passedCount > 1) {
-          // More than one guard passed, this violates oneOf constraint
-          resolver.block();
-          return;
-        }
-      } else {
-        firstRedirectPath ??= result.redirectPath;
+      switch (result) {
+        case AllowResult():
+          passed++;
+          if (passed > 1) {
+            resolver.block();
+            return;
+          }
+        case RedirectResult():
+          firstRedirectResult ??= result;
       }
     }
 
-    if (passedCount == 1) {
+    if (passed == 1) {
       resolver.next();
-    } else {
-      // Either no guards passed or more than one passed
-      final redirectPath = fallbackRedirect ?? firstRedirectPath;
-      if (redirectPath != null) {
-        resolver.redirect(redirectPath);
-      } else {
-        resolver.block();
-      }
+      return;
     }
+
+    assert(firstRedirectResult != null, 'oneOf: no redirect result');
+
+    final path = fallbackRedirect ?? firstRedirectResult!.path;
+    resolver.redirect(path);
   }
 }

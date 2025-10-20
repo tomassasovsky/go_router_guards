@@ -13,5 +13,10 @@ export 'guard_pipes.dart'
         guardAnyOf,
         guardOneOf;
 export 'navigation_resolver.dart'
-    show GuardResult, NavigationResolver, OnGuardNavigation;
+    show
+        AllowResult,
+        GuardResult,
+        NavigationResolver,
+        OnGuardNavigation,
+        RedirectResult;
 export 'route.dart' show GuardedRoute, GuardedShellRoute;

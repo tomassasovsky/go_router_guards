@@ -99,7 +99,11 @@ abstract class RouteGuard {
   GoRouterRedirect toRedirect() {
     return (context, state) async {
       final result = await executeWithResolver(context, state);
-      return result.continueNavigation ? null : result.redirectPath;
+
+      return switch (result) {
+        AllowResult() => null,
+        RedirectResult(:final path) => path,
+      };
     };
   }
 }

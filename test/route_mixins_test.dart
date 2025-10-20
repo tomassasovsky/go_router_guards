@@ -40,6 +40,17 @@ class _FakeState extends Fake implements GoRouterState {
   Uri get uri => _uri;
 }
 
+class _DefaultRoute extends GoRouteData with GuardedRoute {
+  const _DefaultRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const SizedBox();
+}
+
+class _DefaultShell extends ShellRouteData with GuardedShellRoute {
+  const _DefaultShell();
+  // No build override needed for this test
+}
+
 void main() {
   testWidgets('GuardedRoute.executeGuard returns null when allowed',
       (tester) async {
@@ -72,6 +83,31 @@ void main() {
     const route = _TRoute();
     final result = await route.redirect(ctx, _FakeState(Uri.parse('/t')));
     expect(result, isNull);
+  });
+
+  testWidgets('GuardedRoute/GuardedShellRoute default guard allows',
+      (tester) async {
+    final router = GoRouter(
+        routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())]);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    final ctx = tester.element(find.byType(Navigator));
+
+    const r = _DefaultRoute();
+    const s = _DefaultShell();
+    final state = _FakeState(Uri.parse('/t'));
+    expect(await r.executeGuard(ctx, state), isNull);
+    expect(await s.executeGuard(ctx, state), isNull);
+  });
+
+  testWidgets('GuardedRoute.executeGuard throws when router not mounted',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+    final ctx = tester.element(find.byType(Navigator));
+    const route = _TRoute();
+    expect(
+      () => route.executeGuard(ctx, _FakeState(Uri.parse('/t'))),
+      throwsA(isA<RouterNotMountedException>()),
+    );
   });
 
   testWidgets('GuardedShellRoute.redirect delegates to executeGuard',

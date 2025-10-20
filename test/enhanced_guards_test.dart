@@ -17,8 +17,7 @@ void main() {
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..next();
         final result = await resolver.future;
-        expect(result.continueNavigation, isTrue);
-        expect(result.redirectPath, isNull);
+        expect(result, isA<AllowResult>());
       });
 
       testWidgets('should resolve with redirect()', (tester) async {
@@ -27,8 +26,8 @@ void main() {
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..redirect('/new-path');
         final result = await resolver.future;
-        expect(result.continueNavigation, isFalse);
-        expect(result.redirectPath, equals('/new-path'));
+        expect(result, isA<RedirectResult>());
+        expect((result as RedirectResult).path, equals('/new-path'));
       });
 
       testWidgets('should handle block() correctly', (tester) async {
@@ -37,8 +36,8 @@ void main() {
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..block();
         final result = await resolver.future;
-        expect(result.continueNavigation, isFalse);
-        expect(result.redirectPath, equals('/'));
+        expect(result, isA<RedirectResult>());
+        expect((result as RedirectResult).path, equals('/'));
       });
 
       testWidgets('should handle redirect()', (tester) async {
@@ -47,8 +46,8 @@ void main() {
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..redirect('/redirect-path');
         final result = await resolver.future;
-        expect(result.continueNavigation, isFalse);
-        expect(result.redirectPath, equals('/redirect-path'));
+        expect(result, isA<RedirectResult>());
+        expect((result as RedirectResult).path, equals('/redirect-path'));
       });
 
       testWidgets('should prevent multiple resolutions', (tester) async {
@@ -59,9 +58,19 @@ void main() {
           ..next()
           ..redirect('/should-be-ignored');
         final result = await resolver.future;
-        expect(result.continueNavigation, isTrue);
-        expect(result.redirectPath, isNull);
+        expect(result, isA<AllowResult>());
       });
+    });
+
+    test('GuardResult redirect variant stores values', () {
+      const r = GuardResult.redirect('/p');
+      expect(r, isA<RedirectResult>());
+      expect((r as RedirectResult).path, '/p');
+    });
+
+    test('GuardResult allow factory returns AllowResult', () {
+      const r = GuardResult.allow();
+      expect(r, isA<AllowResult>());
     });
 
     group('GuardsEnhanced combinations', () {
@@ -80,7 +89,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.continueNavigation, isTrue);
+        expect(result, isA<AllowResult>());
       });
 
       testWidgets('all should fail when any guard fails', (tester) async {
@@ -98,7 +107,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.redirectPath, equals('/blocked'));
+        expect((result as RedirectResult).path, equals('/blocked'));
       });
 
       testWidgets('anyOf should pass when any guard passes', (tester) async {
@@ -116,7 +125,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.continueNavigation, isTrue);
+        expect(result, isA<AllowResult>());
       });
 
       testWidgets('anyOf should use fallback when all fail', (tester) async {
@@ -135,7 +144,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.redirectPath, equals('/fallback'));
+        expect((result as RedirectResult).path, equals('/fallback'));
       });
 
       testWidgets('oneOf should pass when exactly one guard passes',
@@ -154,7 +163,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.continueNavigation, isTrue);
+        expect(result, isA<AllowResult>());
       });
 
       testWidgets('oneOf should block when more than one guard passes',
@@ -173,7 +182,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.redirectPath, equals('/'));
+        expect((result as RedirectResult).path, equals('/'));
       });
 
       testWidgets('oneOf should redirect when no guards pass', (tester) async {
@@ -192,7 +201,7 @@ void main() {
         final state = MockGoRouterState();
         when(() => state.uri).thenReturn(Uri.parse('/test-path'));
         final result = await guard.executeWithResolver(ctx, state);
-        expect(result.redirectPath, equals('/fallback'));
+        expect((result as RedirectResult).path, equals('/fallback'));
       });
     });
   });

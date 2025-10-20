@@ -17,8 +17,8 @@ void main() {
         ctx,
         _State(Uri.parse('/cur')),
       );
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/r');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/r');
     });
 
     testWidgets('RouteGuard.allow factory', (tester) async {
@@ -31,7 +31,7 @@ void main() {
         ctx,
         _State(Uri.parse('/cur')),
       );
-      expect(res.continueNavigation, isTrue);
+      expect(res, isA<AllowResult>());
     });
 
     testWidgets('RouteGuard.redirectTo factory', (tester) async {
@@ -44,9 +44,49 @@ void main() {
         ctx,
         _State(Uri.parse('/cur')),
       );
-      expect(res.continueNavigation, isFalse);
-      expect(res.redirectPath, '/to');
+      expect(res, isA<RedirectResult>());
+      expect((res as RedirectResult).path, '/to');
     });
+  });
+
+  testWidgets('RouteGuard.toRedirect returns null when allowed',
+      (tester) async {
+    final guard = RouteGuard.allow();
+    final router = GoRouter(
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    final ctx = tester.element(find.byType(Navigator));
+    final redirect = guard.toRedirect();
+    final res = await redirect(ctx, _State(Uri.parse('/cur')));
+    expect(res, isNull);
+  });
+
+  testWidgets('RouteGuard.toRedirect returns path when blocked',
+      (tester) async {
+    final guard = RouteGuard.redirectTo('/dest');
+    final router = GoRouter(
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    final ctx = tester.element(find.byType(Navigator));
+    final redirect = guard.toRedirect();
+    final res = await redirect(ctx, _State(Uri.parse('/cur')));
+    expect(res, '/dest');
+  });
+
+  testWidgets('executeWithResolver throws when router not mounted',
+      (tester) async {
+    // Pump a plain MaterialApp without GoRouter to obtain a BuildContext
+    await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+    final ctx = tester.element(find.byType(Navigator));
+
+    final guard = RouteGuard.allow();
+    expect(
+      () => guard.executeWithResolver(
+        ctx,
+        _State(Uri.parse('/cur')),
+      ),
+      throwsA(isA<RouterNotMountedException>()),
+    );
   });
 }
 

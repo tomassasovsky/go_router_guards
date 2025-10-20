@@ -39,7 +39,7 @@ void main() {
       );
       final resolver = NavigationResolver(router)..next();
       final res = await resolver.future;
-      expect(res.continueNavigation, isTrue);
+      expect(res, isA<AllowResult>());
     });
 
     test('glob ? and meta escaping work', () async {
@@ -53,23 +53,46 @@ void main() {
           routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
       await g.onNavigation(okResolver, const _DummyContext(), okState);
       final ok = await okResolver.future;
-      expect(ok.continueNavigation, isTrue);
+      expect(ok, isA<AllowResult>());
 
       final badState = _FakeState(Uri.parse('/a/file/.txt'));
       final badResolver = NavigationResolver(GoRouter(
           routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
       await g.onNavigation(badResolver, const _DummyContext(), badState);
       final bad = await badResolver.future;
-      expect(bad.continueNavigation, isTrue);
+      expect(bad, isA<AllowResult>());
     });
 
     test('excluding factory applies precedence and regex', () async {
-      final router = GoRouter(
-        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      final g = ConditionalGuard.excluding(
+        guard: _TestGuard((r, c, s) => r.redirect('/blocked')),
+        paths: ['**/status', RegExp('^/admin/.*')],
       );
-      final resolver = NavigationResolver(router)..next();
-      final res = await resolver.future;
-      expect(res.continueNavigation, isTrue);
+
+      final stateExcluded = _FakeState(Uri.parse('/admin/status'));
+      final resolverExcluded = NavigationResolver(GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      await g.onNavigation(
+          resolverExcluded, const _DummyContext(), stateExcluded);
+      final resExcluded = await resolverExcluded.future;
+      expect(resExcluded, isA<AllowResult>());
+
+      final stateAlsoExcluded = _FakeState(Uri.parse('/admin/panel'));
+      final resolverAlsoExcluded = NavigationResolver(GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      await g.onNavigation(
+          resolverAlsoExcluded, const _DummyContext(), stateAlsoExcluded);
+      final resAlsoExcluded = await resolverAlsoExcluded.future;
+      expect(resAlsoExcluded, isA<AllowResult>());
+    });
+
+    test('including factory with exact string stores in includedPaths', () {
+      final g = ConditionalGuard.including(
+        guard: _TestGuard((r, c, s) => r.next()),
+        paths: ['/exact'],
+      );
+      expect(g.includedPaths, ['/exact']);
+      expect(g.includedPatterns, isEmpty);
     });
     test('allows when path excluded by exact match', () async {
       final conditional = ConditionalGuard(
@@ -87,8 +110,7 @@ void main() {
         _FakeState(Uri.parse('/a')),
       );
       final result = await resolver.future;
-      expect(result.continueNavigation, isTrue);
-      expect(result.redirectPath, isNull);
+      expect(result, isA<AllowResult>());
     });
 
     test('applies underlying guard for included exact path', () async {
@@ -106,9 +128,9 @@ void main() {
         const _DummyContext(),
         _FakeState(Uri.parse('/a')),
       );
-      final result = await resolver.future;
-      expect(result.continueNavigation, isFalse);
-      expect(result.redirectPath, '/blocked');
+      final r = await resolver.future;
+      expect(r, isA<RedirectResult>());
+      expect((r as RedirectResult).path, '/blocked');
     });
 
     test('applies underlying guard for included pattern', () async {
@@ -126,9 +148,8 @@ void main() {
         const _DummyContext(),
         _FakeState(Uri.parse('/user/1')),
       );
-      final result = await resolver.future;
-      expect(result.continueNavigation, isTrue);
-      expect(result.redirectPath, isNull);
+      final res2 = await resolver.future;
+      expect(res2, isA<AllowResult>());
     });
 
     test('exclusion takes precedence over inclusion', () async {
@@ -148,8 +169,7 @@ void main() {
         _FakeState(Uri.parse('/admin/status')),
       );
       final result = await resolver.future;
-      expect(result.continueNavigation, isTrue);
-      expect(result.redirectPath, isNull);
+      expect(result, isA<AllowResult>());
     });
 
     test('applies when no inclusion rules provided (default include all)',
@@ -167,8 +187,8 @@ void main() {
         const _DummyContext(),
         _FakeState(Uri.parse('/any')),
       );
-      final result = await resolver.future;
-      expect(result.continueNavigation, isTrue);
+      final res = await resolver.future;
+      expect(res, isA<AllowResult>());
     });
   });
 }
