@@ -37,6 +37,7 @@ jobs:
       skip_packages: "vector_math"
 
   codecov:
+    secrets: inherit
     uses: codecov/codecov-action@v5
     with:
       token: ${{ secrets.CODECOV_TOKEN }}
