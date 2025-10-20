@@ -20,7 +20,7 @@ Version 2.x introduces several breaking changes:
 
 ```yaml
 dependencies:
-  go_router_guards: ^2.0.0
+  go_router_guards: ^2.0.0+1
 ```
 
 ### 2. Migrate Guard Implementation
@@ -261,19 +261,19 @@ Take advantage of new features after migrating:
 
 ### Conditional Guards
 
-Simple guards without boilerplate:
+Apply guards to specific routes with path-based rules:
 
 ```dart
-// Guard when condition is true
-final featureGuard = guardWhen(
-  () => featureFlags.isEnabled('premium'),
-  '/upgrade',
+// Include only specific routes
+final featureGuard = ConditionalGuard.including(
+  guard: AuthGuard(),
+  paths: ['/premium', RegExp(r'^/pro/.*')],
 );
 
-// Guard when condition is false
-final maintenanceGuard = guardUnless(
-  () => isMaintenancMode(),
-  '/maintenance',
+// Exclude routes from a global guard
+final authGuard = ConditionalGuard.excluding(
+  guard: AuthGuard(),
+  paths: ['/login', '/register', '/public'],
 );
 ```
 
@@ -390,14 +390,29 @@ test('guard redirects unauthenticated users', () async {
 ```dart
 testWidgets('guard redirects unauthenticated users', (tester) async {
   final guard = AuthGuard();
-  final router = GoRouter(routes: [...]);
+  
+  // Create a test router with the guard
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/protected',
+        redirect: guard.toRedirect(),
+        builder: (context, state) => Container(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => Container(),
+      ),
+    ],
+  );
+  
   await tester.pumpWidget(MaterialApp.router(routerConfig: router));
   
-  final context = tester.element(find.byType(Navigator));
-  final result = await guard.executeWithResolver(context, mockState);
+  // Test navigation behavior
+  router.go('/protected');
+  await tester.pumpAndSettle();
   
-  expect(result, isA<RedirectResult>());
-  expect((result as RedirectResult).path, '/login');
+  expect(router.routerDelegate.currentConfiguration.uri.path, '/login');
 });
 ```
 
@@ -413,7 +428,7 @@ If you run into issues during migration:
 
 Use this checklist to ensure you've migrated everything:
 
-- [ ] Updated package version to `^2.0.0`
+- [ ] Updated package version to `^2.0.0+1`
 - [ ] Migrated all guard classes to use `NavigationResolver`
 - [ ] Updated guard composition from `Guards.all()` to `guardAll()` or list extensions
 - [ ] Changed `GuardedRoute.guards` to `GuardedRoute.guard` (singular)
