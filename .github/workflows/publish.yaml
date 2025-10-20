@@ -1,4 +1,4 @@
-name: publish
+name: Publish to pub.dev
 
 on:
   push:
@@ -7,23 +7,6 @@ on:
 
 jobs:
   publish:
-    environment: pub.dev
-    runs-on: ubuntu-latest
     permissions:
       id-token: write # Required for authentication using OIDC
-
-    steps:
-      - name: 📚 Git Checkout
-        uses: actions/checkout@v4
-
-      - name: 🎯 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: '3.35.6'
-
-      - name: 📦 Install Dependencies
-        run: flutter pub get
-
-      - name: 🚀 Publish Package
-        run: dart pub publish --force
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
