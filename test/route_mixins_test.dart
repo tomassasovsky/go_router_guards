@@ -55,7 +55,8 @@ void main() {
   testWidgets('GuardedRoute.executeGuard returns null when allowed',
       (tester) async {
     final router = GoRouter(
-        routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
     const route = _TRoute();
@@ -66,7 +67,8 @@ void main() {
   testWidgets('GuardedShellRoute.executeGuard returns null when allowed',
       (tester) async {
     final router = GoRouter(
-        routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
     const route = _TShellRoute();
@@ -77,7 +79,8 @@ void main() {
   testWidgets('GuardedRoute.redirect delegates to executeGuard',
       (tester) async {
     final router = GoRouter(
-        routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
     const route = _TRoute();
@@ -88,7 +91,8 @@ void main() {
   testWidgets('GuardedRoute/GuardedShellRoute default guard allows',
       (tester) async {
     final router = GoRouter(
-        routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
 
@@ -113,7 +117,8 @@ void main() {
   testWidgets('GuardedShellRoute.redirect delegates to executeGuard',
       (tester) async {
     final router = GoRouter(
-        routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/t', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
     const route = _TShellRoute();

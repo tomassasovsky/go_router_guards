@@ -10,7 +10,8 @@ void main() {
         resolver.redirect('/r');
       });
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res = await guard.executeWithResolver(
@@ -24,7 +25,8 @@ void main() {
     testWidgets('RouteGuard.allow factory', (tester) async {
       final guard = RouteGuard.allow();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res = await guard.executeWithResolver(
@@ -37,7 +39,8 @@ void main() {
     testWidgets('RouteGuard.redirectTo factory', (tester) async {
       final guard = RouteGuard.redirectTo('/to');
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res = await guard.executeWithResolver(
@@ -53,7 +56,8 @@ void main() {
       (tester) async {
     final guard = RouteGuard.allow();
     final router = GoRouter(
-        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
     final redirect = guard.toRedirect();
@@ -65,7 +69,8 @@ void main() {
       (tester) async {
     final guard = RouteGuard.redirectTo('/dest');
     final router = GoRouter(
-        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+      routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+    );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     final ctx = tester.element(find.byType(Navigator));
     final redirect = guard.toRedirect();

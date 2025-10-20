@@ -49,15 +49,21 @@ void main() {
       );
 
       final okState = _FakeState(Uri.parse('/a/file1.txt'));
-      final okResolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final okResolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await g.onNavigation(okResolver, const _DummyContext(), okState);
       final ok = await okResolver.future;
       expect(ok, isA<AllowResult>());
 
       final badState = _FakeState(Uri.parse('/a/file/.txt'));
-      final badResolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final badResolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await g.onNavigation(badResolver, const _DummyContext(), badState);
       final bad = await badResolver.future;
       expect(bad, isA<AllowResult>());
@@ -70,18 +76,30 @@ void main() {
       );
 
       final stateExcluded = _FakeState(Uri.parse('/admin/status'));
-      final resolverExcluded = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolverExcluded = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await g.onNavigation(
-          resolverExcluded, const _DummyContext(), stateExcluded);
+        resolverExcluded,
+        const _DummyContext(),
+        stateExcluded,
+      );
       final resExcluded = await resolverExcluded.future;
       expect(resExcluded, isA<AllowResult>());
 
       final stateAlsoExcluded = _FakeState(Uri.parse('/admin/panel'));
-      final resolverAlsoExcluded = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolverAlsoExcluded = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await g.onNavigation(
-          resolverAlsoExcluded, const _DummyContext(), stateAlsoExcluded);
+        resolverAlsoExcluded,
+        const _DummyContext(),
+        stateAlsoExcluded,
+      );
       final resAlsoExcluded = await resolverAlsoExcluded.future;
       expect(resAlsoExcluded, isA<AllowResult>());
     });
@@ -102,8 +120,11 @@ void main() {
         excludedPaths: const ['/a'],
       );
 
-      final resolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await conditional.onNavigation(
         resolver,
         const _DummyContext(),
@@ -121,8 +142,11 @@ void main() {
         includedPaths: const ['/a'],
       );
 
-      final resolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await conditional.onNavigation(
         resolver,
         const _DummyContext(),
@@ -141,8 +165,11 @@ void main() {
         includedPatterns: [RegExp(r'^/user/\\d+$')],
       );
 
-      final resolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await conditional.onNavigation(
         resolver,
         const _DummyContext(),
@@ -161,8 +188,11 @@ void main() {
         excludedPaths: const ['/admin/status'],
       );
 
-      final resolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await conditional.onNavigation(
         resolver,
         const _DummyContext(),
@@ -180,8 +210,11 @@ void main() {
         }),
       );
 
-      final resolver = NavigationResolver(GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]));
+      final resolver = NavigationResolver(
+        GoRouter(
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        ),
+      );
       await conditional.onNavigation(
         resolver,
         const _DummyContext(),

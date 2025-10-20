@@ -70,7 +70,8 @@ void main() {
       final one = [const _Allow(), const _Block('/y')].oneOf();
 
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final state = _FakeState(Uri.parse('/z'));
@@ -89,7 +90,8 @@ void main() {
       final redirects = [const _Allow(), const _Block('/b')];
 
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
 
@@ -110,7 +112,8 @@ void main() {
         (tester) async {
       final guard = [const _Block('/a'), const _Block('/b')].anyOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -124,7 +127,8 @@ void main() {
         (tester) async {
       final guard = [const _Block('/x'), const _Block('/y')].oneOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -137,7 +141,8 @@ void main() {
         (tester) async {
       final guard = [const _BlockNone(), const _BlockNone()].anyOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -150,7 +155,8 @@ void main() {
         (tester) async {
       final guard = [const _BlockNone(), const _BlockNone()].oneOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -163,7 +169,8 @@ void main() {
         (tester) async {
       final guard = [const _Allow(), const _NullRedirectGuard()].all();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -178,7 +185,8 @@ void main() {
       final guard =
           [const _NullRedirectGuard(), const _NullRedirectGuard()].anyOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -193,7 +201,8 @@ void main() {
       final guard =
           [const _NullRedirectGuard(), const _NullRedirectGuard()].oneOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -205,7 +214,8 @@ void main() {
     testWidgets('anyOf with empty guards throws ArgumentError', (tester) async {
       final guard = <RouteGuard>[].anyOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
 
@@ -218,7 +228,8 @@ void main() {
     testWidgets('oneOf with empty guards throws ArgumentError', (tester) async {
       final guard = <RouteGuard>[].oneOf();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
 
@@ -231,7 +242,8 @@ void main() {
     testWidgets('all with empty guards allows navigation', (tester) async {
       final guard = <RouteGuard>[].all();
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -243,7 +255,8 @@ void main() {
       final guard = [const _Block('/a'), const _Block('/b')]
           .anyOf(fallbackRedirect: '/fallback');
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -256,7 +269,8 @@ void main() {
       final guard = [const _Block('/x'), const _Block('/y')]
           .oneOf(fallbackRedirect: '/custom');
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
       final res =
@@ -270,7 +284,8 @@ void main() {
       final redirect = guards.redirectAnyOf(fallbackRedirect: '/fallback');
 
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
 
@@ -283,7 +298,8 @@ void main() {
       final redirect = guards.redirectOneOf(fallbackRedirect: '/custom');
 
       final router = GoRouter(
-          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+        routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+      );
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       final ctx = tester.element(find.byType(Navigator));
 

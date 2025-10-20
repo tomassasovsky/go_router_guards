@@ -13,7 +13,8 @@ void main() {
     group('NavigationResolver', () {
       testWidgets('should resolve with next()', (tester) async {
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..next();
         final result = await resolver.future;
@@ -22,7 +23,8 @@ void main() {
 
       testWidgets('should resolve with redirect()', (tester) async {
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..redirect('/new-path');
         final result = await resolver.future;
@@ -32,7 +34,8 @@ void main() {
 
       testWidgets('should handle block() correctly', (tester) async {
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..block();
         final result = await resolver.future;
@@ -42,7 +45,8 @@ void main() {
 
       testWidgets('should handle redirect()', (tester) async {
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)..redirect('/redirect-path');
         final result = await resolver.future;
@@ -52,7 +56,8 @@ void main() {
 
       testWidgets('should prevent multiple resolutions', (tester) async {
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final resolver = NavigationResolver(router)
           ..next()
@@ -83,7 +88,8 @@ void main() {
         });
         final guard = guardAll([allowGuard1, allowGuard2]);
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
@@ -101,7 +107,8 @@ void main() {
         });
         final guard = guardAll([allowGuard, blockGuard]);
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
@@ -119,7 +126,8 @@ void main() {
         });
         final guard = guardAnyOf([blockGuard, allowGuard]);
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
@@ -135,10 +143,13 @@ void main() {
         final blockGuard2 = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/block2');
         });
-        final guard = guardAnyOf([blockGuard1, blockGuard2],
-            fallbackRedirect: '/fallback');
+        final guard = guardAnyOf(
+          [blockGuard1, blockGuard2],
+          fallbackRedirect: '/fallback',
+        );
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
@@ -157,7 +168,8 @@ void main() {
         });
         final guard = guardOneOf([allowGuard, blockGuard]);
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
@@ -176,7 +188,8 @@ void main() {
         });
         final guard = guardOneOf([allowGuard1, allowGuard2]);
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
@@ -192,10 +205,13 @@ void main() {
         final blockGuard2 = TestEnhancedGuard((resolver, context, state) {
           resolver.redirect('/block2');
         });
-        final guard = guardOneOf([blockGuard1, blockGuard2],
-            fallbackRedirect: '/fallback');
+        final guard = guardOneOf(
+          [blockGuard1, blockGuard2],
+          fallbackRedirect: '/fallback',
+        );
         final router = GoRouter(
-            routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())]);
+          routes: [GoRoute(path: '/', builder: (_, __) => const SizedBox())],
+        );
         await tester.pumpWidget(MaterialApp.router(routerConfig: router));
         final ctx = tester.element(find.byType(Navigator));
         final state = MockGoRouterState();
